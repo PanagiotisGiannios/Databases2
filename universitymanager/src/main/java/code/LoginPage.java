@@ -1,6 +1,5 @@
 package code;
 
-// TODO: Make the login page for the app
 import java.sql.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -10,22 +9,32 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-//import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class LoginPage extends Application {
 
+    // TODO: In the final version delete those + PanButton + FragkButton
+    private final static String USERNAME = "root";
+    private final static String PANPASS = "1234";
+    private final static String FRAGKPASS = "!Sql12345Sql!";
+    private String path = System.getProperty("user.dir") + "/photos/";
+
     @Override
     public void start(Stage primaryStage) {
-        // Add a welcome text at the top
-        Text welcomeText = new Text("Welcome to University Manager");
-        welcomeText.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
+        // TODO: Set application icon
+        // Image logo = new Image(getClass().getResourceAsStream(path + "logo.png"));
+        // primaryStage.getIcons().add(logo);
 
         // Add a welcome text at the top
-        Text explaneText = new Text("\n\nWrite the username and password of your DataBase");
-        explaneText.setStyle("-fx-font-size: 14;");
+        Text welcomeText = new Text("Welcome to University Management");
+        welcomeText.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
+
+        // Add the explanatory text under the welcome
+        Text explanatoryText = new Text("\n\nWrite the username and password of your DataBase");
+        explanatoryText.setStyle("-fx-font-size: 14;");
 
         // Set up the user ID text field
         TextField userIdTextField = new TextField();
@@ -50,11 +59,11 @@ public class LoginPage extends Application {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
-        loginBox.getChildren().addAll(welcomeText, explaneText, userIdTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        loginBox.getChildren().addAll(welcomeText, explanatoryText, userIdTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
 
         // Set up the scene and stage
         Scene scene = new Scene(loginBox, 500, 500);
-        primaryStage.setTitle("University Manager");
+        primaryStage.setTitle("University Management");
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -76,10 +85,9 @@ public class LoginPage extends Application {
             }
         });
 
-        // TODO: Delete.
         PanButton.setOnAction(e -> {
-            String userId = "root";
-            String password = "1234";
+            String userId = USERNAME;
+            String password = PANPASS;
 
             // Establish a connection with the database using the crudentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
@@ -91,10 +99,9 @@ public class LoginPage extends Application {
         }
         );
 
-        // TODO: Delete.
         FragkButton.setOnAction(e -> {
-            String userId = "root";
-            String password = "!Sql12345Sql!";
+            String userId = USERNAME;
+            String password = FRAGKPASS;
 
             // Establish a connection with the database using the crudentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
