@@ -3,7 +3,7 @@ package code;
 import java.sql.*;
 import java.util.Scanner;
 
-public class MainApp {
+public class Main {
 
     public static void main(String[] args) {
         // TODO: Remove in final build
