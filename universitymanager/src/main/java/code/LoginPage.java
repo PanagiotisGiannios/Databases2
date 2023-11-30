@@ -25,7 +25,8 @@ public class LoginPage extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        /**  Add Icon at the top left of the window
+        /*
+         * Add Icon at the top left of the window
          * In order to add the icon we first need to transform it to
          * URI in order for the Image constructor to work, We first 
          * get the path to the logo as a File and then we transform
@@ -69,7 +70,7 @@ public class LoginPage extends Application {
         loginBox.getChildren().addAll(welcomeText, explanatoryText, usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
         
         // Set up the scene and stage
-        Scene scene = new Scene(loginBox, 500, 500);
+        Scene scene = new Scene(loginBox, 800, 600);
         primaryStage.setTitle("University Management");
         primaryStage.setScene(scene);
         primaryStage.show();
