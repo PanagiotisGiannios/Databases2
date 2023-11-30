@@ -1,5 +1,6 @@
 package code;
 
+import java.io.File;
 import java.sql.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -20,25 +21,31 @@ public class LoginPage extends Application {
     private final static String USERNAME = "root";
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
-    private String path = System.getProperty("user.dir") + "/photos/";
+    private String path = System.getProperty("user.dir") + "\\images\\";
 
     @Override
     public void start(Stage primaryStage) {
-        // TODO: Set application icon
-        // Image logo = new Image(getClass().getResourceAsStream(path + "logo.png"));
-        // primaryStage.getIcons().add(logo);
+        /**  Add Icon at the top left of the window
+         * In order to add the icon we first need to transform it to
+         * URI in order for the Image constructor to work, We first 
+         * get the path to the logo as a File and then we transform
+         * it to a URI and then a String so that it can be used.
+         */
+        File imageFile = new File(path+"logo.png");
+        Image logo = new Image(imageFile.toURI().toString());
+        primaryStage.getIcons().add(logo);
 
         // Add a welcome text at the top
         Text welcomeText = new Text("Welcome to University Management");
         welcomeText.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
 
         // Add the explanatory text under the welcome
-        Text explanatoryText = new Text("\n\nWrite the username and password of your DataBase");
+        Text explanatoryText = new Text("\n\nWrite the username and password of your mysql DataBase");
         explanatoryText.setStyle("-fx-font-size: 14;");
 
         // Set up the user ID text field
-        TextField userIdTextField = new TextField();
-        userIdTextField.setPromptText("User ID");
+        TextField usernameTextField = new TextField();
+        usernameTextField.setPromptText("Username");
 
         // Set up the password text field
         PasswordField passwordTextField = new PasswordField();
@@ -59,29 +66,34 @@ public class LoginPage extends Application {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
-        loginBox.getChildren().addAll(welcomeText, explanatoryText, userIdTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
-
+        loginBox.getChildren().addAll(welcomeText, explanatoryText, usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        
         // Set up the scene and stage
         Scene scene = new Scene(loginBox, 500, 500);
         primaryStage.setTitle("University Management");
         primaryStage.setScene(scene);
         primaryStage.show();
-
+        
         // Set up the login button action
         loginButton.setOnAction(e -> {
-            String userId = userIdTextField.getText();
+            String userId = usernameTextField.getText();
             String password = passwordTextField.getText();
 
-            // Establish a connection with the database using the crudentials
+            // Establish a connection with the database using the credentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
                 // Successfully logged in, close login page and do the rest of the program 
                 // TODO: add the rest.
+                
                 primaryStage.close();
                 doStaff(connection);
             } catch (Exception e1) {
                 // Incorrect credentials, show an error message
-                e1.printStackTrace();
-                errorLabel.setText("Invalid username or password. Please try again.");
+                // Otherwise show stackTrace
+                System.out.println(e1.getLocalizedMessage().substring(0,13));
+                if(e1.getLocalizedMessage().substring(0,13).equals("Access denied"))
+                    errorLabel.setText("Invalid username or password. Please try again.");                
+                else
+                    e1.printStackTrace();                
             }
         });
 
@@ -116,10 +128,12 @@ public class LoginPage extends Application {
 
     private void doStaff(Connection connection) throws SQLException {
         // Print query
+        int i = 1;
         Statement stmnt = connection.createStatement();
         ResultSet res = stmnt.executeQuery("select * from employee");
-        while (res.next()) {                
-            System.out.println(res.getString("firstname"));
+        while (res.next()) {                   
+            System.out.println(i +" " + res.getString("firstname"));
+            i++;
         }
     }
 }
