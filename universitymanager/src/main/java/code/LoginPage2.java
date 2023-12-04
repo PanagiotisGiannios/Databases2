@@ -1,8 +1,7 @@
 package code;
 
-import java.io.File;
-import java.sql.*;
-import javafx.application.Application;
+import java.sql.Connection;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -10,58 +9,27 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class LoginPage extends Application {
+public class LoginPage2 extends Page {
 
     // TODO: In the final version delete those + PanButton + FragkButton
     private final static String USERNAME = "root";
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
-    private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
-    private String pagePath = path + "\\pages\\";
 
     @Override
     public void start(Stage primaryStage) {
-        /*
-         * Add Icon at the top left of the window
-         * In order to add the icon we first need to transform it to
-         * URI in order for the Image constructor to work, We first 
-         * get the path to the logo as a File and then we transform
-         * it to a URI and then a String so that it can be used.
-         */
-        File imageFile = new File(path + "university.png");
-        Image logo = new Image(imageFile.toURI().toString());
-        primaryStage.getIcons().add(logo);
+        setPrimaryStage(primaryStage);
+        loadLogo();
+        loadBackground("uniPage.png");
+        loginPageSetup();
+    }
 
-        // Load the blankPage image as the background
-        File backgroundFile = new File(pagePath + "uniPage.png");
-        Image backgroundImage  = new Image(backgroundFile.toURI().toString());
-
-        // Create a background image
-        BackgroundImage background = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.DEFAULT,
-                BackgroundSize.DEFAULT
-        );
-
-        // Set the background to a StackPane
-        StackPane root = new StackPane();
-        root.setMinSize(800, 600);  // Set a minimum size
-        root.setBackground(new Background(background));
-
+    private void loginPageSetup() {
         Text welcomeText = new Text("Welcome to University Management\n\n");
         welcomeText.setStyle("-fx-font-family: 'Irish Grover'; -fx-font-size: 40;");
 
@@ -156,7 +124,6 @@ public class LoginPage extends Application {
             }
         }
         );
-        //TODO: To here
     }
 
     private void showMainMenu(Stage primaryStage) {
