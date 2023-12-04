@@ -11,6 +11,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -21,7 +27,8 @@ public class LoginPage extends Application {
     private final static String USERNAME = "root";
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
-    private String path = System.getProperty("user.dir") + "\\images\\";
+    private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
+    private String pagePath = path + "\\pages\\";
 
     @Override
     public void start(Stage primaryStage) {
@@ -32,10 +39,22 @@ public class LoginPage extends Application {
          * get the path to the logo as a File and then we transform
          * it to a URI and then a String so that it can be used.
          */
-        File imageFile = new File(path+"logo.png");
+        File imageFile = new File(path + "university.png");
         Image logo = new Image(imageFile.toURI().toString());
         primaryStage.getIcons().add(logo);
 
+        // Load the PNG image for the background
+        File backgroundFile = new File(pagePath + "blankPage.png");
+        Image backgroundImage  = new Image(backgroundFile.toURI().toString());
+
+        // Create a background image
+        BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT,
+        BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT);
+
+        // Set the background to a Region
+        StackPane root = new StackPane();
+        root.setBackground(new Background(background));
+        
         // Add a welcome text at the top
         Text welcomeText = new Text("Welcome to University Management");
         welcomeText.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
