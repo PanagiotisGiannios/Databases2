@@ -1,10 +1,21 @@
 package code;
 
 import javafx.application.Application;
+import javafx.stage.Stage;
 
-public class Main {
+public class Main extends Application {
 
     public static void main(String[] args) {
-        Application.launch(LoginPage.class, args);
-    }        
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        try {
+            LoginPage loginPage = new LoginPage();
+            loginPage.start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

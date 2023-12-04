@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -43,33 +44,36 @@ public class LoginPage extends Application {
         Image logo = new Image(imageFile.toURI().toString());
         primaryStage.getIcons().add(logo);
 
-        // Load the PNG image for the background
-        File backgroundFile = new File(pagePath + "blankPage.png");
+        // Load the blankPage image as the background
+        File backgroundFile = new File(pagePath + "loginPage.png");
         Image backgroundImage  = new Image(backgroundFile.toURI().toString());
 
         // Create a background image
-        BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.NO_REPEAT,
-        BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT, BackgroundSize.DEFAULT);
+        BackgroundImage background = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT
+        );
 
         // Set the background to a Region
         StackPane root = new StackPane();
+        root.setMinSize(800, 600);  // Set a minimum size
         root.setBackground(new Background(background));
-        
-        // Add a welcome text at the top
-        Text welcomeText = new Text("Welcome to University Management");
-        welcomeText.setStyle("-fx-font-weight: bold; -fx-font-size: 18;");
 
-        // Add the explanatory text under the welcome
-        Text explanatoryText = new Text("\n\nWrite the username and password of your mysql DataBase");
-        explanatoryText.setStyle("-fx-font-size: 14;");
+        Text spaceText = new Text("\n\n");
+        spaceText.setStyle("-fx-font-family: 'Irish Grover'; -fx-font-size: 24;");
 
         // Set up the user ID text field
         TextField usernameTextField = new TextField();
         usernameTextField.setPromptText("Username");
+        usernameTextField.setMaxWidth(400);
 
         // Set up the password text field
         PasswordField passwordTextField = new PasswordField();
         passwordTextField.setPromptText("Password");
+        passwordTextField.setMaxWidth(400);
 
         // Set up the login button
         Button loginButton = new Button("Login");
@@ -86,10 +90,11 @@ public class LoginPage extends Application {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
-        loginBox.getChildren().addAll(welcomeText, explanatoryText, usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        loginBox.getChildren().addAll(spaceText, usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        root.getChildren().add(loginBox);
         
         // Set up the scene and stage
-        Scene scene = new Scene(loginBox, 800, 600);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setTitle("University Management");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -102,13 +107,13 @@ public class LoginPage extends Application {
             // Establish a connection with the database using the credentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
                 // Successfully logged in, close login page and do the rest of the program 
-                // TODO: add the rest.
+                showMainMenu(primaryStage);
                 
-                primaryStage.close();
-                doStaff(connection);
             } catch (Exception e1) {
                 // Incorrect credentials, show an error message
                 // Otherwise show stackTrace
+                usernameTextField.clear();
+                passwordTextField.clear();
                 System.out.println(e1.getLocalizedMessage().substring(0,13));
                 if(e1.getLocalizedMessage().substring(0,13).equals("Access denied"))
                     errorLabel.setText("Invalid username or password. Please try again.");                
@@ -117,14 +122,22 @@ public class LoginPage extends Application {
             }
         });
 
+        // Activate the loginButton when Enter is pressed
+        loginBox.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                loginButton.fire(); 
+            }
+        });
+
+        // TODO: Delete from here
         PanButton.setOnAction(e -> {
             String userId = USERNAME;
             String password = PANPASS;
 
             // Establish a connection with the database using the crudentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
-                primaryStage.close();
-                doStaff(connection);
+                showMainMenu(primaryStage);
+                
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -137,23 +150,22 @@ public class LoginPage extends Application {
 
             // Establish a connection with the database using the crudentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
-                primaryStage.close();
-                doStaff(connection);
+                showMainMenu(primaryStage);
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
         }
         );
+        //TODO: To here
     }
 
-    private void doStaff(Connection connection) throws SQLException {
-        // Print query
-        int i = 1;
-        Statement stmnt = connection.createStatement();
-        ResultSet res = stmnt.executeQuery("select * from employee");
-        while (res.next()) {                   
-            System.out.println(i +" " + res.getString("firstname"));
-            i++;
-        }
-    }
+    private void showMainMenu(Stage primaryStage) {
+        MainMenu mainMenu = new MainMenu();
+        Scene mainMenuScene = new Scene(mainMenu, 800, 600);
+
+        // Set up the stage for the MainMenu
+        primaryStage.setTitle("University Management");
+        primaryStage.setScene(mainMenuScene);
+        primaryStage.show();
+    }    
 }
