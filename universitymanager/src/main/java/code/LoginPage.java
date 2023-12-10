@@ -28,7 +28,7 @@ public class LoginPage extends Application {
     private final static String USERNAME = "root";
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
-    private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
+    private String path = System.getProperty("user.dir") + "\\images\\";
     private String pagePath = path + "\\pages\\";
 
     @Override

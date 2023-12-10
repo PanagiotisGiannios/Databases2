@@ -23,7 +23,6 @@ public class LoginPage2 extends Page {
 
     @Override
     public void start(Stage primaryStage) {
-        setPrimaryStage(primaryStage);
         loadLogo();
         loadBackground("uniPage.png");
         loginPageSetup();

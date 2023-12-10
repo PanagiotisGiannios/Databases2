@@ -15,8 +15,8 @@ public class Page extends Application {
     private String logo = "university.png";
     private String background = "uniPage.png";
     private String title = "University Management";
-    public Stage primaryStage;
-    public StackPane root;
+    public static Stage primaryStage;
+    public static StackPane root;
 
     // Change logo image
     public void setLogo(String logo) {
@@ -38,18 +38,9 @@ public class Page extends Application {
         this.path = path;
     }
     
-    // Change the primaryStage
-    public void setPrimaryStage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-    }
-
     // Change the title
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public Stage getPrimaryStage() {
-        return primaryStage;
     }
 
     @Override
