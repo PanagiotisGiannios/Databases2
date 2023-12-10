@@ -15,14 +15,24 @@ public class Page extends Application {
     private String logo = "university.png";
     private String background = "uniPage.png";
     private String title = "University Management";
+
+    final int WIDTH = 800;
+    final int HEIGHT = 600;
+
     public static Stage primaryStage;
     public static StackPane root;
-
+    
+    @Override
+    public void start(Stage stage) {
+        primaryStage = stage;
+        initializePage();
+    }
+    
     // Change logo image
     public void setLogo(String logo) {
         this.logo = logo;
     }
-
+    
     // Change background image
     public void setBackground(String background) {
         this.background = background;
@@ -42,13 +52,7 @@ public class Page extends Application {
     public void setTitle(String title) {
         this.title = title;
     }
-
-    @Override
-    public void start(Stage stage) throws Exception {
-        primaryStage = stage;
-        initializePage();
-    }
-
+    
     public void initializePage() {
         loadBackground();
         loadLogo();   
@@ -57,6 +61,7 @@ public class Page extends Application {
     public void loadLogo() {
         File imageFile = new File(path + logo);
         Image logo = new Image(imageFile.toURI().toString());
+        System.out.println(primaryStage);
         primaryStage.getIcons().add(logo);
     }
 
@@ -79,21 +84,23 @@ public class Page extends Application {
         // Set the background color using a hex value
         String backgroundColor = "#789D7A";
         root.setStyle("-fx-background-color: " + backgroundColor + ";" +
-                      "-fx-background-image: url('file:" + pagePath + "uniPage.png');" +
+                      "-fx-background-image: url('file:" + pagePath + background +"');" +
                       "-fx-background-size: cover;"); // 'cover' ensures the image covers the entire StackPane
     
         // Bind the size of the StackPane to the size of the Scene
         root.prefWidthProperty().bind(primaryStage.widthProperty());
         root.prefHeightProperty().bind(primaryStage.heightProperty());
         this.root = root;
-
-        // Set up the scene and stage
-        Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle(title);
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
+    // Set up the scene and stage
+    public void createScene(){
+        Scene scene = new Scene(root, WIDTH, HEIGHT);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle(title);
+        primaryStage.show();
+    }
+    
     public void loadBackground(String image) {
         setBackground(image);
         loadBackground();

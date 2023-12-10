@@ -23,15 +23,17 @@ public class LoginPage2 extends Page {
 
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         loadLogo();
         loadBackground("uniPage.png");
         loginPageSetup();
+        createScene();
     }
 
     private void loginPageSetup() {
         Text welcomeText = new Text("Welcome to University Management\n\n");
         welcomeText.setStyle("-fx-font-family: 'Irish Grover'; -fx-font-size: 40;");
-
+    
         // Set up the user ID text field
         TextField usernameTextField = new TextField();
         usernameTextField.setPromptText("Username");
@@ -59,12 +61,6 @@ public class LoginPage2 extends Page {
         loginBox.setAlignment(Pos.CENTER);
         loginBox.getChildren().addAll(welcomeText, usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
         root.getChildren().add(loginBox);
-        
-        // Set up the scene and stage
-        Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle("University Management");
-        primaryStage.setScene(scene);
-        primaryStage.show();
         
         // Set up the login button action
         loginButton.setOnAction(e -> {

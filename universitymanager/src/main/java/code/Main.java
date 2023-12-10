@@ -8,7 +8,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            LoginPage loginPage = new LoginPage();
+            LoginPage2 loginPage = new LoginPage2();
             loginPage.start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();

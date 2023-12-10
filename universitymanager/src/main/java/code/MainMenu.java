@@ -20,7 +20,7 @@ public class MainMenu extends Application {
 
     private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
     private String pagePath = path + "\\pages\\";
-
+    
     @Override
     public void start(Stage primaryStage) {
         File imageFile = new File(path + "university.png");
