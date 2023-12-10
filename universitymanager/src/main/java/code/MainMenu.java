@@ -2,8 +2,6 @@ package code;
 
 import java.io.File;
 
-import javax.print.attribute.standard.PrinterMoreInfoManufacturer;
-
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
