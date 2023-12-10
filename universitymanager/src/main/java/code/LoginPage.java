@@ -19,11 +19,6 @@ public class LoginPage extends Page {
     private final static String USERNAME = "root";
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
-<<<<<<< Updated upstream
-=======
-    private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
-    private String pagePath = path + "\\pages\\";
->>>>>>> Stashed changes
 
     @Override
     public void start(Stage primaryStage) {
