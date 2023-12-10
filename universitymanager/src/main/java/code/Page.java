@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 
 public class Page extends Application {
     private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
-    private String pagePath = path + "\\pages\\";
+    private String pagePath = path + "pages\\";
     private String logo = "university.png";
     private String background = "uniPage.png";
     private String title = "University Management";

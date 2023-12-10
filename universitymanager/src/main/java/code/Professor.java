@@ -6,9 +6,9 @@ import javafx.stage.Stage;
 public class Professor extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'start'");
+        System.out.println("Unimplemented method 'start'");
     }
     
 }
