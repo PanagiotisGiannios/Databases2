@@ -20,7 +20,10 @@ public class MainMenu extends Application {
 
     private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
     private String pagePath = path + "\\pages\\";
-    
+    // Create a GridPane to arrange the buttons
+    private GridPane gridPane = new GridPane();
+
+
     @Override
     public void start(Stage primaryStage) {
         File imageFile = new File(path + "university.png");
@@ -40,20 +43,19 @@ public class MainMenu extends Application {
                 BackgroundSize.DEFAULT
         );
 
-        // Create a GridPane to arrange the buttons
-        GridPane gridPane = new GridPane();
+        
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(140);
         gridPane.setVgap(80);
 
         // Create and add buttons to the GridPane
-        addButton(gridPane, "professor.png", 0, 0, primaryStage);
-        addButton(gridPane, "secretariat.png", 1, 0, primaryStage);
-        addButton(gridPane, "auxiliary_staff.png", 2, 0, primaryStage);
-        addButton(gridPane, "student.png", 0, 1, primaryStage);
-        addButton(gridPane, "book.png", 1, 1, primaryStage);
-        addButton(gridPane, "course.png", 2, 1, primaryStage);
-        addButton(gridPane, "advance_search.png", 1, 2, primaryStage);
+        addButton("professor.png", 0, 0, primaryStage);
+        //addButton("university.png", 1, 0, primaryStage);
+        addButton("auxiliary_staff.png", 2, 0, primaryStage);
+        addButton("student.png", 0, 1, primaryStage);
+        addButton("course.png", 1, 1, primaryStage);
+        addButton("book.png", 2, 1, primaryStage);
+        addButton("advance_search.png", 1, 2, primaryStage);
 
         // Set up the scene and stage
         StackPane root = new StackPane(gridPane);
@@ -65,7 +67,7 @@ public class MainMenu extends Application {
         primaryStage.show();
     }
 
-    private void addButton(GridPane gridPane, String imageName, int col, int row, Stage primaryStage) {
+    private void addButton(String imageName, int col, int row, Stage primaryStage) {
         // Load the button image
         Image buttonImage = new Image("file:" + path + imageName);
         ImageView buttonView = new ImageView(buttonImage);
@@ -87,7 +89,7 @@ public class MainMenu extends Application {
     }
 
     private void handleCase(int col, int row, Stage primaryStage) throws Exception {
-        int caseNum = col * 3 + row;
+        int caseNum = col  + row * 3;
         switch (caseNum + 1) {
             // Professor Pressed
             case 1:
@@ -97,32 +99,33 @@ public class MainMenu extends Application {
             
             // Secretariat Pressed
             case 2:
-                
+                System.out.println("Secretariat Pressed");
                 break;
             
             // Auxiliary Staff Pressed
             case 3:
-                
+                System.out.println("Auxiliary Staff Pressed");
                 break;
             
             // Student Pressed
             case 4:
-                
+                System.out.println("Student Pressed");
                 break;
 
             // Book Pressed
             case 5:
-                
+                System.out.println("Book Pressed");
                 break;
 
             // Course Pressed
             case 6:
-                
+                System.out.println("Course Pressed");
                 break;
         
 
             // Advance Search Pressed
             default:
+                System.out.println("Advanced Search Pressed");
                 break;
         }
     }
