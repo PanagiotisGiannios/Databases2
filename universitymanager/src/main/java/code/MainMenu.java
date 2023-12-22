@@ -91,8 +91,8 @@ public class MainMenu extends Application {
         switch (caseNum + 1) {
             // Professor Pressed
             case 1:
-                Professor professor = new Professor();
-                professor.start(primaryStage);
+                ProfessorMenu professorMainMenu = new ProfessorMenu();
+                professorMainMenu.start(primaryStage);
                 break;
             
             // Secretariat Pressed

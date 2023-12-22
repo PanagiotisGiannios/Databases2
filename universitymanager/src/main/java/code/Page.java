@@ -90,7 +90,7 @@ public class Page extends Application {
         // Bind the size of the StackPane to the size of the Scene
         root.prefWidthProperty().bind(primaryStage.widthProperty());
         root.prefHeightProperty().bind(primaryStage.heightProperty());
-        this.root = root;
+        Page.root = root;
     }
 
     // Set up the scene and stage
