@@ -8,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import java.sql.Connection;
 
 public class Page extends Application {
     private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
@@ -19,6 +20,7 @@ public class Page extends Application {
     final int WIDTH = 800;
     final int HEIGHT = 600;
 
+    public static Connection connection = null;
     public static Stage primaryStage;
     public static StackPane root;
     
@@ -96,8 +98,10 @@ public class Page extends Application {
     // Set up the scene and stage
     public void createScene(){
         Scene scene = new Scene(root, WIDTH, HEIGHT);
+        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setTitle(title);
+        primaryStage.getScene().getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.show();
     }
     

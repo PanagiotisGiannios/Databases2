@@ -65,10 +65,11 @@ public class LoginPage extends Page {
         loginButton.setOnAction(e -> {
             String userId = usernameTextField.getText();
             String password = passwordTextField.getText();
-
+            System.out.println(userId + " " + password);
             // Establish a connection with the database using the credentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
                 // Successfully logged in, close login page and do the rest of the program 
+                Page.connection = connection;
                 showMainMenu(primaryStage);
                 
             } catch (Exception e1) {
