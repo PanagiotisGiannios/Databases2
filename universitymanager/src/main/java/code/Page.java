@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -20,7 +21,7 @@ public class Page extends Application {
     final int HEIGHT = 600;
 
     public static Stage primaryStage;
-    public static StackPane root;
+    public static Pane root;
     
     @Override
     public void start(Stage stage) {
@@ -79,7 +80,7 @@ public class Page extends Application {
         backgroundView.setPreserveRatio(false); // Allow stretching
     
         // Create a StackPane as the root with the ImageView as a child
-        StackPane root = new StackPane(backgroundView);
+        Pane root = new StackPane(backgroundView);
     
         // Set the background color using a hex value
         String backgroundColor = "#789D7A";
@@ -90,7 +91,7 @@ public class Page extends Application {
         // Bind the size of the StackPane to the size of the Scene
         root.prefWidthProperty().bind(primaryStage.widthProperty());
         root.prefHeightProperty().bind(primaryStage.heightProperty());
-        this.root = root;
+        Page.root = root;
     }
 
     // Set up the scene and stage
