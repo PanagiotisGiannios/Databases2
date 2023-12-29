@@ -195,6 +195,7 @@ public class ProfessorMenu extends Page {
          * Create the stackpanes that will contain all 
          * of the necessary components for each side
          */
+        System.out.println("test");
         StackPane rightSide = new StackPane();
         rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
