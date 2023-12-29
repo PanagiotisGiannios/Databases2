@@ -69,7 +69,7 @@ public class ProfessorMenu extends Page {
         //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         if(Page.connection == null){
             try {
-                Page.connection = DatabaseConnector.connect("root", "1234");
+                Page.connection = DatabaseConnector.connect("root", "!Sql12345Sql!");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -106,6 +106,8 @@ public class ProfessorMenu extends Page {
         switch (text) {
             case "Add":
                 System.out.println("Added!");
+                AddPage prof = new AddPage("professor");
+                prof.start(Page.primaryStage);
                 break;
             case "Delete":
                 System.out.println("Deleted!");
@@ -176,7 +178,8 @@ public class ProfessorMenu extends Page {
 
         button.setFocusTraversable(false);
 
-    }   
+    }
+    
     private void professorMenuSetup(){
         VBox base = new VBox();
         HBox titleBox = new HBox();
