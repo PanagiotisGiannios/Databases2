@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 public class AddPage extends Page {
     private String[] components;
     private String[] special;
-    private String background;
+    private String background = "uniPage.png";
 
     public AddPage(String type) {
         switch (type) {
@@ -32,9 +32,9 @@ public class AddPage extends Page {
 
     @Override
     public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+        Page.primaryStage = primaryStage;
         loadLogo();
-        loadBackground(background);
+        loadBackground("professorPage.png");
         createAddPage();
         createScene();
     }
@@ -85,6 +85,8 @@ public class AddPage extends Page {
         mainLayout.setTop(titleBox);
         mainLayout.setCenter(centerGrid);
         mainLayout.setBottom(buttonBox);
+        
+        root.getChildren().addAll(mainLayout);
     }
 
     private void profInitialize() {
@@ -96,6 +98,7 @@ public class AddPage extends Page {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        AddPage prof = new AddPage("professor");
+        prof.launch(args);
     }
 }
