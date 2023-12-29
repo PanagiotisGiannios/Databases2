@@ -33,7 +33,7 @@ public class LoginPage extends Page {
     private final static String BACKGROUND_COL_DARK = "120,157,122";
     @Override
     public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+        Page.primaryStage = primaryStage;
         loadLogo();
         loadBackground("uniPage.png");
         loginPageSetup();
@@ -124,10 +124,11 @@ public class LoginPage extends Page {
         loginButton.setOnAction(e -> {
             String userId = usernameTextField.getText();
             String password = passwordTextField.getText();
-
+            System.out.println(userId + " " + password);
             // Establish a connection with the database using the credentials
             try (Connection connection = DatabaseConnector.connect(userId, password)) {
                 // Successfully logged in, close login page and do the rest of the program 
+                Page.connection = connection;
                 showMainMenu(primaryStage);
                 
             } catch (Exception e1) {
