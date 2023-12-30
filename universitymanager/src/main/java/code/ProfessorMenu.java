@@ -88,7 +88,7 @@ public class ProfessorMenu extends Page {
         if(Page.connection == null){
             
             try {
-                Page.connection = DatabaseConnector.connect("root", "1234");
+                Page.connection = DatabaseConnector.connect("root", "!Sql12345Sql!");
             } catch (Exception e) {
                 e.printStackTrace();
             }

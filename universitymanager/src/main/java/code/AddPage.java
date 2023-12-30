@@ -18,6 +18,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 
@@ -181,13 +182,12 @@ public class AddPage extends Page {
         VBox featureSide = new VBox(textComponents.get(0), textComponents.get(1), textComponents.get(2), textComponents.get(3), radioComponents.get(0), textComponents.get(4), textComponents.get(5), textComponents.get(6), dateComponents.get(0), dateComponents.get(1), radioComponents.get(1));
         featureSide.setAlignment(Pos.CENTER_LEFT);
         featureSide.setSpacing(5);
-        featureSide.setPadding(new Insets(10, 450, 0, 0));
-        VBox.setVgrow(featureSide, Priority.ALWAYS);
+        featureSide.setPadding(new Insets(10, 430, 0, 0));
         
 
         // Setup the ADD button
         Button addButton = new Button("ADD");
-        Page.addButtonTransition(addButton, 100, 50);
+        addButtonTransition(addButton, 100, 50);
         Button backButton = Page.createBackButton();
         bottomBox.getChildren().addAll(addButton, backButton);
         bottomBox.setSpacing(5);
@@ -230,7 +230,7 @@ public class AddPage extends Page {
             handleButtonPress(addButton);
         });
 
-        // TODO: Project Side
+        // Project Side Setup
         VBox projectSide = makeProjectSide();
 
         
@@ -244,15 +244,96 @@ public class AddPage extends Page {
         root.getChildren().addAll(base);
     }
 
-
     private VBox makeProjectSide() {
+        // Make the label
+        Label projectLabel = new Label("Projects");
+        projectLabel.setFont(Font.font(30));
+        projectLabel.setStyle("-fx-font-weight: bold;");
+
+        // Make the add button
+        Button addButton = new Button("+");
+        addButtonTransition(addButton, 20, 20);
+        addButton.setOnAction(event -> {
+
+        });
+
+
+        HBox topBox = new HBox(projectLabel);
+        topBox.setSpacing(30);
+
+        // Name of Project
+        TextField name = new TextField();
+        name.setPromptText("Name of  the Project");
+
+        // Field Radio Buttons setup
+        Label fieldLabel = new Label("Field");
+        fieldLabel.setFont(Font.font(15));
+        fieldLabel.setStyle("-fx-font-weight: bold;");
+        RadioButton radio1 = new RadioButton("Computer Hardware and Architecture");
+        RadioButton radio2 = new RadioButton("Signals and Communications");
+        RadioButton radio3 = new RadioButton("Applications and Foundations of Computer Science");
+        RadioButton radio4 = new RadioButton("Energy");
+        RadioButton radio5 = new RadioButton("Software and Information System Engineering");
+
+        ToggleGroup fieldGroup = new ToggleGroup();
+        radio1.setToggleGroup(fieldGroup);
+        radio2.setToggleGroup(fieldGroup);
+        radio3.setToggleGroup(fieldGroup);
+        radio4.setToggleGroup(fieldGroup);
+        radio5.setToggleGroup(fieldGroup);
+
+        VBox field = new VBox(fieldLabel, radio1, radio2, radio3, radio4, radio5);
+        field.setPadding(new Insets(5));
+
+        // Type Radio Buttons setup
+        Label typeLabel = new Label("Type");
+        typeLabel.setFont(Font.font(15));
+        typeLabel.setStyle("-fx-font-weight: bold;");
+        RadioButton r1 = new RadioButton("Research");
+        RadioButton r2 = new RadioButton("Development");
+        RadioButton r3 = new RadioButton("Education");
+
+        ToggleGroup typeGroup = new ToggleGroup();
+        r1.setToggleGroup(typeGroup);
+        r2.setToggleGroup(typeGroup);
+        r3.setToggleGroup(typeGroup);
+
+        VBox type = new VBox(typeLabel, r1, r2, r3);
+        type.setPadding(new Insets(5));
+
+        // Information TextField
+        TextField info = new TextField();
+        info.setPromptText("Information");
+        
+        int maxLength = 500;
+
+        // Create a TextFormatter to limit the length of the text
+        TextFormatter<String> textFormatter = new TextFormatter<>(
+                change -> change.getControlNewText().length() <= maxLength ? change : null
+        );
+        info.setTextFormatter(textFormatter);
+
+        VBox projectBox = new VBox(topBox, name, field, type, info);
+        projectBox.setSpacing(5);
+        projectBox.setPadding(new Insets(20, 10, 0, -300));
+
+
+        //TODO: Finish this
 
 
 
 
 
 
-        return new VBox();
+
+
+
+
+
+
+
+
+        return projectBox;
     }
 
 
