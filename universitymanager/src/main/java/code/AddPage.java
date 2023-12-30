@@ -4,18 +4,12 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
-
-import javafx.animation.ScaleTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,10 +18,8 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class AddPage extends Page {
     private String type;
@@ -398,24 +390,6 @@ public class AddPage extends Page {
         alert.showAndWait();
     }
 
-    private TextField createNumericTextField() {
-        TextField textField = new TextField();
-
-        // Create a UnaryOperator that filters out non-numeric characters
-        UnaryOperator<TextFormatter.Change> filter = change -> {
-            String newText = change.getControlNewText();
-            if (Pattern.matches("[0-9,.]*", newText)) {
-                return change; // Accept the change
-            }
-            return null; // Reject the change
-        };
-
-        // Apply the filter to the TextFormatter
-        TextFormatter<String> textFormatter = new TextFormatter<>(filter);
-        textField.setTextFormatter(textFormatter);
-
-        return textField;
-    }
 
     // Clear all the fields.
     private void clearFields() {

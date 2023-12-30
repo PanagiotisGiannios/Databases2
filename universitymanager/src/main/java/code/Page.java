@@ -4,21 +4,23 @@ import java.io.File;
 
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.sql.Connection;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 public class Page extends Application {
     private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
@@ -192,6 +194,25 @@ public class Page extends Application {
         });
 
         button.setFocusTraversable(false);
+    }
+
+    public static TextField createNumericTextField() {
+        TextField textField = new TextField();
+
+        // Create a UnaryOperator that filters out non-numeric characters
+        UnaryOperator<TextFormatter.Change> filter = change -> {
+            String newText = change.getControlNewText();
+            if (Pattern.matches("[0-9,.]*", newText)) {
+                return change; // Accept the change
+            }
+            return null; // Reject the change
+        };
+
+        // Apply the filter to the TextFormatter
+        TextFormatter<String> textFormatter = new TextFormatter<>(filter);
+        textField.setTextFormatter(textFormatter);
+
+        return textField;
     }
     
     public static void main(String[] args) {
