@@ -88,7 +88,6 @@ public class ProfessorMenu extends Page {
         if(Page.connection == null){
             
             try {
-                System.out.println("Connected directly");
                 Page.connection = DatabaseConnector.connect("root", "1234");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -179,7 +178,7 @@ public class ProfessorMenu extends Page {
             hoverTransition.play();
         });
 
-//**** */
+
         clickTransition.setFromX(1);
         clickTransition.setFromY(1);
         clickTransition.setToX(0.9);
@@ -201,7 +200,6 @@ public class ProfessorMenu extends Page {
     }   
     
     private void handleProjectRadioButtonPress(RadioButton button){
-        System.out.println(button.getText() + " Pressed!\n");
         filterButton.getItems().remove(projectRadioButtons);
         if(button.getText().equals("By Name")){
             VBox checkBoxContainer = new VBox();
@@ -235,7 +233,7 @@ public class ProfessorMenu extends Page {
         VBox base = new VBox();
         HBox titleBox = new HBox();
         HBox mainBox = new HBox();
-    
+        HBox backBox = new HBox();
         
         Text titleText = new Text("Professor");
         titleText.setFont(Font.font(19));
@@ -249,7 +247,6 @@ public class ProfessorMenu extends Page {
          * Create the stackpanes that will contain all 
          * of the necessary components for each side
          */
-        System.out.println("test");
         StackPane rightSide = new StackPane();
         //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
@@ -289,8 +286,8 @@ public class ProfessorMenu extends Page {
         yearsWorkedButton = toCustomMenu(FILTER_BUTTON_TEXTS[8]);
         phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[9]);
 
-        startTextField = new TextField();
-        endTextField = new TextField();
+        startTextField = Page.createNumericTextField();
+        endTextField   = Page.createNumericTextField();
         startTextField.setPromptText("Min.");
         endTextField.setPromptText("Max.");
 
@@ -299,12 +296,12 @@ public class ProfessorMenu extends Page {
         radioButtons = new CustomMenuItem(new VBox(10,maleButton,femaleButton));
         radioButtons.setHideOnClick(false);
 
-        ageStartTextField = new TextField();
-        ageEndTextField = new TextField();
+        ageStartTextField = Page.createNumericTextField();
+        ageEndTextField = Page.createNumericTextField();
         ageStartTextField.setPromptText("Min.");
         ageEndTextField.setPromptText("Max.");
 
-        ssnTextField = new TextField();
+        ssnTextField = Page.createNumericTextField();
         ssnTextField.setPromptText("SSN:");
 
         emailTextField = new TextField();
@@ -315,23 +312,27 @@ public class ProfessorMenu extends Page {
         projectsByAmountButton.setToggleGroup(projectsToggleGroup);
         projectsByAmountButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByAmountButton));
         projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton));
-        projectStartTextField = new TextField();
+        projectStartTextField = Page.createNumericTextField();
         projectStartTextField.setPrefWidth(80);
-        projectEndTextField = new TextField();
+        projectEndTextField = Page.createNumericTextField();
         projectEndTextField.setPrefWidth(80);
         projectStartTextField.setPromptText("Min.");
         projectEndTextField.setPromptText("Max.");
 
-        yearsStartTextField = new TextField();
-        yearsEndTextField = new TextField();
+        yearsStartTextField = Page.createNumericTextField();
+        yearsEndTextField = Page.createNumericTextField();
         yearsStartTextField.setPromptText("Min.");
         yearsEndTextField.setPromptText("Max.");
 
-        phoneTextField = new TextField();
+        phoneTextField = Page.createNumericTextField();
         phoneTextField.setPromptText("Phone Number:");
 
         filterButton.getItems().addAll(rectorButton,salaryButton,sexFilterButton,ageButton,ssnButton,emailButton,projectButton,fieldButton,yearsWorkedButton,phoneButton);
-        
+        filterButton.setCursor(Cursor.HAND);
+        filterButton.setPrefWidth(90);
+        filterButton.setPrefHeight(40);
+        filterButton.setFont(Font.font("System",FontWeight.BOLD, 16));
+
         queryOptionsBox.getChildren().addAll(filterButton);
         leftBox.getChildren().addAll(queryOptionsBox);
 
@@ -344,7 +345,12 @@ public class ProfessorMenu extends Page {
         HBox.setHgrow(leftSide, javafx.scene.layout.Priority.ALWAYS);
         //HBox.setHgrow(rightSide, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
-        base.getChildren().addAll(titleBox,mainBox);
+
+        Button backButton = Page.createBackButton();
+        backBox.setAlignment(Pos.CENTER);
+        backBox.getChildren().add(backButton);
+
+        base.getChildren().addAll(titleBox,mainBox,backBox);
 
         root.getChildren().addAll(base);
         
@@ -398,7 +404,6 @@ public class ProfessorMenu extends Page {
         }
         else if(FILTER_BUTTON_TEXTS[6].equals(checkBox.getText())){
             menu.getItems().remove(projectRadioButtons);
-            //menu.getItems().remove(projectRangeMenuItem);
             if(checkBox.isSelected()){
                 projectRadioButtons = new CustomMenuItem(new VBox(projectsByNameButton,projectsByAmountButton));
                 projectRadioButtons.setHideOnClick(false);
@@ -411,7 +416,6 @@ public class ProfessorMenu extends Page {
                    selectedText = selectedRadioButton.getText();
                 }
                 if(selectedRadioButton != null && selectedText.equals("By Name")){
-                    //menu.getItems().remove(projectRadioButtons);
                     VBox checkBoxContainer = new VBox();
                     for(String projectName : projectNames){
                         CheckBox projectBox = new CheckBox(projectName);
@@ -426,11 +430,7 @@ public class ProfessorMenu extends Page {
                     scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
                     scrollPane.setFocusTraversable(false);
                     scrollPane.setPrefHeight(100);
-                    
-                
-                    //projectScrollPaneMenuItem = new CustomMenuItem(scrollPane);
-                    //projectScrollPaneMenuItem.setHideOnClick(false);
-                    
+
                     projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton, scrollPane,projectsByAmountButton));
                     projectRadioButtons.setHideOnClick(false);
                     menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
