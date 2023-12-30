@@ -305,7 +305,7 @@ public class AddPage extends Page {
         TextField info = new TextField();
         info.setPromptText("Information");
         
-        int maxLength = 500;
+        int maxLength = 150;
 
         // Create a TextFormatter to limit the length of the text
         TextFormatter<String> textFormatter = new TextFormatter<>(
