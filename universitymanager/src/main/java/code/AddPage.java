@@ -99,11 +99,12 @@ public class AddPage extends Page {
         VBox base = new VBox();
         HBox titleBox = new HBox();
         HBox mainBox = new HBox();
-        HBox bottomBox = new HBox();
+        VBox bottomBox = new VBox();
 
         // Set up the title
         Label titleLabel = new Label("Professor");
-        titleLabel.setFont(Font.font(25));
+        titleLabel.setFont(Font.font(30));
+        titleBox.setStyle("-fx-font-weight: bold;");
         titleBox.getChildren().add(titleLabel);
         titleBox.setAlignment(Pos.TOP_CENTER);
 
@@ -187,15 +188,17 @@ public class AddPage extends Page {
 
         VBox featureSide = new VBox(textComponents.get(0), textComponents.get(1), textComponents.get(2), textComponents.get(3), radioComponents.get(0), textComponents.get(4), textComponents.get(5), textComponents.get(6), dateComponents.get(0), dateComponents.get(1), radioComponents.get(1));
         featureSide.setAlignment(Pos.CENTER_LEFT);
-        featureSide.setSpacing(8);
+        featureSide.setSpacing(5);
         featureSide.setPadding(new Insets(10, 450, 0, 0));
         VBox.setVgrow(featureSide, Priority.ALWAYS);
         
 
         // Setup the ADD button
         Button addButton = new Button("ADD");
-        setButtonProperties(addButton);
-        bottomBox.getChildren().addAll(addButton);
+        Page.addButtonTransition(addButton, 100, 50);
+        Button backButton = Page.createBackButton();
+        bottomBox.getChildren().addAll(addButton, backButton);
+        bottomBox.setSpacing(5);
         bottomBox.setAlignment(Pos.CENTER);
 
         addButton.setOnAction(event -> {
@@ -232,12 +235,13 @@ public class AddPage extends Page {
             catch (NullPointerException e) {
                 entry.add(null);
             }
+            handleButtonPress(addButton);
         });
 
+        // TODO: Project Side
+        VBox projectSide = makeProjectSide();
 
-
-        VBox projectSide = new VBox();
-        // TODO: Staff
+        
 
         
 
@@ -248,52 +252,19 @@ public class AddPage extends Page {
         root.getChildren().addAll(base);
     }
 
-    // Make the a button have a Transition.
-    private void setButtonProperties(Button button){
-        ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
-        ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
 
-        button.setMinWidth(100);
-        button.setMinHeight(50);
-        button.setPrefWidth(100);
-        button.setPrefHeight(50);
-        button.setFont(Font.font("System",FontWeight.BOLD, 18));
-        button.setStyle("-fx-background-radius: 15;");
-        button.setCursor(Cursor.HAND);
-
-        hoverTransition.setFromX(1);
-        hoverTransition.setFromY(1);
-        hoverTransition.setToX(1.1);
-        hoverTransition.setToY(1.1);
-        button.setOnMouseEntered(e -> {
-            hoverTransition.setRate(1);
-            hoverTransition.play();
-        });
-
-        button.setOnMouseExited(e -> {
-            hoverTransition.setRate(-1);
-            hoverTransition.play();
-        });
+    private VBox makeProjectSide() {
 
 
-        clickTransition.setFromX(1);
-        clickTransition.setFromY(1);
-        clickTransition.setToX(0.9);
-        clickTransition.setToY(0.9);
 
-        button.setOnMousePressed(e ->{
-            clickTransition.setRate(1);
-            clickTransition.play();
-            
-        });
-        button.setOnMouseReleased(e->{
-            hoverTransition.setRate(1);
-            hoverTransition.play();
-            handleButtonPress(button);
-        });
 
-        button.setFocusTraversable(false);
+
+
+        return new VBox();
     }
+
+
+    
 
     // 
     private void handleButtonPress(Button button) {
@@ -409,6 +380,7 @@ public class AddPage extends Page {
 
     }
 
+    // It shows a Success Alert.
     private void showSuccessAlert(String title, String header, String content) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
@@ -417,7 +389,7 @@ public class AddPage extends Page {
         alert.showAndWait();
     }
     
-    // Helper method to show error alert
+    // It shows an Error Alert.
     private void showErrorAlert(String title, String header, String content) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle(title);

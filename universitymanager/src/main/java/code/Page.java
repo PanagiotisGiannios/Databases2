@@ -2,13 +2,22 @@ package code;
 
 import java.io.File;
 
+import javafx.animation.ScaleTransition;
 import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
 import java.sql.Connection;
 
 public class Page extends Application {
@@ -109,6 +118,80 @@ public class Page extends Application {
     public void loadBackground(String image) {
         setBackground(image);
         loadBackground();
+    }
+
+    public static Button createBackButton() {
+        // Load the image
+        Image image = new Image("file:" + System.getProperty("user.dir") + "\\universitymanager\\images\\university.png");
+
+        // Create an ImageView with the image
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+
+        Button backButton = new Button();
+        backButton.setGraphic(imageView);
+        addButtonTransition(backButton, 30, 30);
+
+        // Set up the action for when the button is released
+        backButton.setOnMouseReleased(e -> {
+            MainMenu mainMenu = new MainMenu();
+            mainMenu.start(Page.primaryStage);
+        });
+        
+
+        return backButton;
+    }
+
+    // Make the a button have a Transition.
+    public static void addButtonTransition(Button button) {
+        addButtonTransition(button, 100, 50);
+    }
+
+
+    public static void addButtonTransition(Button button, int w, int h) {
+        ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(w),button);
+        ScaleTransition clickTransition = new ScaleTransition(Duration.millis(h),button);
+
+        button.setMinWidth(w);
+        button.setMinHeight(h);
+        button.setPrefWidth(w);
+        button.setPrefHeight(h);
+        button.setFont(Font.font("System",FontWeight.BOLD, 18));
+        button.setStyle("-fx-background-radius: 15;");
+        button.setCursor(Cursor.HAND);
+
+        hoverTransition.setFromX(1);
+        hoverTransition.setFromY(1);
+        hoverTransition.setToX(1.1);
+        hoverTransition.setToY(1.1);
+        button.setOnMouseEntered(e -> {
+            hoverTransition.setRate(1);
+            hoverTransition.play();
+        });
+
+        button.setOnMouseExited(e -> {
+            hoverTransition.setRate(-1);
+            hoverTransition.play();
+        });
+
+
+        clickTransition.setFromX(1);
+        clickTransition.setFromY(1);
+        clickTransition.setToX(0.9);
+        clickTransition.setToY(0.9);
+
+        button.setOnMousePressed(e ->{
+            clickTransition.setRate(1);
+            clickTransition.play();
+            
+        });
+        button.setOnMouseReleased(e->{
+            hoverTransition.setRate(1);
+            hoverTransition.play();
+        });
+
+        button.setFocusTraversable(false);
     }
     
     public static void main(String[] args) {
