@@ -54,23 +54,15 @@ public class LoginPage extends Page {
 
         // Set up the username text field
         TextField usernameTextField = new TextField();
-        //usernameTextField.setPromptText("Username");
-        //usernameTextField.setMaxWidth(400);
-        //usernameTextField.setPrefWidth(150);
-        usernameTextField.setMaxWidth(150);
-        usernameTextField.setPrefHeight(45);
-        Label usernamePromptLabel = new Label("Username");
-        usernamePromptLabel.setStyle("-fx-text-fill: black;");
-        usernamePromptLabel.setTranslateX(0);
-        usernamePromptLabel.setTranslateY(0);
-        usernameContainer.getChildren().addAll(usernamePromptLabel,usernameTextField);
-        usernamePromptLabel.setTranslateX(usernameTextField.getWidth());
-        usernamePromptLabel.setTranslateY(usernameTextField.getHeight());
-        usernamePromptLabel.toFront();
+        usernameTextField.setPromptText("Username");
+        usernameTextField.setMaxWidth(400);
+        usernameTextField.setFocusTraversable(false);
+        
         // Set up the password text field
         PasswordField passwordTextField = new PasswordField();
         passwordTextField.setPromptText("Password");
         passwordTextField.setMaxWidth(400);
+        passwordTextField.setFocusTraversable(false);
 
 
 
@@ -102,33 +94,19 @@ public class LoginPage extends Page {
         welcomeTextBox.getChildren().addAll(welcomeText);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
-        loginBox.getChildren().addAll(usernameContainer, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        loginBox.getChildren().addAll(usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
+        
         root.getChildren().addAll(welcomeTextBox,loginBox);
         
-        usernameTextField.setOnMouseClicked(event ->{
-            if(event.getClickCount() > 0){
-                usernamePromptLabel.setTranslateX(-usernameTextField.getWidth()/2 + 30);
-                usernamePromptLabel.setTranslateY(-usernameTextField.getHeight()/2 + 8);
-                usernamePromptLabel.toFront();
-            }
-        });
-        usernameTextField.focusedProperty().addListener((obs,oldValue,newValue)->{
-            if(!newValue){
-                usernamePromptLabel.setTranslateX(0);
-                usernamePromptLabel.setTranslateY(0);
-                usernamePromptLabel.toFront();
-            }
-        });
-
+/** */
         // Set up the login button action
         loginButton.setOnAction(e -> {
             String userId = usernameTextField.getText();
             String password = passwordTextField.getText();
             System.out.println(userId + " " + password);
             // Establish a connection with the database using the credentials
-            try (Connection connection = DatabaseConnector.connect(userId, password)) {
-                // Successfully logged in, close login page and do the rest of the program 
-                Page.connection = connection;
+            try {
+                Page.connection = DatabaseConnector.connect(userId, password);
                 showMainMenu(primaryStage);
                 
             } catch (Exception e1) {
@@ -158,7 +136,8 @@ public class LoginPage extends Page {
             String password = PANPASS;
 
             // Establish a connection with the database using the crudentials
-            try (Connection connection = DatabaseConnector.connect(userId, password)) {
+            try {
+                Page.connection = DatabaseConnector.connect(userId, password);
                 showMainMenu(primaryStage);
                 
             } catch (Exception e1) {
@@ -172,7 +151,8 @@ public class LoginPage extends Page {
             String password = FRAGKPASS;
 
             // Establish a connection with the database using the crudentials
-            try (Connection connection = DatabaseConnector.connect(userId, password)) {
+            try{
+                Page.connection = DatabaseConnector.connect(userId, password);
                 showMainMenu(primaryStage);
             } catch (Exception e1) {
                 e1.printStackTrace();

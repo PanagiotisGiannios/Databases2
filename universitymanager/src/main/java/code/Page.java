@@ -32,7 +32,7 @@ public class Page extends Application {
     final int WIDTH = 800;
     final int HEIGHT = 600;
 
-    public static Connection connection = null;
+    public static Connection connection;
     public static Stage primaryStage;
     public static Pane root;
     
@@ -41,7 +41,7 @@ public class Page extends Application {
         primaryStage = stage;
         initializePage();
     }
-    
+    /** */
     // Change logo image
     public void setLogo(String logo) {
         this.logo = logo;
@@ -83,7 +83,7 @@ public class Page extends Application {
         setLogo(image);
         loadLogo();
     }
-
+/** */
     public void loadBackground() {
         // Load the background image
         Image backgroundImage = new Image("file:" + pagePath + background);

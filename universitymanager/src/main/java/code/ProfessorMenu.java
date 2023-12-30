@@ -22,12 +22,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import java.util.*;
 
+import com.google.protobuf.Field;
+
 public class ProfessorMenu extends Page {
 
-    private static final String[] FILTER_BUTTON_TEXTS = {"Is Rector", "Salary", "Sex", "Age", "SSN", "E-mail", "Project"};
+    private static final String[] FILTER_BUTTON_TEXTS = {"Is Rector", "Salary", "Sex", "Age", "SSN", "E-mail", "Project", "Field", "Years Worked", "Phone"};
     
     private List<String> projectNames = new ArrayList<String>();
-    private List<String> projectTypes = new ArrayList<String>();
+    private List<String> professorFields = new ArrayList<String>();
 
     private MenuButton filterButton;
 
@@ -58,8 +60,24 @@ public class ProfessorMenu extends Page {
     private TextField emailTextField;
 
     private CustomMenuItem projectButton;
-    private CustomMenuItem projectScrollPaneMenuItem;
+    private CustomMenuItem projectRadioButtons;
+    private TextField projectStartTextField;
+    private TextField projectEndTextField;
+    private RadioButton  projectsByNameButton = new RadioButton("By Name");
+    private RadioButton projectsByAmountButton = new RadioButton("By Amount");
+    private ToggleGroup projectsToggleGroup = new ToggleGroup();
+    
+    private CustomMenuItem fieldButton;
+    private CustomMenuItem fieldScrollCustomMenuItem;
 
+    private CustomMenuItem yearsWorkedButton;
+    private CustomMenuItem yearsRangeTexFieldsMenuItem;
+    private TextField yearsStartTextField;
+    private TextField yearsEndTextField;
+
+    private CustomMenuItem phoneButton;
+    private CustomMenuItem phoneTextFieldItem;
+    private TextField phoneTextField;
 
     private TextField firstNameField;
     private TextField lastNameField;
@@ -68,14 +86,16 @@ public class ProfessorMenu extends Page {
     public void start(Stage primaryStage) {
         //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         if(Page.connection == null){
+            
             try {
-                Page.connection = DatabaseConnector.connect("root", "!Sql12345Sql!");
+                System.out.println("Connected directly");
+                Page.connection = DatabaseConnector.connect("root", "1234");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         String getProjectNames = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
-        String getProjectTypes = "SELECT DISTINCT type FROM Project";
+        String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
         try (ResultSet result = Page.connection.createStatement().executeQuery(getProjectNames)) {
             while (result.next()) {
                 projectNames.add(result.getString("Name"));
@@ -83,9 +103,9 @@ public class ProfessorMenu extends Page {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProjectTypes)){
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
             while (result.next()) {
-                projectTypes.add(result.getString("type"));
+                professorFields.add(result.getString("profession"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,7 +179,7 @@ public class ProfessorMenu extends Page {
             hoverTransition.play();
         });
 
-
+/** */
         clickTransition.setFromX(1);
         clickTransition.setFromY(1);
         clickTransition.setToX(0.9);
@@ -178,8 +198,39 @@ public class ProfessorMenu extends Page {
 
         button.setFocusTraversable(false);
 
-    }
+    }   
     
+    private void handleProjectRadioButtonPress(RadioButton button){
+        System.out.println(button.getText() + " Pressed!\n");
+        filterButton.getItems().remove(projectRadioButtons);
+        if(button.getText().equals("By Name")){
+            VBox checkBoxContainer = new VBox();
+            for(String projectName : projectNames){
+                CheckBox projectBox = new CheckBox(projectName);
+                projectBox.setFocusTraversable(false);
+                projectBox.setPrefHeight(25);
+                projectBox.setPrefWidth(140);
+                checkBoxContainer.getChildren().add(projectBox);
+            }
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setContent(checkBoxContainer);
+            scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+            scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+            scrollPane.setFocusTraversable(false);
+            scrollPane.setPrefHeight(100);
+
+            projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton, scrollPane,projectsByAmountButton));
+            projectRadioButtons.setHideOnClick(false);
+            filterButton.getItems().add(filterButton.getItems().indexOf(projectButton)+1,projectRadioButtons);
+        }
+        else{
+            HBox rangeContainer = new HBox();
+            rangeContainer.getChildren().addAll(projectStartTextField,projectEndTextField);
+            projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton,rangeContainer));
+            filterButton.getItems().add(filterButton.getItems().indexOf(projectButton)+1,projectRadioButtons);
+        }
+    }
+
     private void professorMenuSetup(){
         VBox base = new VBox();
         HBox titleBox = new HBox();
@@ -200,9 +251,9 @@ public class ProfessorMenu extends Page {
          */
         System.out.println("test");
         StackPane rightSide = new StackPane();
-        rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
+        //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
-        leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
+        //leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
@@ -234,6 +285,9 @@ public class ProfessorMenu extends Page {
         ssnButton = toCustomMenu(FILTER_BUTTON_TEXTS[4]);
         emailButton = toCustomMenu(FILTER_BUTTON_TEXTS[5]);
         projectButton = toCustomMenu(FILTER_BUTTON_TEXTS[6]);
+        fieldButton = toCustomMenu(FILTER_BUTTON_TEXTS[7]);
+        yearsWorkedButton = toCustomMenu(FILTER_BUTTON_TEXTS[8]);
+        phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[9]);
 
         startTextField = new TextField();
         endTextField = new TextField();
@@ -256,7 +310,27 @@ public class ProfessorMenu extends Page {
         emailTextField = new TextField();
         emailTextField.setPromptText("E-mail:");
 
-        filterButton.getItems().addAll(rectorButton,salaryButton,sexFilterButton,ageButton,ssnButton,emailButton,projectButton);
+        projectsByNameButton.setToggleGroup(projectsToggleGroup);
+        projectsByNameButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByNameButton));
+        projectsByAmountButton.setToggleGroup(projectsToggleGroup);
+        projectsByAmountButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByAmountButton));
+        projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton));
+        projectStartTextField = new TextField();
+        projectStartTextField.setPrefWidth(80);
+        projectEndTextField = new TextField();
+        projectEndTextField.setPrefWidth(80);
+        projectStartTextField.setPromptText("Min.");
+        projectEndTextField.setPromptText("Max.");
+
+        yearsStartTextField = new TextField();
+        yearsEndTextField = new TextField();
+        yearsStartTextField.setPromptText("Min.");
+        yearsEndTextField.setPromptText("Max.");
+
+        phoneTextField = new TextField();
+        phoneTextField.setPromptText("Phone Number:");
+
+        filterButton.getItems().addAll(rectorButton,salaryButton,sexFilterButton,ageButton,ssnButton,emailButton,projectButton,fieldButton,yearsWorkedButton,phoneButton);
         
         queryOptionsBox.getChildren().addAll(filterButton);
         leftBox.getChildren().addAll(queryOptionsBox);
@@ -292,7 +366,7 @@ public class ProfessorMenu extends Page {
         else if(FILTER_BUTTON_TEXTS[2].equals(checkBox.getText())){
             menu.getItems().remove(radioButtons);
             if(checkBox.isSelected()){
-                radioButtons = new CustomMenuItem(new VBox(maleButton,femaleButton));
+                radioButtons = new CustomMenuItem(new VBox(10,maleButton,femaleButton));
                 radioButtons.setHideOnClick(false);
                 menu.getItems().add(menu.getItems().indexOf(sexFilterButton)+1,radioButtons);
             }
@@ -323,15 +397,62 @@ public class ProfessorMenu extends Page {
             }
         }
         else if(FILTER_BUTTON_TEXTS[6].equals(checkBox.getText())){
-            menu.getItems().remove(projectScrollPaneMenuItem);
+            menu.getItems().remove(projectRadioButtons);
+            //menu.getItems().remove(projectRangeMenuItem);
+            if(checkBox.isSelected()){
+                projectRadioButtons = new CustomMenuItem(new VBox(projectsByNameButton,projectsByAmountButton));
+                projectRadioButtons.setHideOnClick(false);
+                menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
+                
+                RadioButton selectedRadioButton = (RadioButton) projectsToggleGroup.getSelectedToggle();
+                String selectedText = new String();
+                if(selectedRadioButton != null){
+                    menu.getItems().remove(projectRadioButtons);
+                   selectedText = selectedRadioButton.getText();
+                }
+                if(selectedRadioButton != null && selectedText.equals("By Name")){
+                    //menu.getItems().remove(projectRadioButtons);
+                    VBox checkBoxContainer = new VBox();
+                    for(String projectName : projectNames){
+                        CheckBox projectBox = new CheckBox(projectName);
+                        projectBox.setFocusTraversable(false);
+                        projectBox.setPrefHeight(25);
+                        projectBox.setPrefWidth(140);
+                        checkBoxContainer.getChildren().add(projectBox);
+                    }
+                    ScrollPane scrollPane = new ScrollPane();
+                    scrollPane.setContent(checkBoxContainer);
+                    scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+                    scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+                    scrollPane.setFocusTraversable(false);
+                    scrollPane.setPrefHeight(100);
+                    
+                
+                    //projectScrollPaneMenuItem = new CustomMenuItem(scrollPane);
+                    //projectScrollPaneMenuItem.setHideOnClick(false);
+                    
+                    projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton, scrollPane,projectsByAmountButton));
+                    projectRadioButtons.setHideOnClick(false);
+                    menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
+                }
+                else if(selectedRadioButton != null && selectedText.equals("By Amount")){
+                    HBox rangeContainer = new HBox();
+                    rangeContainer.getChildren().addAll(projectStartTextField,projectEndTextField);
+                    projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton,rangeContainer));
+                    menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
+                }
+            }
+        }
+        else if(FILTER_BUTTON_TEXTS[7].equals(checkBox.getText())){
+            menu.getItems().remove(fieldScrollCustomMenuItem);
             if(checkBox.isSelected()){
                 VBox checkBoxContainer = new VBox();
-                for(String projectName : projectNames){
-                    CheckBox projectBox = new CheckBox(projectName);
-                    projectBox.setFocusTraversable(false);
-                    projectBox.setPrefHeight(25);
-                    projectBox.setPrefWidth(140);
-                    checkBoxContainer.getChildren().add(projectBox);
+                for (String field : professorFields) {
+                    CheckBox fieldBox = new CheckBox(field);
+                    fieldBox.setFocusTraversable(false);
+                    fieldBox.setPrefHeight(25);
+                    fieldBox.setPrefWidth(140);
+                    checkBoxContainer.getChildren().add(fieldBox);
                 }
                 ScrollPane scrollPane = new ScrollPane();
                 scrollPane.setContent(checkBoxContainer);
@@ -339,10 +460,27 @@ public class ProfessorMenu extends Page {
                 scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
                 scrollPane.setFocusTraversable(false);
                 scrollPane.setPrefHeight(100);
-            
-                projectScrollPaneMenuItem = new CustomMenuItem(scrollPane);
-                projectScrollPaneMenuItem.setHideOnClick(false);
-                menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectScrollPaneMenuItem);
+
+                fieldScrollCustomMenuItem = new CustomMenuItem(scrollPane);
+                fieldScrollCustomMenuItem.setHideOnClick(false);
+                menu.getItems().add(menu.getItems().indexOf(fieldButton)+1,fieldScrollCustomMenuItem);
+            }
+        }
+        else if(FILTER_BUTTON_TEXTS[8].equals(checkBox.getText())){
+            menu.getItems().remove(yearsRangeTexFieldsMenuItem);
+            if(checkBox.isSelected()){
+                yearsStartTextField.setPrefWidth(80);
+                yearsEndTextField.setPrefWidth(80);
+                yearsRangeTexFieldsMenuItem = new CustomMenuItem(new HBox(yearsStartTextField,yearsEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(yearsWorkedButton) + 1, yearsRangeTexFieldsMenuItem);
+            }
+        }
+        else if(FILTER_BUTTON_TEXTS[9].equals(checkBox.getText())){
+            menu.getItems().remove(phoneTextFieldItem);
+            if(checkBox.isSelected()){
+                phoneTextField.setPrefWidth(160);
+                phoneTextFieldItem = new CustomMenuItem(new HBox(phoneTextField));
+                menu.getItems().add(menu.getItems().indexOf(phoneButton) + 1, phoneTextFieldItem);
             }
         }
         else {
