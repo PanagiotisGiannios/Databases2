@@ -7,7 +7,6 @@ import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.Node;
@@ -20,6 +19,8 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class AddPage extends Page {
@@ -31,7 +32,9 @@ public class AddPage extends Page {
     List<VBox> radioComponents = null;
     List<DatePicker> dateComponents = null;
 
-    private List<String> entry;
+    private List<String> entry = null;
+    private List<String> secondEntry = null;
+    private Boolean professorStored = false;
 
 
     public AddPage(String type) {
@@ -233,10 +236,6 @@ public class AddPage extends Page {
         // Project Side Setup
         VBox projectSide = makeProjectSide();
 
-        
-
-        
-
         mainBox.getChildren().addAll(featureSide, projectSide);
         mainBox.setAlignment(Pos.CENTER);
 
@@ -250,20 +249,10 @@ public class AddPage extends Page {
         projectLabel.setFont(Font.font(30));
         projectLabel.setStyle("-fx-font-weight: bold;");
 
-        // Make the add button
-        Button addButton = new Button("+");
-        addButtonTransition(addButton, 20, 20);
-        addButton.setOnAction(event -> {
-
-        });
-
-
-        HBox topBox = new HBox(projectLabel);
-        topBox.setSpacing(30);
-
         // Name of Project
         TextField name = new TextField();
         name.setPromptText("Name of  the Project");
+        textComponents.add(name);
 
         // Field Radio Buttons setup
         Label fieldLabel = new Label("Field");
@@ -284,6 +273,7 @@ public class AddPage extends Page {
 
         VBox field = new VBox(fieldLabel, radio1, radio2, radio3, radio4, radio5);
         field.setPadding(new Insets(5));
+        radioComponents.add(field);      
 
         // Type Radio Buttons setup
         Label typeLabel = new Label("Type");
@@ -300,10 +290,12 @@ public class AddPage extends Page {
 
         VBox type = new VBox(typeLabel, r1, r2, r3);
         type.setPadding(new Insets(5));
+        radioComponents.add(type);
 
         // Information TextField
         TextField info = new TextField();
         info.setPromptText("Information");
+        textComponents.add(info);
         
         int maxLength = 150;
 
@@ -313,34 +305,61 @@ public class AddPage extends Page {
         );
         info.setTextFormatter(textFormatter);
 
+        // Create the project board
+
+
+        // Make the add button
+        
+        Image image = new Image("file:" + System.getProperty("user.dir") + "\\universitymanager\\images\\add.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button addProjectButton = new Button();
+        addProjectButton.setGraphic(imageView);
+        addButtonTransition(addProjectButton, 30, 30);
+        addProjectButton.setOnAction(event -> {
+
+            // Save the data into a list
+            secondEntry = new ArrayList<>();
+            secondEntry.add(name.getText());
+            secondEntry.add(info.getText());
+
+            // Save field to the list
+            try {
+                RadioButton selectedField = (RadioButton) fieldGroup.getSelectedToggle();
+                entry.add(selectedField.getText());
+            }
+            catch (NullPointerException e) {
+                entry.add(null);
+            }
+
+            //Save type to the list
+            try {
+                RadioButton selectedType = (RadioButton) typeGroup.getSelectedToggle();
+                entry.add(selectedType.getText());
+            }
+            catch (NullPointerException e) {
+                entry.add(null);
+            }
+            handleButtonPress(addProjectButton);
+        });
+        
+        HBox topBox = new HBox(projectLabel, addProjectButton);
+        topBox.setSpacing(30);
+
         VBox projectBox = new VBox(topBox, name, field, type, info);
         projectBox.setSpacing(5);
         projectBox.setPadding(new Insets(20, 10, 0, -300));
 
-
-        //TODO: Finish this
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         return projectBox;
     }
 
-
-    
-
     // 
     private void handleButtonPress(Button button) {
+        if (button.getText() == "+") {
+            addProject();
+            return;
+        }
         if (type == "professor" || type == "auxilery") {
             if (check()) {
                 addEmployee();
@@ -350,7 +369,7 @@ public class AddPage extends Page {
                 else {
                     // TODO:  addAuxilery();
                 }
-                clearFields();                
+                clearFields("professor");                
             }
             else {
                 // TODO: fill this
@@ -362,13 +381,45 @@ public class AddPage extends Page {
         }       
     }
 
+    private void addProject() {
+        if (professorStored == false) {
+            showAlert(AlertType.ERROR, "Missing Professor", "Professor Entry Missing", "Please add a Professor first to this Project");
+            return;
+        }
+
+        // Insert to Project table
+        String insertProfessorQuery = "INSERT INTO PROJECT (ProfessorId, Name, Field, Type, Information) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertProfessorQuery)) {
+            preparedStatement.setString(1, entry.get(0));
+            preparedStatement.setString(2, secondEntry.get(0));
+            preparedStatement.setString(3, secondEntry.get(1));
+            preparedStatement.setString(4, secondEntry.get(2));
+            preparedStatement.setString(5, secondEntry.get(3));
+
+            if (preparedStatement.executeUpdate() > 0) {
+                showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "The operation was completed successfully.");
+                clearFields("project");
+                // TODO: fillBoard(secondEntry);
+                secondEntry = null;
+            }
+            else {
+                showAlert(AlertType.ERROR, "Problem", "Failed to insert Project.", "An error occurred. Please check your input.");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();            
+        }
+
+        
+
+    }
+
     private boolean check() {
         if (!checkForMissingValues()) {
-            showErrorAlert("Missing Values", "Some values are missing", "Please fill all the cells");
+            showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
             return false;
         }
         else if (!checkForDuplicate()) {
-            showErrorAlert("Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
+            showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
             return false;
         }
         return true;
@@ -415,7 +466,7 @@ public class AddPage extends Page {
             }
 
             if (preparedStatement.executeUpdate() <= 0) {
-                showErrorAlert("Problem", "Failed to insert employee.", "An error occurred. Please check your input.");
+                showAlert(AlertType.ERROR, "Problem", "Failed to insert employee.", "An error occurred. Please check your input.");
             }
         }
         catch (SQLException e) {
@@ -442,29 +493,20 @@ public class AddPage extends Page {
             preparedStatement.setString(3, entry.get(entry.size()-1));
 
             if (preparedStatement.executeUpdate() > 0) {
-                showSuccessAlert("Success", "Operation Successful", "The operation was completed successfully.");
+                showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "The operation was completed successfully.");
             }
             else {
-                showErrorAlert("Problem", "Failed to insert professor.", "An error occurred. Please check your input.");
+                showAlert(AlertType.ERROR, "Problem", "Failed to insert professor.", "An error occurred. Please check your input.");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();            
         }
 
     }
-
-    // It shows a Success Alert.
-    private void showSuccessAlert(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
     
-    // It shows an Error Alert.
-    private void showErrorAlert(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.ERROR);
+    // It shows an Alert.
+    private void showAlert(AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
@@ -473,28 +515,45 @@ public class AddPage extends Page {
 
 
     // Clear all the fields.
-    private void clearFields() {
-        for (TextField text : textComponents) {
-            text.clear();
-        }
-        
-        for (DatePicker date : dateComponents) {
-            date.setValue(null);
-        }
+    private void clearFields(String selection) {
+        if (selection == "project" || selection == "all") {
+            int size = textComponents.size();
+            for (int i = size - 2; i < size; i++) {
+                TextField textField = textComponents.get(i);
+                textField.clear();
+            }
 
-        for (VBox vbox : radioComponents) {
-            for (Node childNode : vbox.getChildren()) {
-                if (childNode instanceof RadioButton) {
-                    RadioButton radioButton = (RadioButton) childNode;
-                    radioButton.setSelected(false);
+            // Clear the radio Buttons from the Project
+            size = radioComponents.size();
+            for (int i = size - 2; i < size; i++) {
+                VBox vbox = radioComponents.get(i);
+                for (Node childNode : vbox.getChildren()) {
+                    if (childNode instanceof RadioButton) {
+                        RadioButton radioButton = (RadioButton) childNode;
+                        radioButton.setSelected(false);
+                    }
                 }
             }
         }
-        
-    }
 
-    public static void main(String[] args) {
-        AddPage prof = new AddPage("professor");
-        prof.start(Page.primaryStage);
+        if (selection == "professor" || selection == "all") {
+
+            for (TextField text : textComponents) {
+                text.clear();
+            }
+            
+            for (DatePicker date : dateComponents) {
+                date.setValue(null);
+            }
+
+            for (VBox vbox : radioComponents) {
+                for (Node childNode : vbox.getChildren()) {
+                    if (childNode instanceof RadioButton) {
+                        RadioButton radioButton = (RadioButton) childNode;
+                        radioButton.setSelected(false);
+                    }
+                }
+            }
+        }       
     }
 }
