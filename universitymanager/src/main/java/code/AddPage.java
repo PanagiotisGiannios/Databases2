@@ -34,9 +34,9 @@ public class AddPage extends Page {
 
     private List<String> entry = null;
     private List<String> secondEntry = null;
+    private List<String> projectHistoryList = null;
     private Boolean professorStored = false;
-
-
+    
     public AddPage(String type) {
         this.type = type;
         switch (type) {
@@ -93,21 +93,19 @@ public class AddPage extends Page {
     // Creates a Professor Add Page.
     private void createAddPageProfessor() {
         VBox base = new VBox();
-        HBox titleBox = new HBox();
         HBox mainBox = new HBox();
         VBox bottomBox = new VBox();
 
-        // Set up the title
-        Label titleLabel = new Label("Professor");
-        titleLabel.setFont(Font.font(30));
-        titleBox.setStyle("-fx-font-weight: bold;");
-        titleBox.getChildren().add(titleLabel);
-        titleBox.setAlignment(Pos.TOP_CENTER);
 
         // Setup the components List
         textComponents = new ArrayList<>();
         radioComponents = new ArrayList<>();
         dateComponents = new ArrayList<>();
+
+        // Set up the title
+        Label professorLabel = new Label("Professor");
+        professorLabel.setFont(Font.font(30));
+        professorLabel.setStyle("-fx-font-weight: bold;");
 
         // Set up the features
         TextField fname = new TextField();
@@ -180,21 +178,17 @@ public class AddPage extends Page {
 
         VBox profession = new VBox(profLabel, radio1, radio2, radio3, radio4, radio5);
         profession.setPadding(new Insets(5));
-        radioComponents.add(profession);
+        radioComponents.add(profession);        
 
-        VBox featureSide = new VBox(textComponents.get(0), textComponents.get(1), textComponents.get(2), textComponents.get(3), radioComponents.get(0), textComponents.get(4), textComponents.get(5), textComponents.get(6), dateComponents.get(0), dateComponents.get(1), radioComponents.get(1));
-        featureSide.setAlignment(Pos.CENTER_LEFT);
-        featureSide.setSpacing(5);
-        featureSide.setPadding(new Insets(10, 430, 0, 0));
-        
+        // Setup the add professor button
+        Image image = new Image("file:" + getPath() + "add_user.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button addButton = new Button();
+        addButton.setGraphic(imageView);
 
-        // Setup the ADD button
-        Button addButton = new Button("ADD");
-        addButtonTransition(addButton, 100, 50);
-        Button backButton = Page.createBackButton();
-        bottomBox.getChildren().addAll(addButton, backButton);
-        bottomBox.setSpacing(5);
-        bottomBox.setAlignment(Pos.CENTER);
+        addButtonTransition(addButton, 30, 30);
 
         addButton.setOnAction(event -> {
             entry = new ArrayList<>();
@@ -230,16 +224,44 @@ public class AddPage extends Page {
             catch (NullPointerException e) {
                 entry.add(null);
             }
-            handleButtonPress(addButton);
+            handleButtonPress("professor");
         });
+
+        HBox titltBox = new HBox(professorLabel, addButton);
+        titltBox.setSpacing(30);
+
+        VBox professorSide = new VBox(titltBox, textComponents.get(0), textComponents.get(1), textComponents.get(2), textComponents.get(3), radioComponents.get(0), textComponents.get(4), textComponents.get(5), textComponents.get(6), dateComponents.get(0), dateComponents.get(1), radioComponents.get(1));
+        professorSide.setAlignment(Pos.CENTER_LEFT);
+        professorSide.setSpacing(5);
+        professorSide.setPadding(new Insets(10, 430, 0, 0));
 
         // Project Side Setup
         VBox projectSide = makeProjectSide();
 
-        mainBox.getChildren().addAll(featureSide, projectSide);
+        // Setup of New Entry Button
+        Button newButton = new Button("New");
+        addButtonTransition(newButton, 100, 50);
+
+        newButton.setOnAction(event -> {
+            clearFields("all");
+            entry = null;
+            secondEntry = null;
+            professorStored = false;
+            projectHistoryList = null;
+            lock(false);
+        });
+
+        // Setup the back to main menu button
+        Button backButton = Page.createBackButton();
+        bottomBox.getChildren().addAll(newButton, backButton);
+        bottomBox.setSpacing(5);
+        bottomBox.setAlignment(Pos.CENTER);
+
+        // Setup the boxes
+        mainBox.getChildren().addAll(professorSide, projectSide);
         mainBox.setAlignment(Pos.CENTER);
 
-        base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        base.getChildren().addAll(mainBox, bottomBox);
         root.getChildren().addAll(base);
     }
 
@@ -308,40 +330,46 @@ public class AddPage extends Page {
         // Create the project board
 
 
-        // Make the add button
-        
-        Image image = new Image("file:" + System.getProperty("user.dir") + "\\universitymanager\\images\\add.png");
+        // Make the add project button        
+        Image image = new Image("file:" + getPath() + "add_project.png");
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(30);
         imageView.setFitHeight(30);
         Button addProjectButton = new Button();
         addProjectButton.setGraphic(imageView);
         addButtonTransition(addProjectButton, 30, 30);
+
         addProjectButton.setOnAction(event -> {
+            if (projectHistoryList == null) {
+                projectHistoryList = new ArrayList<>();
+            }
 
             // Save the data into a list
             secondEntry = new ArrayList<>();
             secondEntry.add(name.getText());
-            secondEntry.add(info.getText());
 
             // Save field to the list
             try {
                 RadioButton selectedField = (RadioButton) fieldGroup.getSelectedToggle();
-                entry.add(selectedField.getText());
+                secondEntry.add(selectedField.getText());
             }
             catch (NullPointerException e) {
-                entry.add(null);
+                secondEntry.add(null);
             }
 
-            //Save type to the list
+            // Save type to the list
             try {
                 RadioButton selectedType = (RadioButton) typeGroup.getSelectedToggle();
-                entry.add(selectedType.getText());
+                secondEntry.add(selectedType.getText());
             }
             catch (NullPointerException e) {
-                entry.add(null);
+                secondEntry.add(null);
             }
-            handleButtonPress(addProjectButton);
+
+            // Save info
+            secondEntry.add(info.getText());
+
+            handleButtonPress("project");
         });
         
         HBox topBox = new HBox(projectLabel, addProjectButton);
@@ -355,21 +383,23 @@ public class AddPage extends Page {
     }
 
     // 
-    private void handleButtonPress(Button button) {
-        if (button.getText() == "+") {
-            addProject();
+    private void handleButtonPress(String button) {
+        button = button.toLowerCase();
+        if (button == "project") {
+            if(check(secondEntry)) {
+                addProject();
+            }            
             return;
         }
-        if (type == "professor" || type == "auxilery") {
-            if (check()) {
+        if (button == "professor" || button == "auxilery") {
+            if (check(entry)) {
                 addEmployee();
                 if (type == "professor") {
                     addProfessor();
                 }
                 else {
                     // TODO:  addAuxilery();
-                }
-                clearFields("professor");                
+                }                
             }
             else {
                 // TODO: fill this
@@ -384,6 +414,7 @@ public class AddPage extends Page {
     private void addProject() {
         if (professorStored == false) {
             showAlert(AlertType.ERROR, "Missing Professor", "Professor Entry Missing", "Please add a Professor first to this Project");
+            clearFields("project");
             return;
         }
 
@@ -397,8 +428,8 @@ public class AddPage extends Page {
             preparedStatement.setString(5, secondEntry.get(3));
 
             if (preparedStatement.executeUpdate() > 0) {
-                showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "The operation was completed successfully.");
-                clearFields("project");
+                showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "Project " + secondEntry.get(0) + " added to professor " + entry.get(1) + " " + entry.get(2)+ ".");
+                projectHistoryList.add(secondEntry.get(0));
                 // TODO: fillBoard(secondEntry);
                 secondEntry = null;
             }
@@ -406,27 +437,24 @@ public class AddPage extends Page {
                 showAlert(AlertType.ERROR, "Problem", "Failed to insert Project.", "An error occurred. Please check your input.");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();            
+            ex.printStackTrace();
         }
-
-        
-
     }
 
-    private boolean check() {
-        if (!checkForMissingValues()) {
+    private boolean check(List<String> list) {
+        if (!checkForMissingValues(list)) {
             showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
             return false;
         }
-        else if (!checkForDuplicate()) {
+        else if (!checkForDuplicate(list)) {
             showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
             return false;
         }
         return true;
     }
 
-    private boolean checkForMissingValues() {
-        for (String e : entry) {
+    private boolean checkForMissingValues(List<String> list) {
+        for (String e : list) {
             if (e == null || e == "") {
                 System.out.println(e);
                 return false;
@@ -435,7 +463,18 @@ public class AddPage extends Page {
         return true;
     }
 
-    private boolean checkForDuplicate() {
+    private boolean checkForDuplicate(List<String> list) {
+            if (list == secondEntry) {
+                for (String project : projectHistoryList) {
+                if (project == secondEntry.get(0)) {                
+                    showAlert(AlertType.ERROR, "Duplicate Project Name", secondEntry.get(0) + " already exists", "You have added a project with the same name!");
+                    clearFields("project");
+                    return false;
+                }
+            }
+            return true;            
+        }
+
         // Check for duplicates
         String checkDuplicateQuery = "SELECT COUNT(*) FROM EMPLOYEE WHERE SSN = ?";
         try (PreparedStatement checkDuplicateStatement = connection.prepareStatement(checkDuplicateQuery)) {
@@ -493,10 +532,12 @@ public class AddPage extends Page {
             preparedStatement.setString(3, entry.get(entry.size()-1));
 
             if (preparedStatement.executeUpdate() > 0) {
-                showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "The operation was completed successfully.");
+                showAlert(AlertType.INFORMATION, "Success", "We have successfully added a new professor", "You can now assign projects to " + entry.get(1) + " " + entry.get(2) + ".");
+                professorStored = true;
+                lock(true);
             }
             else {
-                showAlert(AlertType.ERROR, "Problem", "Failed to insert professor.", "An error occurred. Please check your input.");
+                showAlert(AlertType.ERROR, "Problem", "Failed to insert project.", "An error occurred. Please check your input.");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();            
@@ -556,4 +597,29 @@ public class AddPage extends Page {
             }
         }       
     }
+
+    // 
+    private void lock(boolean value) {
+        for (DatePicker date : dateComponents) {
+                date.setDisable(value);
+            }
+
+        int size = textComponents.size();
+        for (int i = 0; i < size - 2 ; i++) {
+            TextField textField = textComponents.get(i);
+            textField.setDisable(value);
+        }
+
+        // Clear the radio Buttons from the Project
+        size = radioComponents.size();
+        for (int i = 0; i < size - 2; i++) {
+            VBox vbox = radioComponents.get(i);
+            for (Node childNode : vbox.getChildren()) {
+                if (childNode instanceof RadioButton) {
+                    RadioButton radioButton = (RadioButton) childNode;
+                    radioButton.setDisable(value);
+                }
+            }
+        }
+    } 
 }

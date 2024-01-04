@@ -23,11 +23,11 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 public class Page extends Application {
-    private String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
-    private String pagePath = path + "pages\\";
-    private String logo = "university.png";
-    private String background = "uniPage.png";
-    private String title = "University Management";
+    private static String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
+    private static String pagePath = path + "pages\\";
+    private static String logo = "university.png";
+    private static String background = "uniPage.png";
+    private static String title = "University Management";
 
     final int WIDTH = 800;
     final int HEIGHT = 600;
@@ -35,6 +35,14 @@ public class Page extends Application {
     public static Connection connection;
     public static Stage primaryStage;
     public static Pane root;
+
+    public static String getPagePath() {
+        return pagePath;
+    }
+
+    public static String getPath() {
+        return path;
+    }
     
     @Override
     public void start(Stage stage) {
