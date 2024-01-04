@@ -86,7 +86,7 @@ public class MainMenu extends Application {
 
         // Add the button to the GridPane
         gridPane.add(buttonPane, col, row);
-    }/** */
+    }
 
     private void handleCase(int col, int row, Stage primaryStage) throws Exception {
         int caseNum = col  + row * 3;
