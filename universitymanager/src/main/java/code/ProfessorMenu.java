@@ -2,32 +2,39 @@ package code;
 
 import java.sql.*;
 import javafx.animation.ScaleTransition;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.stage.Popup;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import java.util.*;
-
-import com.google.protobuf.Field;
+import javafx.scene.layout.Background;
 
 public class ProfessorMenu extends Page {
 
+    //TODO: 
+    private String FPass = "!Sql12345Sql!";
+    private String PPass = "1234";
+
+
+
     private static final String[] FILTER_BUTTON_TEXTS = {"Is Rector", "Salary", "Sex", "Age", "SSN", "E-mail", "Project", "Field", "Years Worked", "Phone"};
-    
+    private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Field", "Salary", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Job Starting Date", "RectorID","Project Name",  "Project Information", "Project Type"};
     private List<String> projectNames = new ArrayList<String>();
     private List<String> professorFields = new ArrayList<String>();
 
@@ -79,8 +86,30 @@ public class ProfessorMenu extends Page {
     private CustomMenuItem phoneTextFieldItem;
     private TextField phoneTextField;
 
+    private MenuButton selectFilterButton;
+
+    private CustomMenuItem selectFiltersMenuItem;
+    private VBox selectFiltersContainer;
+
     private TextField firstNameField;
     private TextField lastNameField;
+
+    private Button searchButton;
+
+    private String selectString = "SELECT ssn, FirstName, LastName, ";
+    private String joinString   = "FROM employee,professor";
+    private String whereString  = "WHERE ssn=profID";
+    private String groupString = "";
+    private PreparedStatement previousQuery = null;
+
+    private List<Object> whereParametersList = new ArrayList<Object>();
+    private List<Object> groupParametersList = new ArrayList<Object>();
+
+    private ResultSet  resultSet;
+    private ScrollPane resultScrollPane;
+    private TableView<ObservableList<String>>  resultTableView;
+
+    //private String ssnSelected;
 
     @Override
     public void start(Stage primaryStage) {
@@ -88,7 +117,7 @@ public class ProfessorMenu extends Page {
         if(Page.connection == null){
             
             try {
-                Page.connection = DatabaseConnector.connect("root", "!Sql12345Sql!");
+                Page.connection = DatabaseConnector.connect("root", "1234");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -114,7 +143,10 @@ public class ProfessorMenu extends Page {
         loadLogo();
         loadBackground("professorPage.png");
         professorMenuSetup();
+
         createScene();
+        //Simulate a press on the search button to populate the viewTable at the start.
+        handleButtonPress(new Button("Search"));
     }
 
     /*
@@ -129,16 +161,407 @@ public class ProfessorMenu extends Page {
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted!");
+                System.out.println("Deleted! " + TableManager.ssnSelected);
+                if(TableManager.ssnSelected == null){
+                    Alert alert = new Alert(AlertType.ERROR); 
+                    alert.setTitle("Error");
+                    alert.setHeaderText("No professor selected");
+                    alert.setContentText("Select a professor and try again!");
+                    alert.showAndWait();
+                    break;
+                }
+                Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Confirm deletion!");
+                confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: " + TableManager.ssnSelected + " ?");
+                ButtonType yesButtonType = new ButtonType("Yes");
+                ButtonType noButtonType = new ButtonType("No");
+                confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
+                confirmAlert.showAndWait().ifPresent(buttonType ->{
+                    if(buttonType == yesButtonType){
+                        try {
+                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.ssnSelected);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.ssnSelected);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.ssnSelected);
+                            resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
+                            resultTableView.getSelectionModel().clearSelection();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        System.out.println("NO pressed!");
+                    }
+                });
+                resultTableView.getSelectionModel().clearSelection();
+                TableManager.ssnSelected = null;
+
                 break;
             case "Edit":
-                System.out.println("Edited!");
+                System.out.println("Edit person with ssn: "+ TableManager.ssnSelected);
                 break;
             case "Teaches":
                 System.out.println("Teaches!");
                 break;
             case "Rector":
-                System.out.println("Rector!");
+                System.out.println("make rector person with ssn: " + TableManager.ssnSelected);
+                try {
+                    if(TableManager.ssnSelected != null){
+                        Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.ssnSelected);
+                        Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.ssnSelected);
+                        TableManager.ssnSelected = null;
+                        try {
+                            ResultSet resultSet =  previousQuery.executeQuery();
+                            resultTableView = TableManager.CreateTableView(resultSet, "professor");
+                            TableManager.setUpMouseReleased(resultTableView);
+                            resultScrollPane.setContent(resultTableView);
+                            resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        Alert alert = new Alert(AlertType.ERROR); 
+                        alert.setTitle("Error");
+                        alert.setHeaderText("No professor selected");
+                        alert.setContentText("Select a professor and try again!");
+                        alert.showAndWait();
+                    }
+                    
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "Search":
+                selectString = "SELECT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
+                joinString   = "FROM employee JOIN professor ON ssn=profID";
+                whereString  = "WHERE";
+                groupString = "";
+
+                String invalidRangeFilters ="";
+                Boolean isCorrectOrder = true;
+                whereParametersList.clear();
+                groupParametersList.clear();
+                Boolean showMissingAlert = false;
+                Boolean addedProjectTable = false;
+
+                CheckBox[] checkBoxArray = selectFiltersContainer.getChildren().toArray(new CheckBox[0]);
+                if(checkBoxArray[0].isSelected()){
+                    selectString += "Profession AS 'Field', ";
+                }
+                if(checkBoxArray[1].isSelected()){
+                    selectString += "Salary, ";
+                }
+                if(checkBoxArray[2].isSelected()){
+                    selectString += "Sex, ";
+                }
+                if(checkBoxArray[3].isSelected()){
+                    selectString += "Address, ";
+                }
+                if(checkBoxArray[4].isSelected()){
+                    selectString += "Phone AS 'Phone Number', ";
+                }
+                if(checkBoxArray[5].isSelected()){
+                    selectString += "Email AS 'E-mail', ";
+                }
+                if(checkBoxArray[6].isSelected()){
+                    selectString += "Birthday, ";
+                }
+                if(checkBoxArray[7].isSelected()){
+                    selectString += "JobStartingDate AS 'Job Starting Date', ";
+                }
+                if(checkBoxArray[8].isSelected()){
+                    selectString += "ManagerID AS 'Rector ID', ";
+                }
+                if(checkBoxArray[9].isSelected()){
+                    selectString += "Name AS 'Project Name', ";
+                    if(!addedProjectTable){
+                        joinString += " LEFT JOIN project ON profID=professorID";
+                        addedProjectTable = true;
+                    }
+                }
+                if(checkBoxArray[10].isSelected()){
+                    selectString += "Information AS 'Project Information', ";
+                    if(!addedProjectTable){
+                        joinString += " LEFT JOIN project ON profID=professorID";
+                        addedProjectTable = true;
+                    }
+                }
+                if(checkBoxArray[11].isSelected()){
+                    selectString += "Type, ";
+                    if(!addedProjectTable){
+                        joinString += " LEFT JOIN project ON profID=professorID";
+                        addedProjectTable = true;
+                    }
+                }
+                
+                selectString = selectString.substring(0,selectString.length() -2);
+                if(((CheckBox)rectorButton.getContent()).isSelected()){
+                    whereString = whereString + " AND ManagerId IS NULL";
+                }
+                if(((CheckBox)ssnButton.getContent()).isSelected()){
+                    if(!ssnTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND ssn = ?");
+                        whereParametersList.add(Integer.parseInt(ssnTextField.getText()));
+                    }
+                    else{
+                        showMissingAlert = true;
+                    }
+                }
+                if(((CheckBox)emailButton.getContent()).isSelected()){
+                    if(!emailTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND Email = ?");
+                        whereParametersList.add(emailTextField.getText());
+                    }
+                    else{
+                        showMissingAlert = true;
+                    }
+                }
+                if(((CheckBox)phoneButton.getContent()).isSelected()){
+                    if(!phoneTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND Phone = ?");
+                        whereParametersList.add(Integer.parseInt(phoneTextField.getText()));
+                    }
+                    else{
+                        showMissingAlert = true;
+                    }
+                }
+                if(((CheckBox)fieldButton.getContent()).isSelected()){
+                    whereString = whereString.concat( " AND (");
+                    ScrollPane scroll = (ScrollPane)fieldScrollCustomMenuItem.getContent();
+                    VBox containerBox = (VBox)scroll.getContent();
+                    Boolean isFirst = true;
+                    Boolean hasSelected = false;
+
+                    for (Node node : containerBox.getChildren()) {
+                        if (node instanceof CheckBox) {
+                            if(((CheckBox)node).isSelected()){
+                                hasSelected = true;
+                                if(!isFirst){
+                                    whereString = whereString.concat(" OR ");
+                                }
+                                else{
+                                    isFirst = false;
+                                    
+                                }
+                                whereString = whereString.concat("profession = ?");
+                                whereParametersList.add(((CheckBox)node).getText());
+                            }
+                        }
+                    }
+                    if(!hasSelected){
+                        whereString = whereString.concat(("1=1"));
+                        showMissingAlert = true;
+                    }
+                    whereString = whereString.concat(")");
+                }     
+                if(((CheckBox)sexFilterButton.getContent()).isSelected()){
+                    if(toggleGroup.getSelectedToggle() != null) {
+                        whereString = whereString.concat(" AND sex = ?");
+                        whereParametersList.add(((RadioButton)toggleGroup.getSelectedToggle()).getText());
+                    }
+                    else{
+                        showMissingAlert = true;
+                    }
+                }
+                if(((CheckBox)ageButton.getContent()).isSelected()){
+                    int start= Integer.MIN_VALUE;
+                    int end = Integer.MAX_VALUE;
+                    if(!ageStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND datediff(curdate(),birthday)/365.25 >= ?");
+                        whereParametersList.add(Integer.parseInt(ageStartTextField.getText()));
+                        start = Integer.parseInt(ageStartTextField.getText());
+                    }
+                    if(!ageEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND datediff(curdate(),birthday)/365.25 <= ?");
+                        whereParametersList.add(Integer.parseInt(ageEndTextField.getText()));
+                        end = Integer.parseInt(ageEndTextField.getText());
+                    }
+                    if(ageStartTextField.getText().isEmpty() && ageEndTextField.getText().isEmpty()){
+                        showMissingAlert = true;
+                    }
+                    if(start > end){
+                        invalidRangeFilters += "Age, ";
+                        isCorrectOrder = false;
+                    }
+                }
+                if(((CheckBox)salaryButton.getContent()).isSelected()){
+                    int start = Integer.MIN_VALUE;
+                    int end = Integer.MAX_VALUE;
+                    if(!startTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND salary >= ?");
+                        whereParametersList.add(Integer.parseInt(startTextField.getText()));
+                        start = Integer.parseInt(startTextField.getText());
+                    }
+                    if(!endTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND salary <= ?");
+                        whereParametersList.add(Integer.parseInt(endTextField.getText()));
+                        end = Integer.parseInt(endTextField.getText());
+                    }
+                    if(startTextField.getText().isEmpty() && endTextField.getText().isEmpty()){
+                        showMissingAlert = true;
+                    }
+                    if(start > end){
+                        invalidRangeFilters += "Salary, ";
+                        isCorrectOrder = false;
+                    }
+                }
+                if(((CheckBox)yearsWorkedButton.getContent()).isSelected()){
+                    int start = Integer.MIN_VALUE;
+                    int end = Integer.MAX_VALUE;
+                    if(!yearsStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 >= ?");
+                        whereParametersList.add(Integer.parseInt(yearsStartTextField.getText()));
+                        start = Integer.parseInt(yearsStartTextField.getText());
+                    }
+                    if(!yearsEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 <= ?");
+                        whereParametersList.add(Integer.parseInt(yearsEndTextField.getText()));
+                        end = Integer.parseInt(yearsEndTextField.getText());
+                    }
+                    if(yearsStartTextField.getText().isEmpty() && yearsEndTextField.getText().isEmpty()){
+                        showMissingAlert = true;
+                    }
+                    if(start > end){
+                        invalidRangeFilters += "Years Worked, ";
+                        isCorrectOrder = false;
+                    }
+                }
+                if(((CheckBox)projectButton.getContent()).isSelected()){
+                    if(projectsToggleGroup.getToggles() != null){
+                        int start = Integer.MIN_VALUE;
+                        int end = Integer.MAX_VALUE;
+                        if(((RadioButton)projectsToggleGroup.getSelectedToggle()).getText().equals("By Amount")){
+                            if(!addedProjectTable){
+                                joinString += " LEFT JOIN project ON profID = professorID";
+                                addedProjectTable = true;
+                            }
+                            if(!projectStartTextField.getText().isEmpty() && !projectEndTextField.getText().isEmpty()){
+                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) >= ? AND COUNT(*) <= ?)");
+                                whereParametersList.add(Integer.parseInt(projectStartTextField.getText()));
+                                whereParametersList.add(Integer.parseInt(projectEndTextField.getText()));
+                                start = Integer.parseInt(projectStartTextField.getText());
+                                end = Integer.parseInt(projectEndTextField.getText());
+                            }
+                            else if(!projectStartTextField.getText().isEmpty() && projectEndTextField.getText().isEmpty()){
+                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) >= ?)");
+                                whereParametersList.add(Integer.parseInt(projectStartTextField.getText()));
+                            }
+                            else if(projectStartTextField.getText().isEmpty() && !projectEndTextField.getText().isEmpty()){
+                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) <= ?)");
+                                whereParametersList.add(Integer.parseInt(projectEndTextField.getText()));
+                            }
+                            if(projectStartTextField.getText().isEmpty() && projectEndTextField.getText().isEmpty()){
+                                showMissingAlert = true;
+                            }
+                            if(start > end){
+                                invalidRangeFilters += "Project by amount, ";
+                                isCorrectOrder = false;
+                            }
+
+                        }
+                        else{
+                            if(!addedProjectTable){
+                                joinString = joinString.concat(" LEFT JOIN project ON profID=professorID");
+                                whereString = whereString.concat(" AND (");
+                                addedProjectTable = true;
+                            }
+                            else{
+                                whereString = whereString.concat(" AND (");
+                            }
+                            Boolean hasSelected = false;
+                            Boolean isFirst = true;
+                            VBox radioButtonVBox = (VBox)projectRadioButtons.getContent();
+                            ScrollPane projectByNameScroll = (ScrollPane)radioButtonVBox.getChildren().get(1);
+                            VBox containerBox = (VBox) projectByNameScroll.getContent();
+                            for (Node node : containerBox.getChildren()) {
+                                if (node instanceof CheckBox) {
+                                    if(((CheckBox)node).isSelected()){
+                                        hasSelected = true;
+                                        if(!isFirst){
+                                            whereString = whereString.concat(" OR ");
+                                        }
+                                        else{
+                                            isFirst = false;
+                                            
+                                        }
+                                        whereString = whereString.concat("name = ?");
+                                        whereParametersList.add(((CheckBox)node).getText());
+                                    }
+                                }                                
+                            } 
+                            if(!hasSelected){
+                                whereString = whereString.concat("1=1");
+                                showMissingAlert = true;
+                            }
+                            whereString = whereString.concat(")");
+                        }
+                    }
+
+                }
+                if(!firstNameField.getText().isEmpty()){
+                    whereString = whereString.concat(" AND FirstName LIKE ?");
+                    whereParametersList.add("%"+ firstNameField.getText() +"%");
+                }
+                if (!lastNameField.getText().isEmpty()) {
+                    whereString = whereString.concat(" AND LastName LIKE ?");
+                    whereParametersList.add("%" + lastNameField.getText() + "%");
+                }
+                if(whereString.indexOf(" AND") != -1){
+                    whereString = whereString.substring(0,whereString.indexOf(" AND")) + whereString.substring(whereString.indexOf(" AND") + 4);
+                }
+                else{
+                    whereString = "";
+                }
+                String query = selectString + "\n" + joinString + "\n" + whereString + "\n" + groupString;
+                System.out.println("\n\n"+ query + "\n\n");
+                if(showMissingAlert){
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("Incomplete Filters");
+                    alert.setHeaderText(null);
+                    alert.setContentText("One or more filters have been selected but left empty.\nThese filters will be ignored during the search\nPlease review the selected filters to make sure all necessary fields are filled");
+                    alert.showAndWait();
+                }
+                if(!isCorrectOrder){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Incorrect Order");
+                    alert.setHeaderText("Incorrect order in range(s)");
+                    //Remove the last: ", " 
+                    invalidRangeFilters = invalidRangeFilters.substring(0,invalidRangeFilters.length()-2);
+                    //Find the last: ", " and replace it with "and"
+                    int index = invalidRangeFilters.lastIndexOf(", ");
+                    if(index != -1){
+                        invalidRangeFilters = invalidRangeFilters.substring(0,index) + " and " + invalidRangeFilters.substring(index+2);
+                    }
+                    alert.setContentText("Incorrect order in filter(s): "+ invalidRangeFilters);
+                    alert.showAndWait();
+                    break;
+                }
+                try{
+                    PreparedStatement preparedStatement = Page.connection.prepareStatement(query);
+                    int parameterIndex = 1;
+                    for (Object parameter : whereParametersList) {
+                        preparedStatement.setObject(parameterIndex, parameter);
+                        parameterIndex++;
+                    }
+                    for (Object parameter : groupParametersList){
+                        preparedStatement.setObject(parameterIndex, parameter);
+                        parameterIndex++;
+                    }
+                    
+                    previousQuery = preparedStatement;
+                    resultSet = preparedStatement.executeQuery();
+                    
+                    resultTableView = TableManager.CreateTableView(resultSet, "professor");
+                    TableManager.setUpMouseReleased(resultTableView);
+                    
+                    resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+                    resultScrollPane.setContent(resultTableView);
+                    resultScrollPane.setFitToWidth(true);
+                    resultScrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
+                }
+                catch(SQLException e){
+                    e.printStackTrace();
+                }
                 break;
             default:
                 System.out.println("Undefined!");
@@ -147,7 +570,7 @@ public class ProfessorMenu extends Page {
 
     }
 
-    /*
+    /**
      * Sets the prefered width and height of a button, also makes the font bold and size 18
      * and creates two animations, one for hovering that makes the button bigger when hovered
      * and one for clicking that shrinks the button when clicked.
@@ -213,7 +636,7 @@ public class ProfessorMenu extends Page {
             ScrollPane scrollPane = new ScrollPane();
             scrollPane.setContent(checkBoxContainer);
             scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-            scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+            scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
             scrollPane.setFocusTraversable(false);
             scrollPane.setPrefHeight(100);
 
@@ -230,17 +653,16 @@ public class ProfessorMenu extends Page {
     }
 
     private void professorMenuSetup(){
-        VBox base = new VBox();
+        VBox base = new VBox(10);
         HBox titleBox = new HBox();
         HBox mainBox = new HBox();
         HBox backBox = new HBox();
         
         Text titleText = new Text("Professor");
-        titleText.setFont(Font.font(19));
+        titleText.setFont(Font.font("System",FontWeight.BOLD,29));
         titleBox.getChildren().add(titleText);
         titleBox.setAlignment(Pos.TOP_CENTER);
-        titleText.setScaleX(2);
-        titleText.setScaleY(1.85);
+        
 
 
         /*
@@ -327,14 +749,63 @@ public class ProfessorMenu extends Page {
         phoneTextField = Page.createNumericTextField();
         phoneTextField.setPromptText("Phone Number:");
 
-        filterButton.getItems().addAll(rectorButton,salaryButton,sexFilterButton,ageButton,ssnButton,emailButton,projectButton,fieldButton,yearsWorkedButton,phoneButton);
+        filterButton.getItems().addAll(rectorButton,ssnButton,emailButton,phoneButton,fieldButton,projectButton,sexFilterButton,ageButton,salaryButton,yearsWorkedButton);
         filterButton.setCursor(Cursor.HAND);
         filterButton.setPrefWidth(90);
         filterButton.setPrefHeight(40);
-        filterButton.setFont(Font.font("System",FontWeight.BOLD, 16));
+        filterButton.setFont(Font.font("System",FontWeight.BOLD, 14));
+        
+        selectFiltersContainer = new VBox(5);
+        for (String str : SELECT_FILTER_BUTTON_TEXTS) {
+            CheckBox checkbox = new CheckBox(str);
+            selectFiltersContainer.getChildren().add(checkbox);
+        }
+        selectFiltersMenuItem = new CustomMenuItem(selectFiltersContainer);
+        selectFiltersMenuItem.setHideOnClick(false);
+        selectFilterButton = new MenuButton("Show/Hide\nColumns");
+        selectFilterButton.getItems().add(selectFiltersMenuItem);
+        selectFilterButton.setCursor(Cursor.HAND);
+        selectFilterButton.setPrefWidth(100);
+        selectFilterButton.setPrefHeight(40);
+        selectFilterButton.setFont(Font.font("System",FontWeight.BOLD, 12));
 
-        queryOptionsBox.getChildren().addAll(filterButton);
-        leftBox.getChildren().addAll(queryOptionsBox);
+        firstNameField = new TextField();
+        firstNameField.setPrefWidth(140);
+        firstNameField.setPrefHeight(40);
+        firstNameField.setPromptText("First Name:");
+        firstNameField.setFocusTraversable(false);
+        firstNameField.setStyle("-fx-font-size: 12px;");
+
+        lastNameField = new TextField();
+        lastNameField.setPrefWidth(140);
+        lastNameField.setPrefHeight(40);
+        lastNameField.setPromptText("Last Name:");
+        lastNameField.setFocusTraversable(false);   
+        lastNameField.setStyle("-fx-font-size: 12px;");
+
+        searchButton = new Button("Search");
+        Page.addButtonTransition(searchButton);
+        searchButton.setMinHeight(30);
+        searchButton.setMinWidth(30);
+        searchButton.setPrefHeight(40);
+        searchButton.setPrefWidth(70);
+        searchButton.setFont(Font.font("System", FontWeight.BOLD, 15));
+        searchButton.setOnMouseReleased(e -> {
+            searchButton.setScaleX(1);
+            searchButton.setScaleY(1);
+            handleButtonPress(searchButton);
+        });
+        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,firstNameField,lastNameField,searchButton);
+
+        resultScrollPane = new ScrollPane();
+        resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        resultScrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+       // resultScrollPane.setPrefWidth(400);
+        //resultScrollPane.setPrefHeight(300);
+        resultScrollPane.setContent(resultTableView);
+        //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
+        resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
+        leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
 
         leftSide.setMinWidth(200);
         leftSide.getChildren().addAll(leftBox);
@@ -347,7 +818,7 @@ public class ProfessorMenu extends Page {
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
 
         Button backButton = Page.createBackButton();
-        backBox.setAlignment(Pos.CENTER);
+        backBox.setAlignment(Pos.TOP_CENTER);
         backBox.getChildren().add(backButton);
 
         base.getChildren().addAll(titleBox,mainBox,backBox);
