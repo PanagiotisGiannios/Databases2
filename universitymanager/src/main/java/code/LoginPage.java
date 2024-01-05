@@ -1,9 +1,5 @@
 package code;
 
-import java.sql.Connection;
-
-import javax.print.DocFlavor.STRING;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -12,13 +8,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -30,7 +21,7 @@ public class LoginPage extends Page {
     private final static String PANPASS = "1234";
     private final static String FRAGKPASS = "!Sql12345Sql!";
     private final static String BACKGROUND_COL_LIGHT = "151,198,154";
-    private final static String BACKGROUND_COL_DARK = "120,157,122";
+    //private final static String BACKGROUND_COL_DARK = "120,157,122";
     @Override
     public void start(Stage primaryStage) {
         Page.primaryStage = primaryStage;

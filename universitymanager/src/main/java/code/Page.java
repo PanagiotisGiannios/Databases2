@@ -17,10 +17,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.converter.IntegerStringConverter;
 
 import java.sql.Connection;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
 
 public class Page extends Application {
     private static String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
@@ -49,31 +48,6 @@ public class Page extends Application {
         primaryStage = stage;
         initializePage();
     }
-    /** */
-    // Change logo image
-    public void setLogo(String logo) {
-        this.logo = logo;
-    }
-    
-    // Change background image
-    public void setBackground(String background) {
-        this.background = background;
-    }
-
-    // Change the pagePath
-    public void setPagePath(String pagePath) {
-        this.pagePath = pagePath;
-    }
-
-    // Change the path
-    public void setPath(String path) {
-        this.path = path;
-    }
-    
-    // Change the title
-    public void setTitle(String title) {
-        this.title = title;
-    }
     
     public void initializePage() {
         loadBackground();
@@ -88,10 +62,10 @@ public class Page extends Application {
     }
 
     public void loadLogo(String image) {
-        setLogo(image);
+        logo = image;
         loadLogo();
     }
-/** */
+    
     public void loadBackground() {
         // Load the background image
         Image backgroundImage = new Image("file:" + pagePath + background);
@@ -126,7 +100,7 @@ public class Page extends Application {
     }
     
     public void loadBackground(String image) {
-        setBackground(image);
+        background = image;
         loadBackground();
     }
 
@@ -204,20 +178,33 @@ public class Page extends Application {
         button.setFocusTraversable(false);
     }
 
-    public static TextField createNumericTextField() {
+    public static TextField createNumericTextField(int maxLength) {
         TextField textField = new TextField();
 
-        // Create a UnaryOperator that filters out non-numeric characters
-        UnaryOperator<TextFormatter.Change> filter = change -> {
-            String newText = change.getControlNewText();
-            if (Pattern.matches("[0-9,.]*", newText)) {
-                return change; // Accept the change
-            }
-            return null; // Reject the change
-        };
+        // Create a converter for integer values
+        IntegerStringConverter converter = new IntegerStringConverter();
 
-        // Apply the filter to the TextFormatter
-        TextFormatter<String> textFormatter = new TextFormatter<>(filter);
+        // Create a TextFormatter to limit the length of the text
+        textField.setTextFormatter(new TextFormatter<>(converter,
+                null,
+                change -> {
+                    String newText = change.getControlNewText();
+                    if (newText.matches("[0-9]*") && newText.length() <= maxLength) {
+                        return change;
+                    }
+                    return null;
+                }));
+
+        return textField;
+    }
+
+    public static TextField makeTextField(int maxLength) {
+        TextField textField = new TextField();
+
+        // Create a TextFormatter to limit the length of the text
+        TextFormatter<String> textFormatter = new TextFormatter<>(
+                change -> change.getControlNewText().length() <= maxLength ? change : null
+        );
         textField.setTextFormatter(textFormatter);
 
         return textField;

@@ -30,6 +30,7 @@ public class ProfessorMenu extends Page {
     //TODO: 
     private String FPass = "!Sql12345Sql!";
     private String PPass = "1234";
+    private final static int LIMIT = 10;
 
 
 
@@ -708,8 +709,8 @@ public class ProfessorMenu extends Page {
         yearsWorkedButton = toCustomMenu(FILTER_BUTTON_TEXTS[8]);
         phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[9]);
 
-        startTextField = Page.createNumericTextField();
-        endTextField   = Page.createNumericTextField();
+        startTextField = Page.createNumericTextField(LIMIT);
+        endTextField   = Page.createNumericTextField(LIMIT);
         startTextField.setPromptText("Min.");
         endTextField.setPromptText("Max.");
 
@@ -718,12 +719,12 @@ public class ProfessorMenu extends Page {
         radioButtons = new CustomMenuItem(new VBox(10,maleButton,femaleButton));
         radioButtons.setHideOnClick(false);
 
-        ageStartTextField = Page.createNumericTextField();
-        ageEndTextField = Page.createNumericTextField();
+        ageStartTextField = Page.createNumericTextField(LIMIT);
+        ageEndTextField = Page.createNumericTextField(LIMIT);
         ageStartTextField.setPromptText("Min.");
         ageEndTextField.setPromptText("Max.");
 
-        ssnTextField = Page.createNumericTextField();
+        ssnTextField = Page.createNumericTextField(LIMIT);
         ssnTextField.setPromptText("SSN:");
 
         emailTextField = new TextField();
@@ -734,19 +735,19 @@ public class ProfessorMenu extends Page {
         projectsByAmountButton.setToggleGroup(projectsToggleGroup);
         projectsByAmountButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByAmountButton));
         projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton));
-        projectStartTextField = Page.createNumericTextField();
+        projectStartTextField = Page.createNumericTextField(LIMIT);
         projectStartTextField.setPrefWidth(80);
-        projectEndTextField = Page.createNumericTextField();
+        projectEndTextField = Page.createNumericTextField(LIMIT);
         projectEndTextField.setPrefWidth(80);
         projectStartTextField.setPromptText("Min.");
         projectEndTextField.setPromptText("Max.");
 
-        yearsStartTextField = Page.createNumericTextField();
-        yearsEndTextField = Page.createNumericTextField();
+        yearsStartTextField = Page.createNumericTextField(LIMIT);
+        yearsEndTextField = Page.createNumericTextField(LIMIT);
         yearsStartTextField.setPromptText("Min.");
         yearsEndTextField.setPromptText("Max.");
 
-        phoneTextField = Page.createNumericTextField();
+        phoneTextField = Page.createNumericTextField(LIMIT);
         phoneTextField.setPromptText("Phone Number:");
 
         filterButton.getItems().addAll(rectorButton,ssnButton,emailButton,phoneButton,fieldButton,projectButton,sexFilterButton,ageButton,salaryButton,yearsWorkedButton);
