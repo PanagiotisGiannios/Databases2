@@ -368,9 +368,6 @@ public class AddPage extends Page {
 
             handleButtonPress("project");
         });
-        
-        HBox topBox = new HBox(projectLabel, addProjectButton);
-        topBox.setSpacing(30);
 
         // Create the project board
         VBox projectBox;
@@ -382,6 +379,45 @@ public class AddPage extends Page {
             table = null;
             pane = new ScrollPane();
         }
+
+        // Make the Delete project button        
+        Image deleteImage = new Image("file:" + getPath() + "delete_project.png");
+        ImageView deleteImageView = new ImageView(deleteImage);
+        deleteImageView.setFitWidth(30);
+        deleteImageView.setFitHeight(30);
+        Button deleteProjectButton = new Button();
+        deleteProjectButton.setGraphic(deleteImageView);
+        addButtonTransition(deleteProjectButton, 30, 30);
+
+        deleteProjectButton.setOnAction(event -> {
+            String projectName = TableManager.ssnSelected;
+
+            if (projectName == null) {
+                return;
+            }
+
+            String deleteQuery = "DELETE FROM PROJECT WHERE ProfessorId = ? AND Name = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                preparedStatement.setString(1, entry.get(0));
+                preparedStatement.setString(2, projectName);
+
+                if (preparedStatement.executeUpdate() > 0) {
+                    showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "We have successfully deleted the Project " + projectName);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Refreash Table.
+            table = createProjectTable();
+            table.setPrefHeight(120);
+            pane.setContent(table);
+            pane.setFitToWidth(true);
+            pane.setVbarPolicy(ScrollBarPolicy.NEVER);
+        });
+        
+        HBox topBox = new HBox(projectLabel, addProjectButton, deleteProjectButton);
+        topBox.setSpacing(30);
         
         projectBox = new VBox(topBox, name, field, type, info, pane);
         projectBox.setSpacing(5);
