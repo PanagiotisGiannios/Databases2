@@ -90,7 +90,6 @@ public class AuxiliaryMenu extends Page {
     private String joinString   = "FROM employee,auxiliary_staff";
     private String whereString  = "WHERE ssn=EmployeeID";
     private String groupString  = "";
-    private PreparedStatement previousQuery = null;
 
     private List<Object> whereParametersList = new ArrayList<Object>();
     private List<Object> groupParametersList = new ArrayList<Object>();
@@ -147,8 +146,8 @@ public class AuxiliaryMenu extends Page {
         switch (text) {
             case "Add":
                 System.out.println("Added!");
-                AddPage prof = new AddPage("professor");
-                prof.start(Page.primaryStage);
+                AddPage auxiliaryAddPage = new AddPage("auxiliary");
+                auxiliaryAddPage.start(Page.primaryStage);
                 break;
             case "Delete":
                 System.out.println("Deleted! " + TableManager.ssnSelected);
@@ -200,7 +199,6 @@ public class AuxiliaryMenu extends Page {
                 whereParametersList.clear();
                 groupParametersList.clear();
                 Boolean showMissingAlert = false;
-                Boolean addedProjectTable = false;
 
                 CheckBox[] checkBoxArray = selectFiltersContainer.getChildren().toArray(new CheckBox[0]);
                 if(checkBoxArray[0].isSelected()){
@@ -407,7 +405,6 @@ public class AuxiliaryMenu extends Page {
                         parameterIndex++;
                     }
                     
-                    previousQuery = preparedStatement;
                     resultSet = preparedStatement.executeQuery();
                     
                     resultTableView = TableManager.CreateTableView(resultSet, "employee");

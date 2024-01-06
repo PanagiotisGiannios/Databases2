@@ -451,6 +451,8 @@ public class AddPage extends Page {
         dateComponents.add(jobStartingDate);
 
         // Profession Radio Buttons setup
+        //TODO: Since later we might want to add new professions
+        // Maybe we need to do a quick query to populate the radiobuttons so that not everything is hardcoded
         Label profLabel = new Label("Profession");
         profLabel.setFont(Font.font(15));
         profLabel.setStyle("-fx-font-weight: bold;");

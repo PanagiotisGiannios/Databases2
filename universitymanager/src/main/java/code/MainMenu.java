@@ -2,24 +2,12 @@ package code;
 
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
@@ -65,7 +53,7 @@ public class MainMenu extends Page {
         buttonTextLabel.setStyle("-fx-background-color: rgba(151,198,154,0.65);");
         buttonTextLabel.setAlignment(Pos.BOTTOM_CENTER);
         buttonTextLabel.setPrefWidth(200);
-        buttonTextLabel.setPrefHeight(40);/**/
+        buttonTextLabel.setPrefHeight(40);
         buttonTextLabel.setFont(Font.font("System", FontWeight.BOLD, 27));
         buttonTextLabel.setTextFill(Color.BLACK);
         StackPane orderStackPane = new StackPane(buttonTextLabel);
@@ -103,8 +91,8 @@ public class MainMenu extends Page {
                 AuxiliaryMenu auxiliaryMenu = new AuxiliaryMenu();
                 auxiliaryMenu.start(primaryStage);
                 System.out.println("Auxiliary Staff Pressed");
-                AddPage auxiliaryAddPage = new AddPage("auxiliary");
-                auxiliaryAddPage.start(primaryStage);
+                //AddPage auxiliaryAddPage = new AddPage("auxiliary");
+                //auxiliaryAddPage.start(primaryStage);
                 break;
             
             // Student Pressed
