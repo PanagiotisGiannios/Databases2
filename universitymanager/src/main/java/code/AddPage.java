@@ -5,10 +5,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.Node;
@@ -18,6 +20,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
@@ -37,6 +43,9 @@ public class AddPage extends Page {
     private List<String> secondEntry = null;
     private List<String> projectHistoryList = null;
     private Boolean professorStored = false;
+
+    private TableView<ObservableList<String>> table = null;
+    private ScrollPane pane = null;
     
     public AddPage(String type) {
         this.type = type;
@@ -364,22 +373,49 @@ public class AddPage extends Page {
         topBox.setSpacing(30);
 
         // Create the project board
-        /* TODO:
         VBox projectBox;
         if (entry != null) {
             table = createProjectTable();
-            projectBox = new VBox(topBox, name, field, type, info, table);
+            pane = new ScrollPane(table);
         }
         else {
             table = null;
-            projectBox = new VBox(topBox, name, field, type, info);
+            pane = new ScrollPane();
         }
-        */
-        VBox projectBox = new VBox(topBox, name, field, type, info);
+        
+        projectBox = new VBox(topBox, name, field, type, info, pane);
         projectBox.setSpacing(5);
         projectBox.setPadding(new Insets(20, 10, 0, -300));
 
         return projectBox;
+    }
+
+    private TableView<ObservableList<String>> createProjectTable() {
+        String query = "SELECT Name, Field, Type, Information FROM PROJECT WHERE ProfessorId = ?";
+    
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, entry.get(0));
+    
+            // Execute the query and get the result set
+            try {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                // Create the TableView using the result set
+                table = TableManager.CreateTableView(resultSet, "project");
+    
+                // Set up any additional configurations for the table
+                TableManager.setUpMouseReleased(table);
+                table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+
+                resultSet.close();
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        return table;
     }
 
     // Creates a Auxiliary Staff Add Page.
@@ -804,7 +840,6 @@ public class AddPage extends Page {
         }
         else if (button == "student") {
             addStudent();
-
         }
         else if (button == "course") {
             addCourse();
@@ -929,7 +964,15 @@ public class AddPage extends Page {
             if (preparedStatement.executeUpdate() > 0) {
                 showAlert(AlertType.INFORMATION, "Success", "Operation Successful", "Project " + secondEntry.get(0) + " added to professor " + entry.get(1) + " " + entry.get(2)+ ".");
                 projectHistoryList.add(secondEntry.get(0));
-                // TODO: fillBoard(secondEntry);
+
+                // Refreash Table.
+                table = createProjectTable();
+                table.setPrefHeight(120);
+                pane.setContent(table);
+                pane.setFitToWidth(true);
+                pane.setVbarPolicy(ScrollBarPolicy.NEVER);
+
+                // Clear entry and fields.
                 secondEntry = null;
                 clearFields("project");
             }
@@ -939,6 +982,7 @@ public class AddPage extends Page {
         } catch (SQLException ex) {
             showAlert(AlertType.ERROR, "Duplicate Project Name", secondEntry.get(0) + " already exists", "You have added a project with the same name!");
             clearFields("project");
+            ex.printStackTrace();
         }
     }
 

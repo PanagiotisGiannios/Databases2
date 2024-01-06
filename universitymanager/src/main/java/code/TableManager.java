@@ -18,7 +18,7 @@ public class TableManager {
         ObservableList<ObservableList<String>> data = FXCollections.observableArrayList();
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
-
+        
         //Creates List of Strings for each row of our resultSet and puts it in data.
         //This way we have all columns and rows in our resultSet as Strings inside a List of List of Strings.
         while (resultSet.next()) {
@@ -26,6 +26,7 @@ public class TableManager {
             for (int i = 1; i <= columnCount; i++) {
                 row.add(resultSet.getString(i));
             }
+
             data.add(row);
         }
         TableView<ObservableList<String>> tableView = new TableView<>(data);
