@@ -178,6 +178,36 @@ public class Page extends Application {
         button.setFocusTraversable(false);
     }
 
+    public static void addStackPaneTransition(StackPane stackPane){
+        ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),stackPane);
+        ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),stackPane);
+
+        hoverTransition.setFromX(1);
+        hoverTransition.setFromY(1);
+        hoverTransition.setToX(1.3);
+        hoverTransition.setToY(1.3);
+
+        stackPane.setOnMouseEntered(e ->{
+            hoverTransition.setRate(1);
+            hoverTransition.play();
+        });
+        stackPane.setOnMouseExited(e ->{
+            hoverTransition.setRate(-1);
+            hoverTransition.play();
+        });
+
+        clickTransition.setFromX(1);
+        clickTransition.setFromY(1);
+        clickTransition.setToX(0.9);
+        clickTransition.setToY(0.9);
+
+        stackPane.setOnMousePressed(e ->{
+            clickTransition.setRate(1);
+            clickTransition.play();
+        });
+    }
+
+    
     public static TextField createNumericTextField(int maxLength) {
         TextField textField = new TextField();
 
