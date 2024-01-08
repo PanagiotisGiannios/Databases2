@@ -14,7 +14,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -53,13 +52,10 @@ public class AddPage extends Page {
                 background = "professorPage.png";                
                 break;
             case "auxiliary":
-                background = "auxiliaryStaffPage.png";
+                
                 break;
             case "student":
                 background = "studentPage.png";
-                break;
-            case "book":
-                background = "bookPage.png";
                 break;
             case "course":
                 background = "coursePage.png";      
@@ -102,7 +98,6 @@ public class AddPage extends Page {
         HBox mainBox = new HBox();
         VBox bottomBox = new VBox();
 
-
         // Setup the components List
         textComponents = new ArrayList<>();
         radioComponents = new ArrayList<>();
@@ -114,18 +109,22 @@ public class AddPage extends Page {
         professorLabel.setStyle("-fx-font-weight: bold;");
 
         // Set up the features
+        // First Name
         TextField fname = makeTextField(50);
         fname.setPromptText("First Name");
         textComponents.add(fname);
 
+        // Last Name
         TextField lname = makeTextField(50);
         lname.setPromptText("Last Name");
         textComponents.add(lname);
 
+        // SSN
         TextField ssn = createNumericTextField(10);
         ssn.setPromptText("Social Security Number");
         textComponents.add(ssn);
         
+        // Phone
         TextField phone = createNumericTextField(10);
         phone.setPromptText("Phone Number");
         textComponents.add(phone);
@@ -145,22 +144,27 @@ public class AddPage extends Page {
         sex.setPadding(new Insets(5));
         radioComponents.add(sex);
 
+        // Address
         TextField address = makeTextField(150);
         address.setPromptText("Address");
         textComponents.add(address);
 
+        // Salary
         TextField salary = createNumericTextField(10);
         salary.setPromptText("Salary");
         textComponents.add(salary);
 
+        // Email
         TextField email = makeTextField(150);
         email.setPromptText("Email Address");
         textComponents.add(email);
         
+        // Birthday
         DatePicker birthday = new DatePicker();
         birthday.setPromptText("Birthday");
         dateComponents.add(birthday);
 
+        // Job Starting Date
         DatePicker jobStartingDate = new DatePicker();
         jobStartingDate.setPromptText("Job Starting Date");
         dateComponents.add(jobStartingDate);
@@ -195,8 +199,6 @@ public class AddPage extends Page {
         addButton.setGraphic(imageView);
 
         addButtonTransition(addButton, 30, 30);
-        //TODO: see how you like it more, this removes the circle behind the add Professor button
-        addButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
         addButton.setOnAction(event -> {
             entry = new ArrayList<>();
             
@@ -1082,15 +1084,6 @@ public class AddPage extends Page {
             showAlert(AlertType.ERROR, "Problem", "Failed to insert Course.", "An error occurred. Please check your input.");
             e.printStackTrace();
         }
-    }
-    
-    // It shows an Alert.
-    private void showAlert(AlertType type, String title, String header, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     // Clear all the fields.

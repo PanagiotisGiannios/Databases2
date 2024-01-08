@@ -5,7 +5,7 @@ CREATE TABLE EMPLOYEE (
 	Sex				VARCHAR(10)		NOT NULL,
 	Phone			VARCHAR(10)		NOT NULL,
 	Email			VARCHAR(150)	NOT NULL,
-	JobStartingDate	DATETIME		DEFAULT 	CURRENT_TIMESTAMP,
+	JobStartingDate	DATE			NOT NULL,
 	Birthday		DATE			NOT NULL,	
 	Address			VARCHAR(150)	NOT NULL,	
 	Salary			INTEGER		    NOT NULL,	
@@ -50,7 +50,7 @@ CREATE TABLE STUDENT (
     Email       VARCHAR(150)   			NOT NULL,
     Phone       VARCHAR(10)    			NOT NULL,
     Birthday    DATE           			NOT NULL,
-    EntryDate   DATETIME       			DEFAULT CURRENT_TIMESTAMP,
+    EntryDate   DATE       				NOT NULL,
     Address     VARCHAR(255)   			NOT NULL,
     PRIMARY KEY (StudentId)
 ) AUTO_INCREMENT = 1001;

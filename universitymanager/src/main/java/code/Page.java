@@ -5,9 +5,10 @@ import java.io.File;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -17,7 +18,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
@@ -97,10 +97,8 @@ public class Page extends Application {
     // Set up the scene and stage
     public void createScene(){
         Scene scene = new Scene(root, WIDTH, HEIGHT);
-        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setTitle(title);
-        primaryStage.getScene().getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         primaryStage.show();
     }
     
@@ -247,6 +245,15 @@ public class Page extends Application {
         textField.setTextFormatter(textFormatter);
 
         return textField;
+    }
+
+    // It shows an Alert.
+    public void showAlert(AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
     
     public static void main(String[] args) {

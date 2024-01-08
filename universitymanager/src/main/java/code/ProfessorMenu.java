@@ -223,6 +223,8 @@ public class ProfessorMenu extends Page {
                 break;
             case "Edit":
                 System.out.println("Edit person with ssn: "+ TableManager.selectedId);
+                EditPage editProfessor = new EditPage("professor", TableManager.selectedId);
+                editProfessor.start(primaryStage);
                 break;
             case "Teaches":
                 System.out.println("Teaches!");

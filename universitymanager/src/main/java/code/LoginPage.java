@@ -31,13 +31,10 @@ public class LoginPage extends Page {
         createScene();
     }
 
-    private static void createBackground(javafx.scene.Node node, String color, double transparency){
-        node.setStyle("-fx-background-color: rgba("+color+","+ transparency+");");
-    }
 
     private void loginPageSetup() {
         //TODO:
-        StackPane usernameContainer = new StackPane();
+        // StackPane usernameContainer = new StackPane();
         
         Text welcomeText = new Text("Welcome to University Management\n\n");
         
