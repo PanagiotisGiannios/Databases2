@@ -90,6 +90,7 @@ public class AuxiliaryMenu extends Page {
     private String joinString   = "FROM employee,auxiliary_staff";
     private String whereString  = "WHERE ssn=EmployeeID";
     private String groupString  = "";
+    private PreparedStatement previousQuery = null;
 
     private List<Object> whereParametersList = new ArrayList<Object>();
     private List<Object> groupParametersList = new ArrayList<Object>();
@@ -111,14 +112,7 @@ public class AuxiliaryMenu extends Page {
                 e.printStackTrace();
             }
         }
-        String getProfessorFields = "SELECT DISTINCT profession FROM Auxiliary_staff";
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
-            while (result.next()) {
-                professionList.add(result.getString("profession"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        retrieveProfessions();
 
         Page.primaryStage = primaryStage;
         loadLogo();
@@ -138,6 +132,17 @@ public class AuxiliaryMenu extends Page {
         handleButtonPress(new Button("Search"));
     }
 
+    private void retrieveProfessions(){
+        String getProfessorFields = "SELECT DISTINCT profession FROM Auxiliary_staff";
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
+            while (result.next()) {
+                professionList.add(result.getString("profession"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /*
      * Handles what each button does based on the text of the button.
      */
@@ -150,8 +155,8 @@ public class AuxiliaryMenu extends Page {
                 auxiliaryAddPage.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.ssnSelected);
-                if(TableManager.ssnSelected == null){
+                System.out.println("Deleted! " + TableManager.selectedId);
+                if(TableManager.selectedId == null){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
                     alert.setHeaderText("No auxiliary staff selected");
@@ -161,32 +166,35 @@ public class AuxiliaryMenu extends Page {
                 }
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion!");
-                confirmAlert.setHeaderText("Are you sure you want to delete the employee with ssn: '" + TableManager.ssnSelected + "' ?");
+                confirmAlert.setHeaderText("Are you sure you want to delete the employee with ssn: '" + TableManager.selectedId + "' ?");
                 ButtonType yesButtonType = new ButtonType("Yes");
                 ButtonType noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.ssnSelected);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.selectedId);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.selectedId);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.selectedId);
                             resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
                             resultTableView.getSelectionModel().clearSelection();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
+                        refreshTable();
+                        retrieveProfessions();
+                        updateMenu(filterButton, (CheckBox)professionButton.getContent());
                     }
                     else{
                         System.out.println("NO pressed!");
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
-                TableManager.ssnSelected = null;
+                TableManager.selectedId = null;
 
                 break;
             case "Edit":
-                System.out.println("Edit person with ssn: "+ TableManager.ssnSelected);
+                System.out.println("Edit person with ssn: "+ TableManager.selectedId);
                 break;
             case "Search":
                 selectString = "SELECT DISTINCT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
@@ -404,7 +412,8 @@ public class AuxiliaryMenu extends Page {
                         preparedStatement.setObject(parameterIndex, parameter);
                         parameterIndex++;
                     }
-                    
+
+                    previousQuery = preparedStatement;
                     resultSet = preparedStatement.executeQuery();
                     
                     resultTableView = TableManager.CreateTableView(resultSet, "employee");
@@ -738,6 +747,19 @@ public class AuxiliaryMenu extends Page {
         customMenuItem.setHideOnClick(false);
         return customMenuItem;
         
+    }
+
+    private void refreshTable(){
+        try {
+            ResultSet resultSet =  previousQuery.executeQuery();
+            resultTableView = TableManager.CreateTableView(resultSet, "course");
+            TableManager.setUpMouseReleased(resultTableView);
+            TableManager.setAllowMultipleRowSelection(true);
+            resultScrollPane.setContent(resultTableView);
+            resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args){

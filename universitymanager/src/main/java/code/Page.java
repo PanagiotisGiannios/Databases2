@@ -4,6 +4,7 @@ import java.io.File;
 
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -112,10 +113,14 @@ public class Page extends Application {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(30);
         imageView.setFitHeight(30);
+        imageView.setPreserveRatio(true);
+
 
         Button backButton = new Button();
         backButton.setGraphic(imageView);
+        backButton.setPadding(Insets.EMPTY);
         addButtonTransition(backButton, 30, 30);
+        backButton.setStyle("-fx-background-color: rgba(255,255,0,0);"+"-fx-background-radius: 1;");
 
         // Set up the action for when the button is released
         backButton.setOnMouseReleased(e -> {

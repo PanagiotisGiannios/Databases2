@@ -9,13 +9,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -23,7 +20,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import java.util.*;
-import javafx.scene.layout.Background;
 
 public class CourseMenu extends Page {
 
@@ -33,73 +29,47 @@ public class CourseMenu extends Page {
 
 
 
-    private static final String[] FILTER_BUTTON_TEXTS = {"Is Rector", "Salary", "Sex", "Age", "SSN", "E-mail", "Project", "Field", "Years Worked", "Phone"};
-    private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Field", "Salary", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Job Starting Date", "RectorID","Project Name",  "Project Information", "Project Type"};
-    private List<String> projectNames = new ArrayList<String>();
-    private List<String> professorFields = new ArrayList<String>();
+    private static final String[] FILTER_BUTTON_TEXTS = {"Average Grade", "Teacher Amount", "Student Amount", "Semester", "CourseID"};
+    private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Average Grade", "Teacher Amount", "Student Amount"};
+    private List<String> courseSemesters = new ArrayList<String>();
 
     private MenuButton filterButton;
 
-    private CustomMenuItem rectorButton;
+    private CustomMenuItem averageGradeButton;
+    private CustomMenuItem averageGradeRangeTextFieldsMenuItem;
+    private TextField averageGradeStartTextField;
+    private TextField averageGradeEndTextField;
 
-    private CustomMenuItem salaryButton;
-    private CustomMenuItem salaryRangeTextFieldsMenuItem;
-    private TextField startTextField;
-    private TextField endTextField;
+    private CustomMenuItem teacherAmountButton;
+    private CustomMenuItem teacherAmountRangeTextFieldsMenuItem;
+    private TextField teacherAmountStartTextField;
+    private TextField teacherAmountEndTextField;
 
-    private CustomMenuItem sexFilterButton;
-    private CustomMenuItem radioButtons;
-    private RadioButton maleButton = new RadioButton("Male");
-    private RadioButton femaleButton = new RadioButton("Female");
-    private ToggleGroup toggleGroup = new ToggleGroup();
-
-    private CustomMenuItem ageButton;
-    private CustomMenuItem ageRangeTextFieldsMenuItem;
-    private TextField ageStartTextField;
-    private TextField ageEndTextField;
-
-    private CustomMenuItem ssnButton;
-    private CustomMenuItem ssnTextFieldMenuItem;
-    private TextField ssnTextField;
-
-    private CustomMenuItem emailButton;
-    private CustomMenuItem emailTextFieldMenuItem;
-    private TextField emailTextField;
-
-    private CustomMenuItem projectButton;
-    private CustomMenuItem projectRadioButtons;
-    private TextField projectStartTextField;
-    private TextField projectEndTextField;
-    private RadioButton  projectsByNameButton = new RadioButton("By Name");
-    private RadioButton projectsByAmountButton = new RadioButton("By Amount");
-    private ToggleGroup projectsToggleGroup = new ToggleGroup();
+    private CustomMenuItem courseIDButton;
+    private CustomMenuItem courseIDTextFieldMenuItem;
+    private TextField courseIDTextField;
     
-    private CustomMenuItem fieldButton;
-    private CustomMenuItem fieldScrollCustomMenuItem;
+    private CustomMenuItem semesterButton;
+    private CustomMenuItem semesterScrollCustomMenuItem;
 
-    private CustomMenuItem yearsWorkedButton;
-    private CustomMenuItem yearsRangeTexFieldsMenuItem;
-    private TextField yearsStartTextField;
-    private TextField yearsEndTextField;
-
-    private CustomMenuItem phoneButton;
-    private CustomMenuItem phoneTextFieldItem;
-    private TextField phoneTextField;
+    private CustomMenuItem studentAmountButton;
+    private CustomMenuItem studentAmuntRangeTexFieldsMenuItem;
+    private TextField studentAmountStartTextField;
+    private TextField studentAmountEndTextField;
 
     private MenuButton selectFilterButton;
 
     private CustomMenuItem selectFiltersMenuItem;
     private VBox selectFiltersContainer;
 
-    private TextField firstNameField;
-    private TextField lastNameField;
+    private TextField nameField;
 
     private Button searchButton;
 
-    private String selectString = "SELECT ssn, FirstName, LastName, ";
-    private String joinString   = "FROM employee,professor";
-    private String whereString  = "WHERE ssn=profID";
-    private String groupString = "";
+    private String selectString = "SELECT CourseID, Name, Semester, ";
+    private String joinString   = "FROM Course";
+    private String whereString  = "";
+    private String groupString  = "";
     private PreparedStatement previousQuery = null;
 
     private List<Object> whereParametersList = new ArrayList<Object>();
@@ -118,7 +88,7 @@ public class CourseMenu extends Page {
         loadBackground("professorPage.png");
         professorMenuSetup();
         createScene();
-        //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
+
         if(Page.connection == null){
             
             try {
@@ -127,34 +97,24 @@ public class CourseMenu extends Page {
                 e.printStackTrace();
             }
         }
-        String getProjectNames = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
-        String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProjectNames)) {
+        retrieveSemesters();
+
+        //Simulate a press on the search button to populate the viewTable at the start.
+        handleButtonPress(new Button("Search"));
+        System.out.println("\n\nDONE!\n\n");
+    }
+
+    private void retrieveSemesters(){
+        String getSemesters = "SELECT DISTINCT semester FROM Course";
+        
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getSemesters)){
+            courseSemesters.clear();
             while (result.next()) {
-                projectNames.add(result.getString("Name"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
-            while (result.next()) {
-                professorFields.add(result.getString("profession"));
+                courseSemesters.add(result.getString("semester"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //Simulate a press on the search button to populate the viewTable at the start.
-        for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
-            if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[0])){
-                checkBox.setSelected(true);
-            }
-            if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[5])){
-                checkBox.setSelected(true);
-            }
-        }
-        handleButtonPress(new Button("Search"));
-        System.out.println("\n\nDONE!\n\n");
     }
 
     /*
@@ -165,97 +125,97 @@ public class CourseMenu extends Page {
         switch (text) {
             case "Add":
                 System.out.println("Added!");
-                AddPage prof = new AddPage("professor");
+                AddPage prof = new AddPage("course");
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.ssnSelected);
-                if(TableManager.ssnSelected == null){
+                System.out.println("Deleted! " + TableManager.selectedId);
+                if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
-                    alert.setHeaderText("No professor selected");
-                    alert.setContentText("Select a professor and try again!");
+                    alert.setHeaderText("No course selected");
+                    alert.setContentText("Select a course and try again!");
                     alert.showAndWait();
                     break;
                 }
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion!");
-                confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: '" + TableManager.ssnSelected + "' ?");
+                if(TableManager.selectedRowIdList.size() == 1){
+                    confirmAlert.setHeaderText("Are you sure you want to delete the course with Id: '" + TableManager.selectedRowIdList.get(0) + "' ?");
+                }
+                else{
+                    String selections = "";
+                    for (String str : TableManager.selectedRowIdList) {
+                        selections += "'" + str +"', ";
+                    }
+                    selections = selections.substring(0,selections.length()-2);
+                    int index = selections.lastIndexOf(", ");
+                    if(index != -1){
+                        selections = selections.substring(0, index) + " and " + selections.substring(index+2);
+                    }
+                    confirmAlert.setHeaderText("Are you sure you want to delete the courses with Ids: " + selections + " ?");
+                }
                 ButtonType yesButtonType = new ButtonType("Yes");
                 ButtonType noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.ssnSelected);
-                            resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
+                            for (String id : TableManager.selectedRowIdList) {
+                                Page.connection.createStatement().executeUpdate("DELETE FROM Attends WHERE CourseID = " + id);
+                                Page.connection.createStatement().executeUpdate("DELETE FROM Teaches WHERE CourseID = " + id);
+                                Page.connection.createStatement().executeUpdate("DELETE FROM Course  WHERE CourseID = " + id);
+                            }
+                            resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndices());
                             resultTableView.getSelectionModel().clearSelection();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
+                        //After deleting everything there is to do with the course, we execute the previous query
+                        //(Refresh the table without the deleted entry) and then we retrieve the semesters again
+                        //in case it was the last course in that semester, after that we update the menu with
+                        //the new semesters.
+                        refreshTable();
+                        retrieveSemesters();
+                        updateMenu(filterButton, (CheckBox)semesterButton.getContent());
                     }
                     else{
                         System.out.println("NO pressed!");
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
-                TableManager.ssnSelected = null;
+                TableManager.selectedId = null;
 
                 break;
             case "Edit":
-                System.out.println("Edit person with ssn: "+ TableManager.ssnSelected);
+                for (String str : TableManager.selectedRowIdList) {
+                    System.out.println("Edit person with ssn: "+ str);
+                }
+                
                 break;
             case "Teaches":
                 System.out.println("Teaches!");
                 break;
-            case "Rector":
-                System.out.println("make rector person with ssn: " + TableManager.ssnSelected);
-                confirmAlert = new Alert(AlertType.CONFIRMATION);
-                confirmAlert.setTitle("Confirm Setting Rector!");
-                confirmAlert.setHeaderText("Are you sure you want to set the professor with ssn: '" + TableManager.ssnSelected + "' as Rector ?");
-                yesButtonType = new ButtonType("Yes");
-                noButtonType = new ButtonType("No");
-                confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
-                confirmAlert.showAndWait().ifPresent(buttonType ->{
-                    if(buttonType == yesButtonType){
-                        try {
-                            if(TableManager.ssnSelected != null){
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.ssnSelected);
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.ssnSelected);
-                                TableManager.ssnSelected = null;
-                                try {
-                                    ResultSet resultSet =  previousQuery.executeQuery();
-                                    resultTableView = TableManager.CreateTableView(resultSet, "professor");
-                                    TableManager.setUpMouseReleased(resultTableView);
-                                    resultScrollPane.setContent(resultTableView);
-                                    resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            else{
-                                Alert alert = new Alert(AlertType.ERROR); 
-                                alert.setTitle("Error");
-                                alert.setHeaderText("No professor selected");
-                                alert.setContentText("Select a professor and try again!");
-                                alert.showAndWait();
-                            }
-                            
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else{
-                        System.out.println("No rector!");
-                    }
-                });
-                
-                break;
+            
             case "Search":
-                selectString = "SELECT DISTINCT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
-                joinString   = "FROM employee JOIN professor ON ssn=profID";
+            System.out.println("Searching!\n");
+                selectString = "SELECT DISTINCT c.CourseID AS 'CourseID', c.Name AS 'Course Name', c.Semester AS 'Semester', ";
+                joinString   = "FROM course c\n" +
+                                "LEFT JOIN (\n" +
+                                "    SELECT CourseID, AVG(CASE WHEN Grade != -1 THEN Grade END) AS AverageGrade\n" +
+                                "    FROM Attends\n" +
+                                "    GROUP BY CourseID\n" +
+                                ") AS ca ON c.CourseID = ca.CourseID\n" +
+                                "LEFT JOIN (\n" +
+                                "    SELECT CourseID, COUNT(*) AS Amount\n" +
+                                "    FROM teaches\n" +
+                                "    GROUP BY CourseID\n" +
+                                ") AS t ON c.CourseID = t.CourseID\n" +
+                                "LEFT JOIN (\n" +
+                                "    SELECT CourseID, COUNT(*) AS Amount\n" +
+                                "    FROM Attends\n" +
+                                "    GROUP BY CourseID\n" +
+                                ") AS s ON c.CourseID = s.CourseID";
                 whereString  = "WHERE";
                 groupString = "";
 
@@ -264,92 +224,31 @@ public class CourseMenu extends Page {
                 whereParametersList.clear();
                 groupParametersList.clear();
                 Boolean showMissingAlert = false;
-                Boolean addedProjectTable = false;
 
                 CheckBox[] checkBoxArray = selectFiltersContainer.getChildren().toArray(new CheckBox[0]);
                 if(checkBoxArray[0].isSelected()){
-                    selectString += "Profession AS 'Field', ";
+                    selectString += "ca.AverageGrade AS 'Average Grade', ";
                 }
                 if(checkBoxArray[1].isSelected()){
-                    selectString += "Salary, ";
+                    selectString += "t.Amount AS 'Teacher Amount', ";
                 }
                 if(checkBoxArray[2].isSelected()){
-                    selectString += "Sex, ";
-                }
-                if(checkBoxArray[3].isSelected()){
-                    selectString += "Address, ";
-                }
-                if(checkBoxArray[4].isSelected()){
-                    selectString += "Phone AS 'Phone Number', ";
-                }
-                if(checkBoxArray[5].isSelected()){
-                    selectString += "Email AS 'E-mail', ";
-                }
-                if(checkBoxArray[6].isSelected()){
-                    selectString += "Birthday, ";
-                }
-                if(checkBoxArray[7].isSelected()){
-                    selectString += "JobStartingDate AS 'Job Starting Date', ";
-                }
-                if(checkBoxArray[8].isSelected()){
-                    selectString += "ManagerID AS 'Rector ID', ";
-                }
-                if(checkBoxArray[9].isSelected()){
-                    selectString += "Name AS 'Project Name', ";
-                    if(!addedProjectTable){
-                        joinString += " LEFT JOIN project ON profID=professorID";
-                        addedProjectTable = true;
-                    }
-                }
-                if(checkBoxArray[10].isSelected()){
-                    selectString += "Information AS 'Project Information', ";
-                    if(!addedProjectTable){
-                        joinString += " LEFT JOIN project ON profID=professorID";
-                        addedProjectTable = true;
-                    }
-                }
-                if(checkBoxArray[11].isSelected()){
-                    selectString += "Type, ";
-                    if(!addedProjectTable){
-                        joinString += " LEFT JOIN project ON profID=professorID";
-                        addedProjectTable = true;
-                    }
+                    selectString += "s.Amount AS 'Student Amount', ";
                 }
                 
                 selectString = selectString.substring(0,selectString.length() -2);
-                if(((CheckBox)rectorButton.getContent()).isSelected()){
-                    whereString = whereString + " AND ManagerId IS NULL";
-                }
-                if(((CheckBox)ssnButton.getContent()).isSelected()){
-                    if(!ssnTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND ssn = ?");
-                        whereParametersList.add(Integer.parseInt(ssnTextField.getText()));
+                if(((CheckBox)courseIDButton.getContent()).isSelected()){
+                    if(!courseIDTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND c.CourseID = ?");
+                        whereParametersList.add(Integer.parseInt(courseIDTextField.getText()));
                     }
                     else{
                         showMissingAlert = true;
                     }
                 }
-                if(((CheckBox)emailButton.getContent()).isSelected()){
-                    if(!emailTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND Email = ?");
-                        whereParametersList.add(emailTextField.getText());
-                    }
-                    else{
-                        showMissingAlert = true;
-                    }
-                }
-                if(((CheckBox)phoneButton.getContent()).isSelected()){
-                    if(!phoneTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND Phone = ?");
-                        whereParametersList.add(Integer.parseInt(phoneTextField.getText()));
-                    }
-                    else{
-                        showMissingAlert = true;
-                    }
-                }
-                if(((CheckBox)fieldButton.getContent()).isSelected()){
+                if(((CheckBox)semesterButton.getContent()).isSelected()){
                     whereString = whereString.concat( " AND (");
-                    ScrollPane scroll = (ScrollPane)fieldScrollCustomMenuItem.getContent();
+                    ScrollPane scroll = (ScrollPane)semesterScrollCustomMenuItem.getContent();
                     VBox containerBox = (VBox)scroll.getContent();
                     Boolean isFirst = true;
                     Boolean hasSelected = false;
@@ -365,8 +264,8 @@ public class CourseMenu extends Page {
                                     isFirst = false;
                                     
                                 }
-                                whereString = whereString.concat("profession = ?");
-                                whereParametersList.add(((CheckBox)node).getText());
+                                whereString = whereString.concat("c.semester = ?");
+                                whereParametersList.add(Integer.parseInt(((CheckBox)node).getText()));
                             }
                         }
                     }
@@ -375,158 +274,73 @@ public class CourseMenu extends Page {
                         showMissingAlert = true;
                     }
                     whereString = whereString.concat(")");
-                }     
-                if(((CheckBox)sexFilterButton.getContent()).isSelected()){
-                    if(toggleGroup.getSelectedToggle() != null) {
-                        whereString = whereString.concat(" AND sex = ?");
-                        whereParametersList.add(((RadioButton)toggleGroup.getSelectedToggle()).getText());
-                    }
-                    else{
-                        showMissingAlert = true;
-                    }
                 }
-                if(((CheckBox)ageButton.getContent()).isSelected()){
+                if(((CheckBox)averageGradeButton.getContent()).isSelected()){
                     int start= Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
-                    if(!ageStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),birthday)/365.25 >= ?");
-                        whereParametersList.add(Integer.parseInt(ageStartTextField.getText()));
-                        start = Integer.parseInt(ageStartTextField.getText());
+                    if(!averageGradeStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND ca.AverageGrade >= ?");
+                        whereParametersList.add(Integer.parseInt(averageGradeStartTextField.getText()));
+                        start = Integer.parseInt(averageGradeStartTextField.getText());
                     }
-                    if(!ageEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),birthday)/365.25 <= ?");
-                        whereParametersList.add(Integer.parseInt(ageEndTextField.getText()));
-                        end = Integer.parseInt(ageEndTextField.getText());
+                    if(!averageGradeEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND ca.AverageGrade <= ?");
+                        whereParametersList.add(Integer.parseInt(averageGradeEndTextField.getText()));
+                        end = Integer.parseInt(averageGradeEndTextField.getText());
                     }
-                    if(ageStartTextField.getText().isEmpty() && ageEndTextField.getText().isEmpty()){
+                    if(averageGradeStartTextField.getText().isEmpty() && averageGradeEndTextField.getText().isEmpty()){
                         showMissingAlert = true;
                     }
                     if(start > end){
-                        invalidRangeFilters += "'Age', ";
+                        invalidRangeFilters += "'Average Grade', ";
                         isCorrectOrder = false;
                     }
                 }
-                if(((CheckBox)salaryButton.getContent()).isSelected()){
+                if(((CheckBox)teacherAmountButton.getContent()).isSelected()){
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
-                    if(!startTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND salary >= ?");
-                        whereParametersList.add(Integer.parseInt(startTextField.getText()));
-                        start = Integer.parseInt(startTextField.getText());
+                    if(!teacherAmountStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND t.Amount >= ?");
+                        whereParametersList.add(Integer.parseInt(teacherAmountStartTextField.getText()));
+                        start = Integer.parseInt(teacherAmountStartTextField.getText());
                     }
-                    if(!endTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND salary <= ?");
-                        whereParametersList.add(Integer.parseInt(endTextField.getText()));
-                        end = Integer.parseInt(endTextField.getText());
+                    if(!teacherAmountEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND t.Amount <= ?");
+                        whereParametersList.add(Integer.parseInt(teacherAmountEndTextField.getText()));
+                        end = Integer.parseInt(teacherAmountEndTextField.getText());
                     }
-                    if(startTextField.getText().isEmpty() && endTextField.getText().isEmpty()){
+                    if(teacherAmountStartTextField.getText().isEmpty() && teacherAmountEndTextField.getText().isEmpty()){
                         showMissingAlert = true;
                     }
                     if(start > end){
-                        invalidRangeFilters += "'Salary', ";
+                        invalidRangeFilters += "'Teacher Amount', ";
                         isCorrectOrder = false;
                     }
                 }
-                if(((CheckBox)yearsWorkedButton.getContent()).isSelected()){
+                if(((CheckBox)studentAmountButton.getContent()).isSelected()){
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
-                    if(!yearsStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 >= ?");
-                        whereParametersList.add(Integer.parseInt(yearsStartTextField.getText()));
-                        start = Integer.parseInt(yearsStartTextField.getText());
+                    if(!studentAmountStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND s.Amount >= ?");
+                        whereParametersList.add(Integer.parseInt(studentAmountStartTextField.getText()));
+                        start = Integer.parseInt(studentAmountStartTextField.getText());
                     }
-                    if(!yearsEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 <= ?");
-                        whereParametersList.add(Integer.parseInt(yearsEndTextField.getText()));
-                        end = Integer.parseInt(yearsEndTextField.getText());
+                    if(!studentAmountEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND s.Amount <= ?");
+                        whereParametersList.add(Integer.parseInt(studentAmountEndTextField.getText()));
+                        end = Integer.parseInt(studentAmountEndTextField.getText());
                     }
-                    if(yearsStartTextField.getText().isEmpty() && yearsEndTextField.getText().isEmpty()){
+                    if(studentAmountStartTextField.getText().isEmpty() && studentAmountEndTextField.getText().isEmpty()){
                         showMissingAlert = true;
                     }
                     if(start > end){
-                        invalidRangeFilters += "'Years Worked', ";
+                        invalidRangeFilters += "'Student Amount', ";
                         isCorrectOrder = false;
                     }
                 }
-                if(((CheckBox)projectButton.getContent()).isSelected()){
-                    if(projectsToggleGroup.getToggles() != null){
-                        int start = Integer.MIN_VALUE;
-                        int end = Integer.MAX_VALUE;
-                        if(((RadioButton)projectsToggleGroup.getSelectedToggle()).getText().equals("By Amount")){
-                            if(!addedProjectTable){
-                                joinString += " LEFT JOIN project ON profID = professorID";
-                                addedProjectTable = true;
-                            }
-                            if(!projectStartTextField.getText().isEmpty() && !projectEndTextField.getText().isEmpty()){
-                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) >= ? AND COUNT(*) <= ?)");
-                                whereParametersList.add(Integer.parseInt(projectStartTextField.getText()));
-                                whereParametersList.add(Integer.parseInt(projectEndTextField.getText()));
-                                start = Integer.parseInt(projectStartTextField.getText());
-                                end = Integer.parseInt(projectEndTextField.getText());
-                            }
-                            else if(!projectStartTextField.getText().isEmpty() && projectEndTextField.getText().isEmpty()){
-                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) >= ?)");
-                                whereParametersList.add(Integer.parseInt(projectStartTextField.getText()));
-                            }
-                            else if(projectStartTextField.getText().isEmpty() && !projectEndTextField.getText().isEmpty()){
-                                whereString = whereString.concat(" AND ssn IN (SELECT ssn\n\tFROM employee\n\tJOIN professor ON ssn=profID\n\tLEFT JOIN project ON profID=professorID\n\tGROUP BY ssn\n\tHAVING COUNT(*) <= ?)");
-                                whereParametersList.add(Integer.parseInt(projectEndTextField.getText()));
-                            }
-                            if(projectStartTextField.getText().isEmpty() && projectEndTextField.getText().isEmpty()){
-                                showMissingAlert = true;
-                            }
-                            if(start > end){
-                                invalidRangeFilters += "'Project by amount', ";
-                                isCorrectOrder = false;
-                            }
-
-                        }
-                        else{
-                            if(!addedProjectTable){
-                                joinString = joinString.concat(" LEFT JOIN project ON profID=professorID");
-                                whereString = whereString.concat(" AND (");
-                                addedProjectTable = true;
-                            }
-                            else{
-                                whereString = whereString.concat(" AND (");
-                            }
-                            Boolean hasSelected = false;
-                            Boolean isFirst = true;
-                            VBox radioButtonVBox = (VBox)projectRadioButtons.getContent();
-                            ScrollPane projectByNameScroll = (ScrollPane)radioButtonVBox.getChildren().get(1);
-                            VBox containerBox = (VBox) projectByNameScroll.getContent();
-                            for (Node node : containerBox.getChildren()) {
-                                if (node instanceof CheckBox) {
-                                    if(((CheckBox)node).isSelected()){
-                                        hasSelected = true;
-                                        if(!isFirst){
-                                            whereString = whereString.concat(" OR ");
-                                        }
-                                        else{
-                                            isFirst = false;
-                                            
-                                        }
-                                        whereString = whereString.concat("name = ?");
-                                        whereParametersList.add(((CheckBox)node).getText());
-                                    }
-                                }                                
-                            } 
-                            if(!hasSelected){
-                                whereString = whereString.concat("1=1");
-                                showMissingAlert = true;
-                            }
-                            whereString = whereString.concat(")");
-                        }
-                    }
-
-                }
-                if(!firstNameField.getText().isEmpty()){
-                    whereString = whereString.concat(" AND FirstName LIKE ?");
-                    whereParametersList.add("%"+ firstNameField.getText() +"%");
-                }
-                if (!lastNameField.getText().isEmpty()) {
-                    whereString = whereString.concat(" AND LastName LIKE ?");
-                    whereParametersList.add("%" + lastNameField.getText() + "%");
+                if(!nameField.getText().isEmpty()){
+                    whereString = whereString.concat(" AND c.Name LIKE ?");
+                    whereParametersList.add("%"+ nameField.getText() +"%");
                 }
                 if(whereString.indexOf(" AND") != -1){
                     whereString = whereString.substring(0,whereString.indexOf(" AND")) + whereString.substring(whereString.indexOf(" AND") + 4);
@@ -573,9 +387,10 @@ public class CourseMenu extends Page {
                     previousQuery = preparedStatement;
                     resultSet = preparedStatement.executeQuery();
                     
-                    resultTableView = TableManager.CreateTableView(resultSet, "professor");
+                    resultTableView = TableManager.CreateTableView(resultSet, "course");
+                    resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                     TableManager.setUpMouseReleased(resultTableView);
-                    
+                    TableManager.setAllowMultipleRowSelection(true);
                     resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
                     resultScrollPane.setContent(resultTableView);
                     resultScrollPane.setFitToWidth(true);
@@ -600,7 +415,7 @@ public class CourseMenu extends Page {
     private void setButtonProperties(Button button){
         ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
         ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
-
+        System.out.println("\nsetting up button: " + button.getText() + "\n");
         button.setMinWidth(100);
         button.setMinHeight(50);
         button.setPrefWidth(100);
@@ -608,6 +423,12 @@ public class CourseMenu extends Page {
         button.setFont(Font.font("System",FontWeight.BOLD, 18));
         button.setStyle("-fx-background-radius: 15;");
         button.setCursor(Cursor.HAND);
+        if(button.getText().equals("Taught By")){
+            button.setPrefWidth(115);
+        }
+        else if(button.getText().equals("Attended By")){
+            button.setPrefWidth(130);
+        }
 
         hoverTransition.setFromX(1);
         hoverTransition.setFromY(1);
@@ -643,36 +464,7 @@ public class CourseMenu extends Page {
         button.setFocusTraversable(false);
 
     }   
-    
-    private void handleProjectRadioButtonPress(RadioButton button){
-        filterButton.getItems().remove(projectRadioButtons);
-        if(button.getText().equals("By Name")){
-            VBox checkBoxContainer = new VBox();
-            for(String projectName : projectNames){
-                CheckBox projectBox = new CheckBox(projectName);
-                projectBox.setFocusTraversable(false);
-                projectBox.setPrefHeight(25);
-                projectBox.setPrefWidth(140);
-                checkBoxContainer.getChildren().add(projectBox);
-            }
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setContent(checkBoxContainer);
-            scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-            scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
-            scrollPane.setFocusTraversable(false);
-            scrollPane.setPrefHeight(100);
 
-            projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton, scrollPane,projectsByAmountButton));
-            projectRadioButtons.setHideOnClick(false);
-            filterButton.getItems().add(filterButton.getItems().indexOf(projectButton)+1,projectRadioButtons);
-        }
-        else{
-            HBox rangeContainer = new HBox();
-            rangeContainer.getChildren().addAll(projectStartTextField,projectEndTextField);
-            projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton,rangeContainer));
-            filterButton.getItems().add(filterButton.getItems().indexOf(projectButton)+1,projectRadioButtons);
-        }
-    }
 
     private void professorMenuSetup(){
         VBox base = new VBox(10);
@@ -680,7 +472,7 @@ public class CourseMenu extends Page {
         HBox mainBox = new HBox();
         HBox backBox = new HBox();
         
-        Text titleText = new Text("Professor");
+        Text titleText = new Text("Course");
         titleText.setFont(Font.font("System",FontWeight.BOLD,29));
         titleBox.getChildren().add(titleText);
         titleBox.setAlignment(Pos.TOP_CENTER);
@@ -698,7 +490,7 @@ public class CourseMenu extends Page {
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
-        String[] buttonTexts = {"Add","Delete","Edit","Teaches","Rector"};
+        String[] buttonTexts = {"Add","Delete","Edit","Taught By","Attended By"};
         Button[] rightSideButtons = new Button[buttonTexts.length];
         for(int i = 0; i < rightSideButtons.length;i++){
             rightSideButtons[i] = new Button(buttonTexts[i]);
@@ -709,7 +501,7 @@ public class CourseMenu extends Page {
         }
 
         rightBox.getChildren().addAll(rightSideButtons);
-        rightBox.setAlignment(Pos.TOP_RIGHT);
+        rightBox.setAlignment(Pos.TOP_CENTER);
         rightBox.setPadding(new Insets(20, 25, 40, 0));
         rightSide.setAlignment(Pos.CENTER);
         mainBox.setAlignment(Pos.CENTER);
@@ -719,59 +511,33 @@ public class CourseMenu extends Page {
 
         filterButton = new MenuButton("Filters");
         filterButton.setFocusTraversable(false);
-        rectorButton = toCustomMenu(FILTER_BUTTON_TEXTS[0]);
-        salaryButton = toCustomMenu(FILTER_BUTTON_TEXTS[1]);
-        sexFilterButton = toCustomMenu(FILTER_BUTTON_TEXTS[2]);
-        ageButton = toCustomMenu(FILTER_BUTTON_TEXTS[3]);
-        ssnButton = toCustomMenu(FILTER_BUTTON_TEXTS[4]);
-        emailButton = toCustomMenu(FILTER_BUTTON_TEXTS[5]);
-        projectButton = toCustomMenu(FILTER_BUTTON_TEXTS[6]);
-        fieldButton = toCustomMenu(FILTER_BUTTON_TEXTS[7]);
-        yearsWorkedButton = toCustomMenu(FILTER_BUTTON_TEXTS[8]);
-        phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[9]);
 
-        startTextField = Page.createNumericTextField(6);
-        endTextField   = Page.createNumericTextField(6);
-        startTextField.setPromptText("Min.");
-        endTextField.setPromptText("Max.");
+        averageGradeButton = toCustomMenu(FILTER_BUTTON_TEXTS[0]);
+        teacherAmountButton = toCustomMenu(FILTER_BUTTON_TEXTS[1]);
+        studentAmountButton = toCustomMenu(FILTER_BUTTON_TEXTS[2]);
+        semesterButton = toCustomMenu(FILTER_BUTTON_TEXTS[3]);
+        courseIDButton = toCustomMenu(FILTER_BUTTON_TEXTS[4]);
+        System.out.println("Done customMenus!\n");
 
-        maleButton.setToggleGroup(toggleGroup);
-        femaleButton.setToggleGroup(toggleGroup);
-        radioButtons = new CustomMenuItem(new VBox(10,maleButton,femaleButton));
-        radioButtons.setHideOnClick(false);
+        averageGradeStartTextField = Page.createNumericTextField(3);
+        averageGradeEndTextField   = Page.createNumericTextField(3);
+        averageGradeStartTextField.setPromptText("Min.");
+        averageGradeEndTextField.setPromptText("Max.");
 
-        ageStartTextField = Page.createNumericTextField(3);
-        ageEndTextField = Page.createNumericTextField(3);
-        ageStartTextField.setPromptText("Min.");
-        ageEndTextField.setPromptText("Max.");
+        teacherAmountStartTextField = Page.createNumericTextField(3);
+        teacherAmountEndTextField = Page.createNumericTextField(3);
+        teacherAmountStartTextField.setPromptText("Min.");
+        teacherAmountEndTextField.setPromptText("Max.");
+        
+        studentAmountStartTextField = Page.createNumericTextField(3);
+        studentAmountEndTextField = Page.createNumericTextField(3);
+        studentAmountStartTextField.setPromptText("Min.");
+        studentAmountEndTextField.setPromptText("Max.");
 
-        ssnTextField = Page.createNumericTextField(10);
-        ssnTextField.setPromptText("SSN:");
+        courseIDTextField = Page.createNumericTextField(5);
+        courseIDTextField.setPromptText("SSN:");
 
-        emailTextField = new TextField();
-        emailTextField.setPromptText("E-mail:");
-
-        projectsByNameButton.setToggleGroup(projectsToggleGroup);
-        projectsByNameButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByNameButton));
-        projectsByAmountButton.setToggleGroup(projectsToggleGroup);
-        projectsByAmountButton.setOnAction(e -> handleProjectRadioButtonPress(projectsByAmountButton));
-        projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton));
-        projectStartTextField = Page.createNumericTextField(3);
-        projectStartTextField.setPrefWidth(80);
-        projectEndTextField = Page.createNumericTextField(3);
-        projectEndTextField.setPrefWidth(80);
-        projectStartTextField.setPromptText("Min.");
-        projectEndTextField.setPromptText("Max.");
-
-        yearsStartTextField = Page.createNumericTextField(3);
-        yearsEndTextField = Page.createNumericTextField(3);
-        yearsStartTextField.setPromptText("Min.");
-        yearsEndTextField.setPromptText("Max.");
-
-        phoneTextField = Page.createNumericTextField(10);
-        phoneTextField.setPromptText("Phone Number:");
-
-        filterButton.getItems().addAll(rectorButton,ssnButton,emailButton,phoneButton,fieldButton,projectButton,sexFilterButton,ageButton,salaryButton,yearsWorkedButton);
+        filterButton.getItems().addAll(courseIDButton,semesterButton,averageGradeButton,teacherAmountButton,studentAmountButton);
         filterButton.setCursor(Cursor.HAND);
         filterButton.setPrefWidth(90);
         filterButton.setPrefHeight(40);
@@ -791,19 +557,12 @@ public class CourseMenu extends Page {
         selectFilterButton.setPrefHeight(40);
         selectFilterButton.setFont(Font.font("System",FontWeight.BOLD, 12));
 
-        firstNameField = new TextField();
-        firstNameField.setPrefWidth(140);
-        firstNameField.setPrefHeight(40);
-        firstNameField.setPromptText("First Name:");
-        firstNameField.setFocusTraversable(false);
-        firstNameField.setStyle("-fx-font-size: 12px;");
-
-        lastNameField = new TextField();
-        lastNameField.setPrefWidth(140);
-        lastNameField.setPrefHeight(40);
-        lastNameField.setPromptText("Last Name:");
-        lastNameField.setFocusTraversable(false);   
-        lastNameField.setStyle("-fx-font-size: 12px;");
+        nameField = new TextField();
+        nameField.setPrefWidth(140);
+        nameField.setPrefHeight(40);
+        nameField.setPromptText("Name:");
+        nameField.setFocusTraversable(false);
+        nameField.setStyle("-fx-font-size: 12px;");
 
         searchButton = new Button("Search");
         Page.addButtonTransition(searchButton);
@@ -817,18 +576,14 @@ public class CourseMenu extends Page {
             searchButton.setScaleY(1);
             handleButtonPress(searchButton);
         });
-        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,firstNameField,lastNameField,searchButton);
+        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,nameField,searchButton);
 
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         resultScrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-       // resultScrollPane.setPrefWidth(400);
-        //resultScrollPane.setPrefHeight(300);
         resultScrollPane.setContent(resultTableView);
-        //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
-        resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
         leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
-
+        leftBox.setPadding(new Insets(0, 0, 0, 25));
         leftSide.setMinWidth(200);
         leftSide.getChildren().addAll(leftBox);
         rightSide.getChildren().addAll(rightBox);
@@ -851,136 +606,69 @@ public class CourseMenu extends Page {
 
     private void updateMenu(MenuButton menu,CheckBox checkBox){
         if(FILTER_BUTTON_TEXTS[0].equals(checkBox.getText())) {
-            System.out.println("Rector");
-        } 
-        else if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())) {
-            menu.getItems().remove(salaryRangeTextFieldsMenuItem);
+            menu.getItems().remove(averageGradeRangeTextFieldsMenuItem);
             if(checkBox.isSelected()) {
-                startTextField.setPrefWidth(80);
-                endTextField.setPrefWidth(80);
-                salaryRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(startTextField, endTextField));
-                menu.getItems().add(menu.getItems().indexOf(salaryButton) + 1, salaryRangeTextFieldsMenuItem);
+                averageGradeStartTextField.setPrefWidth(80);
+                averageGradeEndTextField.setPrefWidth(80);
+                averageGradeRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(averageGradeStartTextField, averageGradeEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(averageGradeButton) + 1, averageGradeRangeTextFieldsMenuItem);
             }
-        } 
-        else if(FILTER_BUTTON_TEXTS[2].equals(checkBox.getText())){
-            menu.getItems().remove(radioButtons);
+        }
+        else if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())){
+            menu.getItems().remove(teacherAmountRangeTextFieldsMenuItem);
             if(checkBox.isSelected()){
-                radioButtons = new CustomMenuItem(new VBox(10,maleButton,femaleButton));
-                radioButtons.setHideOnClick(false);
-                menu.getItems().add(menu.getItems().indexOf(sexFilterButton)+1,radioButtons);
+                teacherAmountStartTextField.setPrefWidth(80);
+                teacherAmountEndTextField.setPrefWidth(80);
+                teacherAmountRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(teacherAmountStartTextField,teacherAmountEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(teacherAmountButton)+1,teacherAmountRangeTextFieldsMenuItem);
+            }
+        }
+        else if(FILTER_BUTTON_TEXTS[2].equals(checkBox.getText())){
+            menu.getItems().remove(studentAmuntRangeTexFieldsMenuItem);
+            if(checkBox.isSelected()){
+                studentAmountStartTextField.setPrefWidth(80);
+                studentAmountEndTextField.setPrefWidth(80);
+                studentAmuntRangeTexFieldsMenuItem = new CustomMenuItem(new HBox(studentAmountStartTextField,studentAmountEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(studentAmountButton)+1,studentAmuntRangeTexFieldsMenuItem);
             }
         }
         else if(FILTER_BUTTON_TEXTS[3].equals(checkBox.getText())){
-            menu.getItems().remove(ageRangeTextFieldsMenuItem);
+            menu.getItems().remove(semesterScrollCustomMenuItem);
             if(checkBox.isSelected()){
-                ageStartTextField.setPrefWidth(80);
-                ageEndTextField.setPrefWidth(80);
-                ageRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(ageStartTextField,ageEndTextField));
-                menu.getItems().add(menu.getItems().indexOf(ageButton)+1,ageRangeTextFieldsMenuItem);
+                refreshSemesters();
+                semesterScrollCustomMenuItem.setHideOnClick(false);
+                menu.getItems().add(menu.getItems().indexOf(semesterButton)+1,semesterScrollCustomMenuItem);
             }
         }
         else if(FILTER_BUTTON_TEXTS[4].equals(checkBox.getText())){
-            menu.getItems().remove(ssnTextFieldMenuItem);
+            menu.getItems().remove(courseIDTextFieldMenuItem);
             if(checkBox.isSelected()){
-                ssnTextField.setPrefWidth(160);
-                ssnTextFieldMenuItem = new CustomMenuItem(new HBox(ssnTextField));
-                menu.getItems().add(menu.getItems().indexOf(ssnButton)+1,ssnTextFieldMenuItem);
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[5].equals(checkBox.getText())){
-            menu.getItems().remove(emailTextFieldMenuItem);
-            if(checkBox.isSelected()){
-                emailTextField.setPrefWidth(160);
-                emailTextFieldMenuItem = new CustomMenuItem(new HBox(emailTextField));
-                menu.getItems().add(menu.getItems().indexOf(emailButton)+1,emailTextFieldMenuItem);
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[6].equals(checkBox.getText())){
-            menu.getItems().remove(projectRadioButtons);
-            if(checkBox.isSelected()){
-                projectRadioButtons = new CustomMenuItem(new VBox(projectsByNameButton,projectsByAmountButton));
-                projectRadioButtons.setHideOnClick(false);
-                menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
-                
-                RadioButton selectedRadioButton = (RadioButton) projectsToggleGroup.getSelectedToggle();
-                String selectedText = new String();
-                if(selectedRadioButton != null){
-                    menu.getItems().remove(projectRadioButtons);
-                   selectedText = selectedRadioButton.getText();
-                }
-                if(selectedRadioButton != null && selectedText.equals("By Name")){
-                    VBox checkBoxContainer = new VBox();
-                    for(String projectName : projectNames){
-                        CheckBox projectBox = new CheckBox(projectName);
-                        projectBox.setFocusTraversable(false);
-                        projectBox.setPrefHeight(25);
-                        projectBox.setPrefWidth(140);
-                        checkBoxContainer.getChildren().add(projectBox);
-                    }
-                    ScrollPane scrollPane = new ScrollPane();
-                    scrollPane.setContent(checkBoxContainer);
-                    scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-                    scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-                    scrollPane.setFocusTraversable(false);
-                    scrollPane.setPrefHeight(100);
-
-                    projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton, scrollPane,projectsByAmountButton));
-                    projectRadioButtons.setHideOnClick(false);
-                    menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
-                }
-                else if(selectedRadioButton != null && selectedText.equals("By Amount")){
-                    HBox rangeContainer = new HBox();
-                    rangeContainer.getChildren().addAll(projectStartTextField,projectEndTextField);
-                    projectRadioButtons = new CustomMenuItem(new VBox(10,projectsByNameButton,projectsByAmountButton,rangeContainer));
-                    menu.getItems().add(menu.getItems().indexOf(projectButton)+1,projectRadioButtons);
-                }
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[7].equals(checkBox.getText())){
-            menu.getItems().remove(fieldScrollCustomMenuItem);
-            if(checkBox.isSelected()){
-                VBox checkBoxContainer = new VBox();
-                for (String field : professorFields) {
-                    CheckBox fieldBox = new CheckBox(field);
-                    fieldBox.setFocusTraversable(false);
-                    fieldBox.setPrefHeight(25);
-                    fieldBox.setPrefWidth(140);
-                    checkBoxContainer.getChildren().add(fieldBox);
-                }
-                ScrollPane scrollPane = new ScrollPane();
-                scrollPane.setContent(checkBoxContainer);
-                scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-                scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-                scrollPane.setFocusTraversable(false);
-                scrollPane.setPrefHeight(100);
-
-                fieldScrollCustomMenuItem = new CustomMenuItem(scrollPane);
-                fieldScrollCustomMenuItem.setHideOnClick(false);
-                menu.getItems().add(menu.getItems().indexOf(fieldButton)+1,fieldScrollCustomMenuItem);
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[8].equals(checkBox.getText())){
-            menu.getItems().remove(yearsRangeTexFieldsMenuItem);
-            if(checkBox.isSelected()){
-                yearsStartTextField.setPrefWidth(80);
-                yearsEndTextField.setPrefWidth(80);
-                yearsRangeTexFieldsMenuItem = new CustomMenuItem(new HBox(yearsStartTextField,yearsEndTextField));
-                menu.getItems().add(menu.getItems().indexOf(yearsWorkedButton) + 1, yearsRangeTexFieldsMenuItem);
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[9].equals(checkBox.getText())){
-            menu.getItems().remove(phoneTextFieldItem);
-            if(checkBox.isSelected()){
-                phoneTextField.setPrefWidth(160);
-                phoneTextFieldItem = new CustomMenuItem(new HBox(phoneTextField));
-                menu.getItems().add(menu.getItems().indexOf(phoneButton) + 1, phoneTextFieldItem);
+                courseIDTextField.setPrefWidth(160);
+                courseIDTextFieldMenuItem = new CustomMenuItem(new HBox(courseIDTextField));
+                menu.getItems().add(menu.getItems().indexOf(courseIDButton)+1,courseIDTextFieldMenuItem);
             }
         }
         else {
             System.out.println("Other!");
         }
     }
-
+    private void refreshSemesters(){
+        VBox checkBoxContainer = new VBox();
+        for (String field : courseSemesters) {
+            CheckBox fieldBox = new CheckBox(field);
+            fieldBox.setFocusTraversable(false);
+            fieldBox.setPrefHeight(25);
+            fieldBox.setPrefWidth(140);
+            checkBoxContainer.getChildren().add(fieldBox);
+        }
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(checkBoxContainer);
+        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+        scrollPane.setFocusTraversable(false);
+        scrollPane.setPrefHeight(100);
+        semesterScrollCustomMenuItem = new CustomMenuItem(scrollPane);
+    }
     private CustomMenuItem toCustomMenu(String text){
         CheckBox checkBox = new CheckBox(text);
         checkBox.setFocusTraversable(false);
@@ -991,6 +679,19 @@ public class CourseMenu extends Page {
         customMenuItem.setHideOnClick(false);
         return customMenuItem;
         
+    }
+
+    private void refreshTable(){
+        try {
+            ResultSet resultSet =  previousQuery.executeQuery();
+            resultTableView = TableManager.CreateTableView(resultSet, "course");
+            TableManager.setUpMouseReleased(resultTableView);
+            TableManager.setAllowMultipleRowSelection(true);
+            resultScrollPane.setContent(resultTableView);
+            resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args){

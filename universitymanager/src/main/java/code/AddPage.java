@@ -196,7 +196,8 @@ public class AddPage extends Page {
         addButton.setGraphic(imageView);
 
         addButtonTransition(addButton, 30, 30);
-
+        //TODO: see how you like it more, this removes the circle behind the add Professor button
+        //addButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
         addButton.setOnAction(event -> {
             entry = new ArrayList<>();
             
@@ -248,7 +249,6 @@ public class AddPage extends Page {
         // Setup of New Entry Button
         Button newButton = new Button("New");
         addButtonTransition(newButton, 100, 50);
-
         newButton.setOnAction(event -> {
             clearFields("all");
             entry = null;
@@ -335,7 +335,7 @@ public class AddPage extends Page {
         Button addProjectButton = new Button();
         addProjectButton.setGraphic(imageView);
         addButtonTransition(addProjectButton, 30, 30);
-
+        addProjectButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
         addProjectButton.setOnAction(event -> {
             if (projectHistoryList == null) {
                 projectHistoryList = new ArrayList<>();
@@ -388,9 +388,10 @@ public class AddPage extends Page {
         Button deleteProjectButton = new Button();
         deleteProjectButton.setGraphic(deleteImageView);
         addButtonTransition(deleteProjectButton, 30, 30);
+        deleteProjectButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
 
         deleteProjectButton.setOnAction(event -> {
-            String projectName = TableManager.ssnSelected;
+            String projectName = TableManager.selectedId;
 
             if (projectName == null) {
                 return;
@@ -1065,7 +1066,7 @@ public class AddPage extends Page {
 
     // Insert a new entry in the Course Table.
     private void addCourse() {
-        String insertStudentQuery = "INSERT INTO COURSE (CourseId, FirstName, Semester) VALUES (?, ?, ?)";
+        String insertStudentQuery = "INSERT INTO COURSE (CourseId, Name, Semester) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertStudentQuery)) {
             for (int i = 0; i < 3; i++) {
                 preparedStatement.setString(i+1, entry.get(i));

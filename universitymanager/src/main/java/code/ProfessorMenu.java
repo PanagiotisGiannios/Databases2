@@ -128,22 +128,8 @@ public class ProfessorMenu extends Page {
                 e.printStackTrace();
             }
         }
-        String getProjectNames = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
-        String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProjectNames)) {
-            while (result.next()) {
-                projectNames.add(result.getString("Name"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
-            while (result.next()) {
-                professorFields.add(result.getString("profession"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        retrieveFields();
+        retrieveProjects();
 
         //Simulate a press on the search button to populate the viewTable at the start.
         for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
@@ -156,6 +142,31 @@ public class ProfessorMenu extends Page {
         }
         handleButtonPress(new Button("Search"));
         System.out.println("\n\nDONE!\n\n");
+    }
+    
+    private void retrieveFields(){
+        String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
+        
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
+            while (result.next()) {
+                professorFields.add(result.getString("profession"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void retrieveProjects(){
+        String getProjects = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
+        
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getProjects)){
+            projectNames.clear();
+            while (result.next()) {
+                projectNames.add(result.getString("Name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -170,8 +181,8 @@ public class ProfessorMenu extends Page {
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.ssnSelected);
-                if(TableManager.ssnSelected == null){
+                System.out.println("Deleted! " + TableManager.selectedId);
+                if(TableManager.selectedId == null){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
                     alert.setHeaderText("No professor selected");
@@ -181,51 +192,56 @@ public class ProfessorMenu extends Page {
                 }
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion!");
-                confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: '" + TableManager.ssnSelected + "' ?");
+                confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: '" + TableManager.selectedId + "' ?");
                 ButtonType yesButtonType = new ButtonType("Yes");
                 ButtonType noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.ssnSelected);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.ssnSelected);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.selectedId);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.selectedId);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.selectedId);
                             resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
                             resultTableView.getSelectionModel().clearSelection();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
+                        refreshTable();
+                        retrieveFields();
+                        retrieveProjects();
+                        updateMenu(filterButton, (CheckBox)fieldButton.getContent());
+                        updateMenu(filterButton, (CheckBox)projectButton.getContent());
                     }
                     else{
                         System.out.println("NO pressed!");
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
-                TableManager.ssnSelected = null;
+                TableManager.selectedId = null;
 
                 break;
             case "Edit":
-                System.out.println("Edit person with ssn: "+ TableManager.ssnSelected);
+                System.out.println("Edit person with ssn: "+ TableManager.selectedId);
                 break;
             case "Teaches":
                 System.out.println("Teaches!");
                 break;
             case "Rector":
-                System.out.println("make rector person with ssn: " + TableManager.ssnSelected);
+                System.out.println("make rector person with ssn: " + TableManager.selectedId);
                 confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Setting Rector!");
-                confirmAlert.setHeaderText("Are you sure you want to set the professor with ssn: '" + TableManager.ssnSelected + "' as Rector ?");
+                confirmAlert.setHeaderText("Are you sure you want to set the professor with ssn: '" + TableManager.selectedId + "' as Rector ?");
                 yesButtonType = new ButtonType("Yes");
                 noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            if(TableManager.ssnSelected != null){
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.ssnSelected);
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.ssnSelected);
-                                TableManager.ssnSelected = null;
+                            if(TableManager.selectedId != null){
+                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.selectedId);
+                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.selectedId);
+                                TableManager.selectedId = null;
                                 try {
                                     ResultSet resultSet =  previousQuery.executeQuery();
                                     resultTableView = TableManager.CreateTableView(resultSet, "professor");
@@ -843,6 +859,7 @@ public class ProfessorMenu extends Page {
         Button backButton = Page.createBackButton();
         backBox.setAlignment(Pos.TOP_CENTER);
         backBox.getChildren().add(backButton);
+        backBox.setPadding(new Insets(0, 0,5, 0));
 
         base.getChildren().addAll(titleBox,mainBox,backBox);
 
@@ -992,6 +1009,19 @@ public class ProfessorMenu extends Page {
         customMenuItem.setHideOnClick(false);
         return customMenuItem;
         
+    }
+
+    private void refreshTable(){
+        try {
+            ResultSet resultSet =  previousQuery.executeQuery();
+            resultTableView = TableManager.CreateTableView(resultSet, "course");
+            TableManager.setUpMouseReleased(resultTableView);
+            TableManager.setAllowMultipleRowSelection(true);
+            resultScrollPane.setContent(resultTableView);
+            resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args){

@@ -106,8 +106,8 @@ public class MainMenu extends Page {
             // Course Pressed
             case 4:
                 System.out.println("Course Pressed");
-                AddPage courseAddPage = new AddPage("course");
-                courseAddPage.start(primaryStage);
+                CourseMenu courseMenu = new CourseMenu();
+                courseMenu.start(primaryStage);
                 break;
         }
     }
