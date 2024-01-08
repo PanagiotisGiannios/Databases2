@@ -41,17 +41,17 @@ CREATE TABLE COURSE (
 PRIMARY KEY (CourseId));
 
 CREATE TABLE STUDENT (
-    StudentId   INTEGER AUTO_INCREMENT NOT NULL,
-    FirstName   VARCHAR(50)     NOT NULL,
-    LastName    VARCHAR(50)     NOT NULL,
-    FatherName  VARCHAR(50)     NOT NULL,
+    StudentId   INTEGER AUTO_INCREMENT 	NOT NULL,
+    FirstName   VARCHAR(50)     		NOT NULL,
+    LastName    VARCHAR(50)     		NOT NULL,
+    FatherName  VARCHAR(50)     		NOT NULL,
     Sex         VARCHAR(10),
-    Semester    TINYINT         DEFAULT 1,
-    Email       VARCHAR(150)    NOT NULL,
-    Phone       VARCHAR(10)     NOT NULL,
-    Birthday    DATE            NOT NULL,
-    EntryDate   DATETIME        DEFAULT CURRENT_TIMESTAMP,
-    Address     VARCHAR(255)    NOT NULL,
+    Semester    TINYINT        			DEFAULT 1,
+    Email       VARCHAR(150)   			NOT NULL,
+    Phone       VARCHAR(10)    			NOT NULL,
+    Birthday    DATE           			NOT NULL,
+    EntryDate   DATETIME       			DEFAULT CURRENT_TIMESTAMP,
+    Address     VARCHAR(255)   			NOT NULL,
     PRIMARY KEY (StudentId)
 ) AUTO_INCREMENT = 1001;
 
@@ -63,7 +63,7 @@ CREATE TABLE TEACHES (
 PRIMARY KEY (ProfId, CourseId));
 
 CREATE TABLE ATTENDS (
-	Grade			REAL		DEFAULT 0,
+	Grade			REAL		DEFAULT -1,
 	StudentId		INTEGER		NOT NULL,
 	CourseId		INTEGER		NOT NULL,
 	FOREIGN KEY		(StudentId) REFERENCES STUDENT (StudentId) ON DELETE CASCADE ON UPDATE CASCADE,

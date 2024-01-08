@@ -860,10 +860,13 @@ public class ProfessorMenu extends Page {
         backBox.setAlignment(Pos.TOP_CENTER);
         backBox.getChildren().add(backButton);
         backBox.setPadding(new Insets(0, 0,5, 0));
-
+        
         base.getChildren().addAll(titleBox,mainBox,backBox);
 
-        root.getChildren().addAll(base);
+        VBox test = new VBox(base);
+        test.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(test);
         
     }
 

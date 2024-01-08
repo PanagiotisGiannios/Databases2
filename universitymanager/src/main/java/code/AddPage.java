@@ -20,7 +20,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TableView;
@@ -197,7 +196,7 @@ public class AddPage extends Page {
 
         addButtonTransition(addButton, 30, 30);
         //TODO: see how you like it more, this removes the circle behind the add Professor button
-        //addButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        addButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
         addButton.setOnAction(event -> {
             entry = new ArrayList<>();
             
@@ -269,6 +268,7 @@ public class AddPage extends Page {
         mainBox.setAlignment(Pos.CENTER);
 
         base.getChildren().addAll(mainBox, bottomBox);
+        base.setAlignment(Pos.CENTER);
         root.getChildren().addAll(base);
     }
 

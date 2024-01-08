@@ -5,6 +5,7 @@ import java.io.File;
 import javafx.animation.ScaleTransition;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
@@ -29,8 +31,8 @@ public class Page extends Application {
     private static String background = "uniPage.png";
     private static String title = "University Management";
 
-    final int WIDTH = 800;
-    final int HEIGHT = 600;
+    final int WIDTH = 1000;
+    final int HEIGHT = 800;
 
     public static Connection connection;
     public static Stage primaryStage;
@@ -73,7 +75,9 @@ public class Page extends Application {
     
         // Create an ImageView for the background
         ImageView backgroundView = new ImageView(backgroundImage);
-        backgroundView.setPreserveRatio(false); // Allow stretching
+        backgroundView.setFitHeight(960);
+        backgroundView.setFitWidth(960);
+        backgroundView.setPreserveRatio(true); // Allow stretching
     
         // Create a StackPane as the root with the ImageView as a child
         Pane root = new StackPane(backgroundView);
@@ -139,8 +143,8 @@ public class Page extends Application {
 
 
     public static void addButtonTransition(Button button, int w, int h) {
-        ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(w),button);
-        ScaleTransition clickTransition = new ScaleTransition(Duration.millis(h),button);
+        ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
+        ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
 
         button.setMinWidth(w);
         button.setMinHeight(h);
