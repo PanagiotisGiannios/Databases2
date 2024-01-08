@@ -32,7 +32,7 @@ public class Page extends Application {
     private static String title = "University Management";
 
     final int WIDTH = 1000;
-    final int HEIGHT = 800;
+    final int HEIGHT = 900;
 
     public static Connection connection;
     public static Stage primaryStage;
@@ -77,6 +77,8 @@ public class Page extends Application {
         ImageView backgroundView = new ImageView(backgroundImage);
         backgroundView.setFitHeight(960);
         backgroundView.setFitWidth(960);
+        //backgroundView.setFitHeight(600);
+        //backgroundView.setFitWidth(800);
         backgroundView.setPreserveRatio(true); // Allow stretching
     
         // Create a StackPane as the root with the ImageView as a child

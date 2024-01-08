@@ -2,6 +2,8 @@ package code;
 
 import java.sql.*;
 import javafx.animation.ScaleTransition;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -619,13 +621,20 @@ public class ProfessorMenu extends Page {
     private void setButtonProperties(Button button){
         ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
         ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
-
-        button.setMinWidth(100);
-        button.setMinHeight(50);
-        button.setPrefWidth(100);
-        button.setPrefHeight(50);
-        button.setFont(Font.font("System",FontWeight.BOLD, 18));
-        button.setStyle("-fx-background-radius: 15;");
+        DoubleProperty sizeProperty = new SimpleDoubleProperty();
+        sizeProperty.bind(Page.primaryStage.widthProperty().add(Page.primaryStage.heightProperty()));
+        //button.setMinWidth(100);
+        //button.setMinHeight(50);
+        //button.setPrefWidth(100);
+        //button.setPrefHeight(50);
+        //button.setFont(Font.font("System",FontWeight.BOLD, 18));
+        //button.setStyle("-fx-background-radius: 15;");
+        button.prefHeightProperty().bind(Page.primaryStage.heightProperty().multiply(0.075));
+        button.prefWidthProperty().bind(Page.primaryStage.widthProperty().multiply(0.15));
+        sizeProperty.addListener((observable,oldValue,newValue) -> {
+            double fontSize = newValue.doubleValue() * 0.012;
+            button.setFont(Font.font("System",FontWeight.BOLD, fontSize));
+        });
         button.setCursor(Cursor.HAND);
 
         hoverTransition.setFromX(1);
