@@ -279,25 +279,35 @@ public class EditPage extends Page {
         updatedEntry.put(EMPLOYEE[0], textComponents.get(2).getText());
         updatedEntry.put(EMPLOYEE[1], textComponents.get(0).getText());
         updatedEntry.put(EMPLOYEE[2], textComponents.get(1).getText());
+        updatedEntry.put(EMPLOYEE[4], textComponents.get(3).getText());
+        updatedEntry.put(EMPLOYEE[5], textComponents.get(4).getText());
+        updatedEntry.put(EMPLOYEE[8], textComponents.get(5).getText());
+        updatedEntry.put(EMPLOYEE[9], textComponents.get(6).getText());
 
-        // TODO: Continue with the update 
-        /*
-        VBox vbox = radioComponents.get(0);
+        // Update Sex
+        VBox vbox = radioComponents.get(0); // Sex Radio Button
         for (Node childNode : vbox.getChildren()) {
-                    if (childNode instanceof RadioButton) {
-                        RadioButton radioButton = (RadioButton) childNode;
-                        radioButton.setSelected(false);
-                    }
+            if (childNode instanceof RadioButton) {
+                RadioButton radioButton = (RadioButton) childNode;
+                if (radioButton.isSelected()) {
+                    updatedEntry.put(EMPLOYEE[3], radioButton.getText());
                 }
+            }
+        }
 
-        try {
-            RadioButton selectedGender = (RadioButton) toggleGroup.getSelectedToggle();
-            entry.add(selectedGender.getText());
+        // Update Dates
+        if (dateComponents.size() >= 2 && dateComponents.get(0).getValue() != null && dateComponents.get(1).getValue() != null) {
+            LocalDate selectedDate1 = dateComponents.get(0).getValue();
+            LocalDate selectedDate2 = dateComponents.get(1).getValue();
+        
+            // Store the selected dates in updatedEntry
+            updatedEntry.put(EMPLOYEE[6], selectedDate1.toString());
+            updatedEntry.put(EMPLOYEE[7], selectedDate2.toString());
+        } else {
+            System.out.println("\n\n\n#####################\n\n\n\n###################\n\n\n###################\n\n\n\nProblima eeeeeeeeee");
         }
-        catch (NullPointerException e) {
-            entry.add(null);
-        }
-        */
+
+        
 
 
 
