@@ -85,8 +85,8 @@ public class CourseMenu extends Page {
     public void start(Stage primaryStage) {
         Page.primaryStage = primaryStage;
         loadLogo();
-        loadBackground("professorPage.png");
-        professorMenuSetup();
+        loadBackground("coursePage.png");
+        courseMenuSetup();
         createScene();
 
         if(Page.connection == null){
@@ -199,23 +199,8 @@ public class CourseMenu extends Page {
             
             case "Search":
             System.out.println("Searching!\n");
-                selectString = "SELECT DISTINCT c.CourseID AS 'CourseID', c.Name AS 'Course Name', c.Semester AS 'Semester', ";
-                joinString   = "FROM course c\n" +
-                                "LEFT JOIN (\n" +
-                                "    SELECT CourseID, AVG(CASE WHEN Grade != -1 THEN Grade END) AS AverageGrade\n" +
-                                "    FROM Attends\n" +
-                                "    GROUP BY CourseID\n" +
-                                ") AS ca ON c.CourseID = ca.CourseID\n" +
-                                "LEFT JOIN (\n" +
-                                "    SELECT CourseID, COUNT(*) AS Amount\n" +
-                                "    FROM teaches\n" +
-                                "    GROUP BY CourseID\n" +
-                                ") AS t ON c.CourseID = t.CourseID\n" +
-                                "LEFT JOIN (\n" +
-                                "    SELECT CourseID, COUNT(*) AS Amount\n" +
-                                "    FROM Attends\n" +
-                                "    GROUP BY CourseID\n" +
-                                ") AS s ON c.CourseID = s.CourseID";
+                selectString = "SELECT DISTINCT CourseID AS 'CourseID', Name AS 'Course Name', Semester AS 'Semester', ";
+                joinString   = "From courseInfo";
                 whereString  = "WHERE";
                 groupString = "";
 
@@ -227,19 +212,19 @@ public class CourseMenu extends Page {
 
                 CheckBox[] checkBoxArray = selectFiltersContainer.getChildren().toArray(new CheckBox[0]);
                 if(checkBoxArray[0].isSelected()){
-                    selectString += "ca.AverageGrade AS 'Average Grade', ";
+                    selectString += "AverageGrade AS 'Average Grade', ";
                 }
                 if(checkBoxArray[1].isSelected()){
-                    selectString += "t.Amount AS 'Teacher Amount', ";
+                    selectString += "Amount_t AS 'Teacher Amount', ";
                 }
                 if(checkBoxArray[2].isSelected()){
-                    selectString += "s.Amount AS 'Student Amount', ";
+                    selectString += "Amount_s AS 'Student Amount', ";
                 }
                 
                 selectString = selectString.substring(0,selectString.length() -2);
                 if(((CheckBox)courseIDButton.getContent()).isSelected()){
                     if(!courseIDTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND c.CourseID = ?");
+                        whereString = whereString.concat(" AND CourseID = ?");
                         whereParametersList.add(Integer.parseInt(courseIDTextField.getText()));
                     }
                     else{
@@ -264,7 +249,7 @@ public class CourseMenu extends Page {
                                     isFirst = false;
                                     
                                 }
-                                whereString = whereString.concat("c.semester = ?");
+                                whereString = whereString.concat("semester = ?");
                                 whereParametersList.add(Integer.parseInt(((CheckBox)node).getText()));
                             }
                         }
@@ -279,12 +264,12 @@ public class CourseMenu extends Page {
                     int start= Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
                     if(!averageGradeStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND ca.AverageGrade >= ?");
+                        whereString = whereString.concat(" AND AverageGrade >= ?");
                         whereParametersList.add(Integer.parseInt(averageGradeStartTextField.getText()));
                         start = Integer.parseInt(averageGradeStartTextField.getText());
                     }
                     if(!averageGradeEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND ca.AverageGrade <= ?");
+                        whereString = whereString.concat(" AND AverageGrade <= ?");
                         whereParametersList.add(Integer.parseInt(averageGradeEndTextField.getText()));
                         end = Integer.parseInt(averageGradeEndTextField.getText());
                     }
@@ -300,12 +285,12 @@ public class CourseMenu extends Page {
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
                     if(!teacherAmountStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND t.Amount >= ?");
+                        whereString = whereString.concat(" AND Amount_t >= ?");
                         whereParametersList.add(Integer.parseInt(teacherAmountStartTextField.getText()));
                         start = Integer.parseInt(teacherAmountStartTextField.getText());
                     }
                     if(!teacherAmountEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND t.Amount <= ?");
+                        whereString = whereString.concat(" AND Amount_t <= ?");
                         whereParametersList.add(Integer.parseInt(teacherAmountEndTextField.getText()));
                         end = Integer.parseInt(teacherAmountEndTextField.getText());
                     }
@@ -321,12 +306,12 @@ public class CourseMenu extends Page {
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
                     if(!studentAmountStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND s.Amount >= ?");
+                        whereString = whereString.concat(" AND Amount_s >= ?");
                         whereParametersList.add(Integer.parseInt(studentAmountStartTextField.getText()));
                         start = Integer.parseInt(studentAmountStartTextField.getText());
                     }
                     if(!studentAmountEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND s.Amount <= ?");
+                        whereString = whereString.concat(" AND Amount_s <= ?");
                         whereParametersList.add(Integer.parseInt(studentAmountEndTextField.getText()));
                         end = Integer.parseInt(studentAmountEndTextField.getText());
                     }
@@ -339,7 +324,7 @@ public class CourseMenu extends Page {
                     }
                 }
                 if(!nameField.getText().isEmpty()){
-                    whereString = whereString.concat(" AND c.Name LIKE ?");
+                    whereString = whereString.concat(" AND Name LIKE ?");
                     whereParametersList.add("%"+ nameField.getText() +"%");
                 }
                 if(whereString.indexOf(" AND") != -1){
@@ -466,7 +451,7 @@ public class CourseMenu extends Page {
     }   
 
 
-    private void professorMenuSetup(){
+    private void courseMenuSetup(){
         VBox base = new VBox(10);
         HBox titleBox = new HBox();
         HBox mainBox = new HBox();

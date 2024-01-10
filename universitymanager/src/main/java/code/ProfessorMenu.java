@@ -5,6 +5,7 @@ import javafx.animation.ScaleTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.geometry.Insets;
@@ -25,6 +26,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import java.util.*;
+
 import javafx.scene.layout.Background;
 
 public class ProfessorMenu extends Page {
@@ -99,14 +101,16 @@ public class ProfessorMenu extends Page {
 
     private Button searchButton;
 
+    //TODO:
+    private ComboBox<String> viewComboBox  = new ComboBox<String>(FXCollections.observableArrayList());
+    private TextField viewNameTextField = Page.makeTextField(20);
+
     private String selectString = "SELECT ssn, FirstName, LastName, ";
     private String joinString   = "FROM employee,professor";
     private String whereString  = "WHERE ssn=profID";
-    private String groupString = "";
     private PreparedStatement previousQuery = null;
 
     private List<Object> whereParametersList = new ArrayList<Object>();
-    private List<Object> groupParametersList = new ArrayList<Object>();
 
     private ResultSet  resultSet;
     private ScrollPane resultScrollPane;
@@ -132,7 +136,7 @@ public class ProfessorMenu extends Page {
         }
         retrieveFields();
         retrieveProjects();
-
+        retrieveViews();
         //Simulate a press on the search button to populate the viewTable at the start.
         for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
             if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[0])){
@@ -146,6 +150,22 @@ public class ProfessorMenu extends Page {
         System.out.println("\n\nDONE!\n\n");
     }
     
+    private void retrieveViews() {
+        try{
+            viewComboBox.getItems().clear();
+            ResultSet results = Page.connection.createStatement().executeQuery("Select table_name FROM information_schema.views WHERE table_schema = 'university'");
+            while (results.next()) {
+                if(!results.getString(1).substring(0,3).equals("ov_") && results.getString(1).substring(0,3).equals("pr_")){
+                    viewComboBox.getItems().add(results.getString(1).substring(3));
+                }
+            }
+            viewComboBox.getItems().add("Default");
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+    }
+
     private void retrieveFields(){
         String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
         
@@ -276,14 +296,19 @@ public class ProfessorMenu extends Page {
                 break;
             case "Search":
                 selectString = "SELECT DISTINCT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
-                joinString   = "FROM employee JOIN professor ON ssn=profID";
+                String selectedViewString = viewComboBox.getSelectionModel().getSelectedItem();
+                if(selectedViewString == null || selectedViewString.equals("Default")){
+                    selectedViewString = "ov_professors";
+                }
+                else{
+                    selectedViewString = "pr_"+selectedViewString;
+                }
+                joinString   = "FROM `" + selectedViewString + "`";
                 whereString  = "WHERE";
-                groupString = "";
 
                 String invalidRangeFilters ="";
                 Boolean isCorrectOrder = true;
                 whereParametersList.clear();
-                groupParametersList.clear();
                 Boolean showMissingAlert = false;
                 Boolean addedProjectTable = false;
 
@@ -555,7 +580,7 @@ public class ProfessorMenu extends Page {
                 else{
                     whereString = "";
                 }
-                String query = selectString + "\n" + joinString + "\n" + whereString + "\n" + groupString;
+                String query = selectString + "\n" + joinString + "\n" + whereString;
                 System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
@@ -586,10 +611,6 @@ public class ProfessorMenu extends Page {
                         preparedStatement.setObject(parameterIndex, parameter);
                         parameterIndex++;
                     }
-                    for (Object parameter : groupParametersList){
-                        preparedStatement.setObject(parameterIndex, parameter);
-                        parameterIndex++;
-                    }
                     
                     previousQuery = preparedStatement;
                     resultSet = preparedStatement.executeQuery();
@@ -604,6 +625,35 @@ public class ProfessorMenu extends Page {
                 }
                 catch(SQLException e){
                     e.printStackTrace();
+                }
+                break;
+            case "Create View":
+                if(viewNameTextField.getText().trim().isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No name input");
+                    alert.setHeaderText("View Name Text Field is empty\nInput a name and try again!");
+                    alert.setContentText(null);
+                    alert.showAndWait();
+                }
+                else if(viewNameTextField.getText().trim().toLowerCase().equals("default")){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Not allowed name");
+                    alert.setHeaderText("The name of the created view cannot be \"Default\"!\nChange it and try again!");
+                    alert.setContentText(null);
+                    alert.showAndWait();
+                }
+                else{
+                    try {
+                        String name = "`pr_" + viewNameTextField.getText().replace(" ", "_") + "`";
+                        for(Object parameter: whereParametersList){
+                            whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
+                        }
+                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                        Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                        retrieveViews();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             default:
@@ -623,18 +673,16 @@ public class ProfessorMenu extends Page {
         ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
         DoubleProperty sizeProperty = new SimpleDoubleProperty();
         sizeProperty.bind(Page.primaryStage.widthProperty().add(Page.primaryStage.heightProperty()));
-        //button.setMinWidth(100);
-        //button.setMinHeight(50);
-        //button.setPrefWidth(100);
-        //button.setPrefHeight(50);
-        //button.setFont(Font.font("System",FontWeight.BOLD, 18));
-        //button.setStyle("-fx-background-radius: 15;");
-        button.prefHeightProperty().bind(Page.primaryStage.heightProperty().multiply(0.075));
-        button.prefWidthProperty().bind(Page.primaryStage.widthProperty().multiply(0.15));
-        sizeProperty.addListener((observable,oldValue,newValue) -> {
-            double fontSize = newValue.doubleValue() * 0.012;
-            button.setFont(Font.font("System",FontWeight.BOLD, fontSize));
-        });
+        button.setMinWidth(100);
+        button.setMinHeight(50);
+        button.setPrefWidth(100);
+        button.setPrefHeight(50);
+        
+        button.setFont(Font.font("System",FontWeight.BOLD, 18));
+        button.setStyle("-fx-background-radius: 15;");
+        if(button.getText().equals("Create View")){
+            button.setFont(Font.font("System",FontWeight.BOLD, 14));
+        }
         button.setCursor(Cursor.HAND);
 
         hoverTransition.setFromX(1);
@@ -726,7 +774,7 @@ public class ProfessorMenu extends Page {
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
-        String[] buttonTexts = {"Add","Delete","Edit","Teaches","Rector"};
+        String[] buttonTexts = {"Add","Delete","Edit","Teaches","Rector","Create View"};
         Button[] rightSideButtons = new Button[buttonTexts.length];
         for(int i = 0; i < rightSideButtons.length;i++){
             rightSideButtons[i] = new Button(buttonTexts[i]);
@@ -743,7 +791,7 @@ public class ProfessorMenu extends Page {
         mainBox.setAlignment(Pos.CENTER);
         rightSide.setMinWidth(200);
 
-        HBox queryOptionsBox = new HBox(15);
+        HBox queryOptionsBox = new HBox(5);
 
         filterButton = new MenuButton("Filters");
         filterButton.setFocusTraversable(false);
@@ -845,7 +893,21 @@ public class ProfessorMenu extends Page {
             searchButton.setScaleY(1);
             handleButtonPress(searchButton);
         });
-        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,firstNameField,lastNameField,searchButton);
+
+        viewComboBox.setPromptText("Select View");
+        viewComboBox.setPrefHeight(40);
+        viewComboBox.setPrefWidth(105);
+        viewComboBox.setOnAction(event -> {
+            String select = viewComboBox.getSelectionModel().getSelectedItem();
+            System.out.println("Selected view: " + select);
+        });
+        viewNameTextField.setPrefWidth(105);
+        viewNameTextField.setPrefHeight(40);
+        viewNameTextField.setPromptText("New View Name");
+
+        
+
+        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,firstNameField,lastNameField,searchButton,viewComboBox,viewNameTextField);
 
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
@@ -856,7 +918,7 @@ public class ProfessorMenu extends Page {
         //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
         resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
         leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
-
+        leftBox.setPadding(new Insets(0, 0, 0, 25));
         leftSide.setMinWidth(200);
         leftSide.getChildren().addAll(leftBox);
         rightSide.getChildren().addAll(rightBox);

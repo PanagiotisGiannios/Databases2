@@ -2,7 +2,9 @@ package code;
 
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -24,6 +26,10 @@ public class MainMenu extends Page {
         loadBackground("emptyPage.png");
         createMainMenuPage();
         createScene();
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setContentText("Make sure you have updated to the latest database with everything using everything.sql !!");
+        alert.showAndWait();
     }
 
     private void createMainMenuPage() {
@@ -98,9 +104,8 @@ public class MainMenu extends Page {
             // Student Pressed
             case 3:
                 System.out.println("Student Pressed");
-                AddPage studentAddPage = new AddPage("student");
-                studentAddPage.start(primaryStage);
-
+                StudentMenu studentMenu = new StudentMenu();
+                studentMenu.start(primaryStage);
                 break;
 
             // Course Pressed

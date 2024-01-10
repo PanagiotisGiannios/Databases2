@@ -2,8 +2,10 @@ package code;
 
 import java.sql.*;
 import javafx.animation.ScaleTransition;
-import javafx.collections.FXCollections;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.geometry.Insets;
@@ -24,27 +26,28 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import java.util.*;
+
 import javafx.scene.layout.Background;
 
-public class AuxiliaryMenu extends Page {
+public class StudentMenu extends Page {
 
     //TODO: 
     private String FPass = "!Sql12345Sql!";
     private String PPass = "1234";
+    private final static int LIMIT = 10;
 
 
 
-    private static final String[] FILTER_BUTTON_TEXTS = {"Salary", "Sex", "Age", "SSN", "E-mail", "Profession", "Years Worked", "Phone"};
-    private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Profession", "Salary", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Job Starting Date"};
-
-    private List<String> professionList = new ArrayList<String>();
+    private static final String[] FILTER_BUTTON_TEXTS = {"Semester", "Sex", "Age", "Student ID", "E-mail", "Years Enrolled", "Phone", "Average Grade", "Course Amount", "Father Name"};
+    private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Semester", "Average Grade", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Entry Date", "Father Name"};
+    private List<String> semestersList = new ArrayList<String>();
 
     private MenuButton filterButton;
 
-    private CustomMenuItem salaryButton;
-    private CustomMenuItem salaryRangeTextFieldsMenuItem;
-    private TextField startTextField;
-    private TextField endTextField;
+    private CustomMenuItem averageGradeButton;
+    private CustomMenuItem averageGradeRangeTextFieldsMenuItem;
+    private TextField averageGradeStartTextField;
+    private TextField averageGradeEndTextField;
 
     private CustomMenuItem sexFilterButton;
     private CustomMenuItem radioButtons;
@@ -57,25 +60,34 @@ public class AuxiliaryMenu extends Page {
     private TextField ageStartTextField;
     private TextField ageEndTextField;
 
-    private CustomMenuItem ssnButton;
-    private CustomMenuItem ssnTextFieldMenuItem;
-    private TextField ssnTextField;
+    private CustomMenuItem idButton;
+    private CustomMenuItem idTextFieldMenuItem;
+    private TextField idTextField;
 
     private CustomMenuItem emailButton;
     private CustomMenuItem emailTextFieldMenuItem;
     private TextField emailTextField;
     
-    private CustomMenuItem professionButton;
-    private CustomMenuItem professionScrollCustomMenuItem;
+    private CustomMenuItem semesterButton;
+    private CustomMenuItem semesterScrollCustomMenuItem;
 
-    private CustomMenuItem yearsWorkedButton;
-    private CustomMenuItem yearsRangeTexFieldsMenuItem;
+    private CustomMenuItem yearsEnrolledButton;
+    private CustomMenuItem yearsRangeTextFieldsMenuItem;
     private TextField yearsStartTextField;
     private TextField yearsEndTextField;
 
     private CustomMenuItem phoneButton;
     private CustomMenuItem phoneTextFieldItem;
     private TextField phoneTextField;
+
+    private CustomMenuItem courseAmountButton;
+    private CustomMenuItem courseAmountRangeTextFieldsItem;
+    private TextField courseAmountStartTextField;
+    private TextField courseAmountEndTextField;
+
+    private CustomMenuItem fatherNameButton;
+    private CustomMenuItem fatherNameTextFieldItem;
+    private TextField fatherNameTextField;
 
     private MenuButton selectFilterButton;
 
@@ -87,17 +99,16 @@ public class AuxiliaryMenu extends Page {
 
     private Button searchButton;
 
+    //TODO:
     private ComboBox<String> viewComboBox  = new ComboBox<String>(FXCollections.observableArrayList());
     private TextField viewNameTextField = Page.makeTextField(20);
 
-    private String selectString = "SELECT ssn, FirstName, LastName, ";
-    private String joinString   = "FROM employee,auxiliary_staff";
-    private String whereString  = "WHERE ssn=EmployeeID";
-    private String groupString  = "";
+    private String selectString = "";
+    private String joinString   = "";
+    private String whereString  = "";
     private PreparedStatement previousQuery = null;
 
     private List<Object> whereParametersList = new ArrayList<Object>();
-    private List<Object> groupParametersList = new ArrayList<Object>();
 
     private ResultSet  resultSet;
     private ScrollPane resultScrollPane;
@@ -107,6 +118,11 @@ public class AuxiliaryMenu extends Page {
 
     @Override
     public void start(Stage primaryStage) {
+        Page.primaryStage = primaryStage;
+        loadLogo();
+        loadBackground("professorPage.png");
+        studentMenuSetup();
+        createScene();
         //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         if(Page.connection == null){
             
@@ -116,32 +132,27 @@ public class AuxiliaryMenu extends Page {
                 e.printStackTrace();
             }
         }
-        retrieveProfessions();
+        retrieveFields();
         retrieveViews();
-        Page.primaryStage = primaryStage;
-        loadLogo();
-        loadBackground("AuxiliaryStaffPage.png");
-        professorMenuSetup();
-
-        createScene();
-        for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
-            if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[0])){
-                checkBox.setSelected(true);
-            }
-            if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[5])){
-                checkBox.setSelected(true);
-            }
-        }
         //Simulate a press on the search button to populate the viewTable at the start.
+        // for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
+        //     if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[0])){
+        //         checkBox.setSelected(true);
+        //     }
+        //     if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[5])){
+        //         checkBox.setSelected(true);
+        //     }
+        // }
         handleButtonPress(new Button("Search"));
+        System.out.println("\n\nDONE!\n\n");
     }
-
+    
     private void retrieveViews() {
         try{
             viewComboBox.getItems().clear();
             ResultSet results = Page.connection.createStatement().executeQuery("Select table_name FROM information_schema.views WHERE table_schema = 'university'");
             while (results.next()) {
-                if(!results.getString(1).substring(0,3).equals("ov_") && results.getString(1).substring(0,3).equals("au_")){
+                if(!results.getString(1).substring(0,3).equals("ov_") && results.getString(1).substring(0,3).equals("pr_")){
                     viewComboBox.getItems().add(results.getString(1).substring(3));
                 }
             }
@@ -152,11 +163,12 @@ public class AuxiliaryMenu extends Page {
         }
     }
 
-    private void retrieveProfessions(){
-        String getProfessorFields = "SELECT DISTINCT profession FROM Auxiliary_staff";
-        try (ResultSet result = Page.connection.createStatement().executeQuery(getProfessorFields)){
+    private void retrieveFields(){
+        String getStudentSemester = "SELECT DISTINCT semester FROM student";
+        
+        try (ResultSet result = Page.connection.createStatement().executeQuery(getStudentSemester)){
             while (result.next()) {
-                professionList.add(result.getString("profession"));
+                semestersList.add(result.getString("semester"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,31 +183,31 @@ public class AuxiliaryMenu extends Page {
         switch (text) {
             case "Add":
                 System.out.println("Added!");
-                AddPage auxiliaryAddPage = new AddPage("auxiliary");
-                auxiliaryAddPage.start(Page.primaryStage);
+                AddPage prof = new AddPage("student");
+                prof.start(Page.primaryStage);
                 break;
             case "Delete":
                 System.out.println("Deleted! " + TableManager.selectedId);
                 if(TableManager.selectedId == null){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
-                    alert.setHeaderText("No auxiliary staff selected");
-                    alert.setContentText("Select an employee and try again!");
+                    alert.setHeaderText("No student selected");
+                    alert.setContentText("Select a student and try again!");
                     alert.showAndWait();
                     break;
                 }
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion!");
-                confirmAlert.setHeaderText("Are you sure you want to delete the employee with ssn: '" + TableManager.selectedId + "' ?");
+                confirmAlert.setHeaderText("Are you sure you want to delete the student with studentID: '" + TableManager.selectedId + "' ?");
                 ButtonType yesButtonType = new ButtonType("Yes");
                 ButtonType noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            //TODO: check deletes
+                            //TODO: fix deletes
                             Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.selectedId);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM auxiliaryStaff WHERE EmployeeID = "    + TableManager.selectedId);
+                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.selectedId);
                             Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.selectedId);
                             resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
                             resultTableView.getSelectionModel().clearSelection();
@@ -203,8 +215,8 @@ public class AuxiliaryMenu extends Page {
                             e.printStackTrace();
                         }
                         refreshTable();
-                        retrieveProfessions();
-                        updateMenu(filterButton, (CheckBox)professionButton.getContent());
+                        retrieveFields();
+                        updateMenu(filterButton, (CheckBox)semesterButton.getContent());
                     }
                     else{
                         System.out.println("NO pressed!");
@@ -216,32 +228,35 @@ public class AuxiliaryMenu extends Page {
                 break;
             case "Edit":
                 System.out.println("Edit person with ssn: "+ TableManager.selectedId);
+                EditPage editStudent = new EditPage("student", TableManager.selectedId);
+                editStudent.start(primaryStage);
+                break;
+            case "Teaches":
+                System.out.println("Teaches!");
                 break;
             case "Search":
-                selectString = "SELECT DISTINCT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
+                selectString = "SELECT DISTINCT StudentID AS 'Student ID', FirstName AS 'First Name', LastName AS 'Last Name', ";
                 String selectedViewString = viewComboBox.getSelectionModel().getSelectedItem();
                 if(selectedViewString == null || selectedViewString.equals("Default")){
-                    selectedViewString = "ov_professors";
+                    selectedViewString = "ov_students";
                 }
                 else{
-                    selectedViewString = "au_"+selectedViewString;
+                    selectedViewString = "st_" + selectedViewString;
                 }
                 joinString   = "FROM `" + selectedViewString + "`";
                 whereString  = "WHERE";
-                groupString  = "";
 
-                String invalidRangeFilters = "";
+                String invalidRangeFilters ="";
                 Boolean isCorrectOrder = true;
                 whereParametersList.clear();
-                groupParametersList.clear();
                 Boolean showMissingAlert = false;
 
                 CheckBox[] checkBoxArray = selectFiltersContainer.getChildren().toArray(new CheckBox[0]);
                 if(checkBoxArray[0].isSelected()){
-                    selectString += "Profession AS 'Profession', ";
+                    selectString += "Semester AS 'Semester', ";
                 }
                 if(checkBoxArray[1].isSelected()){
-                    selectString += "Salary, ";
+                    selectString += "AverageGrade AS 'Average Grade', ";
                 }
                 if(checkBoxArray[2].isSelected()){
                     selectString += "Sex, ";
@@ -259,14 +274,18 @@ public class AuxiliaryMenu extends Page {
                     selectString += "Birthday, ";
                 }
                 if(checkBoxArray[7].isSelected()){
-                    selectString += "JobStartingDate AS 'Job Starting Date', ";
+                    selectString += "EntryDate AS 'Entry Date', ";
+                }
+                if(checkBoxArray[8].isSelected()){
+                    selectString += "FatherName AS 'Father Name', ";
                 }
                 
+                
                 selectString = selectString.substring(0,selectString.length() -2);
-                if(((CheckBox)ssnButton.getContent()).isSelected()){
-                    if(!ssnTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND ssn = ?");
-                        whereParametersList.add(ssnTextField.getText());
+                if(((CheckBox)idButton.getContent()).isSelected()){
+                    if(!idTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND StudentID = ?");
+                        whereParametersList.add(Integer.parseInt(idTextField.getText()));
                     }
                     else{
                         showMissingAlert = true;
@@ -284,15 +303,15 @@ public class AuxiliaryMenu extends Page {
                 if(((CheckBox)phoneButton.getContent()).isSelected()){
                     if(!phoneTextField.getText().isEmpty()){
                         whereString = whereString.concat(" AND Phone = ?");
-                        whereParametersList.add(phoneTextField.getText());
+                        whereParametersList.add(Integer.parseInt(phoneTextField.getText()));
                     }
                     else{
                         showMissingAlert = true;
                     }
                 }
-                if(((CheckBox)professionButton.getContent()).isSelected()){
+                if(((CheckBox)semesterButton.getContent()).isSelected()){
                     whereString = whereString.concat( " AND (");
-                    ScrollPane scroll = (ScrollPane)professionScrollCustomMenuItem.getContent();
+                    ScrollPane scroll = (ScrollPane)semesterScrollCustomMenuItem.getContent();
                     VBox containerBox = (VBox)scroll.getContent();
                     Boolean isFirst = true;
                     Boolean hasSelected = false;
@@ -308,7 +327,7 @@ public class AuxiliaryMenu extends Page {
                                     isFirst = false;
                                     
                                 }
-                                whereString = whereString.concat("profession = ?");
+                                whereString = whereString.concat("semester = ?");
                                 whereParametersList.add(((CheckBox)node).getText());
                             }
                         }
@@ -349,37 +368,37 @@ public class AuxiliaryMenu extends Page {
                         isCorrectOrder = false;
                     }
                 }
-                if(((CheckBox)salaryButton.getContent()).isSelected()){
+                if(((CheckBox)averageGradeButton.getContent()).isSelected()){
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
-                    if(!startTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND salary >= ?");
-                        whereParametersList.add(Integer.parseInt(startTextField.getText()));
-                        start = Integer.parseInt(startTextField.getText());
+                    if(!averageGradeStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND AverageGrade >= ?");
+                        whereParametersList.add(Integer.parseInt(averageGradeStartTextField.getText()));
+                        start = Integer.parseInt(averageGradeStartTextField.getText());
                     }
-                    if(!endTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND salary <= ?");
-                        whereParametersList.add(Integer.parseInt(endTextField.getText()));
-                        end = Integer.parseInt(endTextField.getText());
+                    if(!averageGradeEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND AverageGrade <= ?");
+                        whereParametersList.add(Integer.parseInt(averageGradeEndTextField.getText()));
+                        end = Integer.parseInt(averageGradeEndTextField.getText());
                     }
-                    if(startTextField.getText().isEmpty() && endTextField.getText().isEmpty()){
+                    if(averageGradeStartTextField.getText().isEmpty() && averageGradeEndTextField.getText().isEmpty()){
                         showMissingAlert = true;
                     }
                     if(start > end){
-                        invalidRangeFilters += "'Salary', ";
+                        invalidRangeFilters += "'Average Grade', ";
                         isCorrectOrder = false;
                     }
                 }
-                if(((CheckBox)yearsWorkedButton.getContent()).isSelected()){
+                if(((CheckBox)yearsEnrolledButton.getContent()).isSelected()){
                     int start = Integer.MIN_VALUE;
                     int end = Integer.MAX_VALUE;
                     if(!yearsStartTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 >= ?");
+                        whereString = whereString.concat(" AND datediff(curdate(),entrydate)/365.25 >= ?");
                         whereParametersList.add(Integer.parseInt(yearsStartTextField.getText()));
                         start = Integer.parseInt(yearsStartTextField.getText());
                     }
                     if(!yearsEndTextField.getText().isEmpty()){
-                        whereString = whereString.concat(" AND datediff(curdate(),jobstartingdate)/365.25 <= ?");
+                        whereString = whereString.concat(" AND datediff(curdate(),entrydate)/365.25 <= ?");
                         whereParametersList.add(Integer.parseInt(yearsEndTextField.getText()));
                         end = Integer.parseInt(yearsEndTextField.getText());
                     }
@@ -389,6 +408,33 @@ public class AuxiliaryMenu extends Page {
                     if(start > end){
                         invalidRangeFilters += "'Years Worked', ";
                         isCorrectOrder = false;
+                    }
+                }
+                if(((CheckBox)courseAmountButton.getContent()).isSelected()){
+                    int start = Integer.MIN_VALUE;
+                    int end = Integer.MAX_VALUE;
+                    if(!courseAmountStartTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND CourseAmount >= ?");
+                        whereParametersList.add(Integer.parseInt(courseAmountStartTextField.getText()));
+                        start = Integer.parseInt(courseAmountStartTextField.getText());
+                    }
+                    if(!courseAmountEndTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND CourseAmount <= ?");
+                        whereParametersList.add(Integer.parseInt(courseAmountEndTextField.getText()));
+                        end = Integer.parseInt(courseAmountEndTextField.getText());
+                    }
+                    if(courseAmountEndTextField.getText().isEmpty() && courseAmountEndTextField.getText().isEmpty()){
+                        showMissingAlert = true;
+                    }
+                    if(start > end){
+                        invalidRangeFilters += "'Course Amount', ";
+                        isCorrectOrder = false;
+                    }
+                }
+                if(((CheckBox)fatherNameButton.getContent()).isSelected()){
+                    if(!fatherNameTextField.getText().isEmpty()){
+                        whereString = whereString.concat(" AND FatherName LIKE ?");
+                        whereParametersList.add("%" + fatherNameTextField.getText() + "%");
                     }
                 }
                 if(!firstNameField.getText().isEmpty()){
@@ -405,7 +451,7 @@ public class AuxiliaryMenu extends Page {
                 else{
                     whereString = "";
                 }
-                String query = selectString + "\n" + joinString + "\n" + whereString + "\n" + groupString;
+                String query = selectString + "\n" + joinString + "\n" + whereString;
                 System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
@@ -436,15 +482,11 @@ public class AuxiliaryMenu extends Page {
                         preparedStatement.setObject(parameterIndex, parameter);
                         parameterIndex++;
                     }
-                    for (Object parameter : groupParametersList){
-                        preparedStatement.setObject(parameterIndex, parameter);
-                        parameterIndex++;
-                    }
-
+                    
                     previousQuery = preparedStatement;
                     resultSet = preparedStatement.executeQuery();
                     
-                    resultTableView = TableManager.CreateTableView(resultSet, "employee");
+                    resultTableView = TableManager.CreateTableView(resultSet, "student");
                     TableManager.setUpMouseReleased(resultTableView);
                     
                     resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
@@ -473,7 +515,7 @@ public class AuxiliaryMenu extends Page {
                 }
                 else{
                     try {
-                        String name = "`au_" + viewNameTextField.getText().replace(" ", "_") + "`";
+                        String name = "`pr_" + viewNameTextField.getText().replace(" ", "_") + "`";
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
@@ -500,16 +542,18 @@ public class AuxiliaryMenu extends Page {
     private void setButtonProperties(Button button){
         ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
         ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
-
+        DoubleProperty sizeProperty = new SimpleDoubleProperty();
+        sizeProperty.bind(Page.primaryStage.widthProperty().add(Page.primaryStage.heightProperty()));
         button.setMinWidth(100);
         button.setMinHeight(50);
         button.setPrefWidth(100);
         button.setPrefHeight(50);
+        
         button.setFont(Font.font("System",FontWeight.BOLD, 18));
+        button.setStyle("-fx-background-radius: 15;");
         if(button.getText().equals("Create View")){
             button.setFont(Font.font("System",FontWeight.BOLD, 14));
         }
-        button.setStyle("-fx-background-radius: 15;");
         button.setCursor(Cursor.HAND);
 
         hoverTransition.setFromX(1);
@@ -546,14 +590,16 @@ public class AuxiliaryMenu extends Page {
         button.setFocusTraversable(false);
 
     }   
+    
 
-    private void professorMenuSetup(){
+
+    private void studentMenuSetup(){
         VBox base = new VBox(10);
         HBox titleBox = new HBox();
         HBox mainBox = new HBox();
         HBox backBox = new HBox();
         
-        Text titleText = new Text("Auxiliary Staff");
+        Text titleText = new Text("Student");
         titleText.setFont(Font.font("System",FontWeight.BOLD,29));
         titleBox.getChildren().add(titleText);
         titleBox.setAlignment(Pos.TOP_CENTER);
@@ -571,7 +617,7 @@ public class AuxiliaryMenu extends Page {
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
-        String[] buttonTexts = {"Add","Delete","Edit","Create View"};
+        String[] buttonTexts = {"Add","Delete","Edit","Teaches","Rector","Create View"};
         Button[] rightSideButtons = new Button[buttonTexts.length];
         for(int i = 0; i < rightSideButtons.length;i++){
             rightSideButtons[i] = new Button(buttonTexts[i]);
@@ -588,23 +634,25 @@ public class AuxiliaryMenu extends Page {
         mainBox.setAlignment(Pos.CENTER);
         rightSide.setMinWidth(200);
 
-        HBox queryOptionsBox = new HBox(15);
+        HBox queryOptionsBox = new HBox(5);
 
         filterButton = new MenuButton("Filters");
         filterButton.setFocusTraversable(false);
-        salaryButton = toCustomMenu(FILTER_BUTTON_TEXTS[0]);
+        semesterButton = toCustomMenu(FILTER_BUTTON_TEXTS[0]);
         sexFilterButton = toCustomMenu(FILTER_BUTTON_TEXTS[1]);
         ageButton = toCustomMenu(FILTER_BUTTON_TEXTS[2]);
-        ssnButton = toCustomMenu(FILTER_BUTTON_TEXTS[3]);
+        idButton = toCustomMenu(FILTER_BUTTON_TEXTS[3]);
         emailButton = toCustomMenu(FILTER_BUTTON_TEXTS[4]);
-        professionButton = toCustomMenu(FILTER_BUTTON_TEXTS[5]);
-        yearsWorkedButton = toCustomMenu(FILTER_BUTTON_TEXTS[6]);
-        phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[7]);
+        yearsEnrolledButton = toCustomMenu(FILTER_BUTTON_TEXTS[5]);
+        phoneButton = toCustomMenu(FILTER_BUTTON_TEXTS[6]);
+        averageGradeButton = toCustomMenu(FILTER_BUTTON_TEXTS[7]);
+        courseAmountButton = toCustomMenu(FILTER_BUTTON_TEXTS[8]);
+        fatherNameButton = toCustomMenu(FILTER_BUTTON_TEXTS[9]);
 
-        startTextField = Page.createNumericTextField(6);
-        endTextField   = Page.createNumericTextField(6);
-        startTextField.setPromptText("Min.");
-        endTextField.setPromptText("Max.");
+        averageGradeStartTextField = Page.createNumericTextField(2);
+        averageGradeEndTextField   = Page.createNumericTextField(2);
+        averageGradeStartTextField.setPromptText("Min.");
+        averageGradeEndTextField.setPromptText("Max.");
 
         maleButton.setToggleGroup(toggleGroup);
         femaleButton.setToggleGroup(toggleGroup);
@@ -616,22 +664,29 @@ public class AuxiliaryMenu extends Page {
         ageStartTextField.setPromptText("Min.");
         ageEndTextField.setPromptText("Max.");
 
-        ssnTextField = Page.createNumericTextField(10);
-        ssnTextField.setPromptText("SSN:");
+        idTextField = Page.createNumericTextField(LIMIT);
+        idTextField.setPromptText("Student ID:");
 
         emailTextField = new TextField();
         emailTextField.setPromptText("E-mail:");
 
-
-        yearsStartTextField = Page.createNumericTextField(3);
-        yearsEndTextField = Page.createNumericTextField(3);
+        yearsStartTextField = Page.createNumericTextField(2);
+        yearsEndTextField = Page.createNumericTextField(2);
         yearsStartTextField.setPromptText("Min.");
         yearsEndTextField.setPromptText("Max.");
 
-        phoneTextField = Page.createNumericTextField(10);
+        phoneTextField = Page.createNumericTextField(LIMIT);
         phoneTextField.setPromptText("Phone Number:");
 
-        filterButton.getItems().addAll(ssnButton,emailButton,phoneButton,professionButton,sexFilterButton,ageButton,salaryButton,yearsWorkedButton);
+        courseAmountStartTextField = Page.createNumericTextField(3);
+        courseAmountEndTextField = Page.createNumericTextField(3);
+        courseAmountStartTextField.setPromptText("Min.");
+        courseAmountEndTextField.setPromptText("Max.");
+
+        fatherNameTextField = Page.makeTextField(50);
+        fatherNameTextField.setPromptText("Father Name:");
+
+        filterButton.getItems().addAll(fatherNameButton,semesterButton,idButton,emailButton,phoneButton,sexFilterButton,ageButton,averageGradeButton,yearsEnrolledButton,courseAmountButton);
         filterButton.setCursor(Cursor.HAND);
         filterButton.setPrefWidth(90);
         filterButton.setPrefHeight(40);
@@ -671,7 +726,7 @@ public class AuxiliaryMenu extends Page {
         searchButton.setMinWidth(30);
         searchButton.setPrefHeight(40);
         searchButton.setPrefWidth(70);
-        searchButton.setFont(Font.font("System", FontWeight.BOLD, 13));
+        searchButton.setFont(Font.font("System", FontWeight.BOLD, 15));
         searchButton.setOnMouseReleased(e -> {
             searchButton.setScaleX(1);
             searchButton.setScaleY(1);
@@ -688,6 +743,8 @@ public class AuxiliaryMenu extends Page {
         viewNameTextField.setPrefWidth(105);
         viewNameTextField.setPrefHeight(40);
         viewNameTextField.setPromptText("New View Name");
+
+        
 
         queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,firstNameField,lastNameField,searchButton,viewComboBox,viewNameTextField);
 
@@ -714,23 +771,41 @@ public class AuxiliaryMenu extends Page {
         Button backButton = Page.createBackButton();
         backBox.setAlignment(Pos.TOP_CENTER);
         backBox.getChildren().add(backButton);
-
+        backBox.setPadding(new Insets(0, 0,5, 0));
+        
         base.getChildren().addAll(titleBox,mainBox,backBox);
 
-        root.getChildren().addAll(base);
+        VBox test = new VBox(base);
+        test.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(test);
         
     }
 
     private void updateMenu(MenuButton menu,CheckBox checkBox){
-        if(FILTER_BUTTON_TEXTS[0].equals(checkBox.getText())) {
-            menu.getItems().remove(salaryRangeTextFieldsMenuItem);
-            if(checkBox.isSelected()) {
-                startTextField.setPrefWidth(80);
-                endTextField.setPrefWidth(80);
-                salaryRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(startTextField, endTextField));
-                menu.getItems().add(menu.getItems().indexOf(salaryButton) + 1, salaryRangeTextFieldsMenuItem);
+        if(FILTER_BUTTON_TEXTS[0].equals(checkBox.getText())){
+            menu.getItems().remove(semesterScrollCustomMenuItem);
+            if(checkBox.isSelected()){
+                VBox checkBoxContainer = new VBox();
+                for (String field : semestersList) {
+                    CheckBox fieldBox = new CheckBox(field);
+                    fieldBox.setFocusTraversable(false);
+                    fieldBox.setPrefHeight(25);
+                    fieldBox.setPrefWidth(140);
+                    checkBoxContainer.getChildren().add(fieldBox);
+                }
+                ScrollPane scrollPane = new ScrollPane();
+                scrollPane.setContent(checkBoxContainer);
+                scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+                scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+                scrollPane.setFocusTraversable(false);
+                scrollPane.setPrefHeight(100);
+                
+                semesterScrollCustomMenuItem = new CustomMenuItem(scrollPane);
+                semesterScrollCustomMenuItem.setHideOnClick(false);
+                menu.getItems().add(menu.getItems().indexOf(semesterButton)+1,semesterScrollCustomMenuItem);
             }
-        } 
+        }
         else if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())){
             menu.getItems().remove(radioButtons);
             if(checkBox.isSelected()){
@@ -749,11 +824,11 @@ public class AuxiliaryMenu extends Page {
             }
         }
         else if(FILTER_BUTTON_TEXTS[3].equals(checkBox.getText())){
-            menu.getItems().remove(ssnTextFieldMenuItem);
+            menu.getItems().remove(idTextFieldMenuItem);
             if(checkBox.isSelected()){
-                ssnTextField.setPrefWidth(160);
-                ssnTextFieldMenuItem = new CustomMenuItem(new HBox(ssnTextField));
-                menu.getItems().add(menu.getItems().indexOf(ssnButton)+1,ssnTextFieldMenuItem);
+                idTextField.setPrefWidth(160);
+                idTextFieldMenuItem = new CustomMenuItem(new HBox(idTextField));
+                menu.getItems().add(menu.getItems().indexOf(idButton)+1,idTextFieldMenuItem);
             }
         }
         else if(FILTER_BUTTON_TEXTS[4].equals(checkBox.getText())){
@@ -765,38 +840,15 @@ public class AuxiliaryMenu extends Page {
             }
         }
         else if(FILTER_BUTTON_TEXTS[5].equals(checkBox.getText())){
-            menu.getItems().remove(professionScrollCustomMenuItem);
-            if(checkBox.isSelected()){
-                VBox checkBoxContainer = new VBox();
-                for (String field : professionList) {
-                    CheckBox fieldBox = new CheckBox(field);
-                    fieldBox.setFocusTraversable(false);
-                    fieldBox.setPrefHeight(25);
-                    fieldBox.setPrefWidth(140);
-                    checkBoxContainer.getChildren().add(fieldBox);
-                }
-                ScrollPane scrollPane = new ScrollPane();
-                scrollPane.setContent(checkBoxContainer);
-                scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-                scrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-                scrollPane.setFocusTraversable(false);
-                scrollPane.setPrefHeight(100);
-
-                professionScrollCustomMenuItem = new CustomMenuItem(scrollPane);
-                professionScrollCustomMenuItem.setHideOnClick(false);
-                menu.getItems().add(menu.getItems().indexOf(professionButton)+1,professionScrollCustomMenuItem);
-            }
-        }
-        else if(FILTER_BUTTON_TEXTS[6].equals(checkBox.getText())){
-            menu.getItems().remove(yearsRangeTexFieldsMenuItem);
+            menu.getItems().remove(yearsRangeTextFieldsMenuItem);
             if(checkBox.isSelected()){
                 yearsStartTextField.setPrefWidth(80);
                 yearsEndTextField.setPrefWidth(80);
-                yearsRangeTexFieldsMenuItem = new CustomMenuItem(new HBox(yearsStartTextField,yearsEndTextField));
-                menu.getItems().add(menu.getItems().indexOf(yearsWorkedButton) + 1, yearsRangeTexFieldsMenuItem);
+                yearsRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(yearsStartTextField,yearsEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(yearsEnrolledButton) + 1, yearsRangeTextFieldsMenuItem);
             }
         }
-        else if(FILTER_BUTTON_TEXTS[7].equals(checkBox.getText())){
+        else if(FILTER_BUTTON_TEXTS[6].equals(checkBox.getText())){
             menu.getItems().remove(phoneTextFieldItem);
             if(checkBox.isSelected()){
                 phoneTextField.setPrefWidth(160);
@@ -804,8 +856,34 @@ public class AuxiliaryMenu extends Page {
                 menu.getItems().add(menu.getItems().indexOf(phoneButton) + 1, phoneTextFieldItem);
             }
         }
+        else if(FILTER_BUTTON_TEXTS[7].equals(checkBox.getText())) {
+            menu.getItems().remove(averageGradeRangeTextFieldsMenuItem);
+            if(checkBox.isSelected()) {
+                averageGradeStartTextField.setPrefWidth(80);
+                averageGradeEndTextField.setPrefWidth(80);
+                averageGradeRangeTextFieldsMenuItem = new CustomMenuItem(new HBox(averageGradeStartTextField, averageGradeEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(averageGradeButton) + 1, averageGradeRangeTextFieldsMenuItem);
+            }
+        } 
+        else if(FILTER_BUTTON_TEXTS[8].equals(checkBox.getText())){
+            menu.getItems().remove(courseAmountRangeTextFieldsItem);
+            if(checkBox.isSelected()){
+                courseAmountStartTextField.setPrefWidth(80);
+                courseAmountEndTextField.setPrefWidth(80);
+                courseAmountRangeTextFieldsItem = new CustomMenuItem(new HBox(courseAmountStartTextField,courseAmountEndTextField));
+                menu.getItems().add(menu.getItems().indexOf(courseAmountButton)+1,courseAmountRangeTextFieldsItem);
+            }
+        }
+        else if(FILTER_BUTTON_TEXTS[9].equals(checkBox.getText())){
+            menu.getItems().remove(fatherNameTextFieldItem);
+            if(checkBox.isSelected()){
+                fatherNameTextField.setPrefWidth(160);
+                fatherNameTextFieldItem = new CustomMenuItem(new VBox(fatherNameTextField));
+                menu.getItems().add(menu.getItems().indexOf(fatherNameButton)+1,fatherNameTextFieldItem);
+            }
+        }
         else {
-            System.out.println("Other!");
+            System.out.println("We have big problem!");
         }
     }
 

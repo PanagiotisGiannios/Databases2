@@ -60,7 +60,6 @@ public class Page extends Application {
     public void loadLogo() {
         File imageFile = new File(path + logo);
         Image logo = new Image(imageFile.toURI().toString());
-        System.out.println(primaryStage);
         primaryStage.getIcons().add(logo);
     }
 
@@ -70,6 +69,7 @@ public class Page extends Application {
     }
     
     public void loadBackground() {
+        pagePath = pagePath.replace('\\', '/');
         // Load the background image
         Image backgroundImage = new Image("file:" + pagePath + background);
     
@@ -87,7 +87,6 @@ public class Page extends Application {
         // Set the background color using a hex value
         String backgroundColor = "#789D7A";
         root.setStyle("-fx-background-color: " + backgroundColor + ";" +
-                      "-fx-background-image: url('file:" + pagePath + background +"');" +
                       "-fx-background-size: cover;"); // 'cover' ensures the image covers the entire StackPane
     
         // Bind the size of the StackPane to the size of the Scene
