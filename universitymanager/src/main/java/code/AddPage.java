@@ -52,7 +52,7 @@ public class AddPage extends Page {
                 background = "professorPage.png";                
                 break;
             case "auxiliary":
-                
+                background = "auxiliaryStaffPage.png";                
                 break;
             case "student":
                 background = "studentPage.png";
@@ -263,11 +263,12 @@ public class AddPage extends Page {
         Button backButton = Page.createBackButton();
         bottomBox.getChildren().addAll(newButton, backButton);
         bottomBox.setSpacing(5);
-        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
 
         // Setup the boxes
         mainBox.getChildren().addAll(professorSide, projectSide);
         mainBox.setAlignment(Pos.CENTER);
+
 
         base.getChildren().addAll(mainBox, bottomBox);
         base.setAlignment(Pos.CENTER);
@@ -445,6 +446,7 @@ public class AddPage extends Page {
                 TableManager.setUpMouseReleased(table);
                 table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
 
+                table.setPrefHeight(150);
                 resultSet.close();
             }
             catch (Exception ex) {
@@ -526,8 +528,6 @@ public class AddPage extends Page {
         dateComponents.add(jobStartingDate);
 
         // Profession Radio Buttons setup
-        //TODO: Since later we might want to add new professions
-        // Maybe we need to do a quick query to populate the radiobuttons so that not everything is hardcoded
         Label profLabel = new Label("Profession");
         profLabel.setFont(Font.font(15));
         profLabel.setStyle("-fx-font-weight: bold;");
@@ -598,7 +598,7 @@ public class AddPage extends Page {
         Button backButton = Page.createBackButton();
         bottomBox.getChildren().addAll(addButton, backButton);
         bottomBox.setSpacing(5);
-        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
         
 
         // Limit the TextField size to 100 pixels
@@ -862,7 +862,7 @@ public class AddPage extends Page {
             else {
                 showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
             }
-            return;            
+            return;
         }
 
         if (!check()) {
@@ -912,7 +912,7 @@ public class AddPage extends Page {
     // Check for duplicates.
     private boolean checkForDuplicate() {
         String checkDuplicateQuery = "";
-        if (type == "professor" || type == "axiliary") {
+        if (type == "professor" || type == "auxiliary") {
             checkDuplicateQuery = "SELECT COUNT(*) FROM EMPLOYEE WHERE SSN = ?";
         }
         else if (type == "student") {
@@ -1006,7 +1006,7 @@ public class AddPage extends Page {
 
                 // Refreash Table.
                 table = createProjectTable();
-                table.setPrefHeight(120);
+                table.setPrefHeight(150);
                 pane.setContent(table);
                 pane.setFitToWidth(true);
                 pane.setVbarPolicy(ScrollBarPolicy.NEVER);
