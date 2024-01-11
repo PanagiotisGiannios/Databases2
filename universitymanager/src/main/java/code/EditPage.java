@@ -27,6 +27,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -54,12 +55,17 @@ public class EditPage extends Page {
     private final int TABLEWIDTH = 350;
     private final int TABLEHEIGHT = 150;
 
+    // For the next Entry Button
+    private String query;
+    private String next = null;
+    private String id = null;
+
     // SQL Tables
     private final String[] EMPLOYEE = {"SSN", "FirstName", "LastName", "Sex", "Phone", "Email", "JobStartingDate", "Birthday", "Address", "Salary"};
     private final String[] PROFESSOR = {"ProfId", "ManagerId", "Profession"};
     private final String[] PROJECT = {"ProfessorId", "Name", "Field", "Type", "Information"};
     private final String[] AUXILIARY_STAFF = {"EmployeeID", "profession"};
-    private final String[] STUDENT = {"FirstName", "LastName", "FatherName", "Sex", "Semester", "Email", "Phone", "Birthday", "EntryDate", "Address"};
+    private final String[] STUDENT = {"StudentId", "FirstName", "LastName", "FatherName", "Sex", "Semester", "Email", "Phone", "Birthday", "EntryDate", "Address"};
     private final String[] COURSE = {"CourseId", "Name", "Semester"};
 
 
@@ -69,16 +75,49 @@ public class EditPage extends Page {
 
         if (type == "professor") {
             background = "professorPage.png";
+            query =  "SELECT e.SSN FROM EMPLOYEE e JOIN PROFESSOR p ON e.SSN = p.ProfId;";
+            id = EMPLOYEE[0];
         }
         else if (type == "auxiliary") {
             background = "auxiliaryStaffPage.png";
+            query =  "SELECT e.SSN FROM EMPLOYEE e JOIN AUXILIARY_STAFF a ON e.SSN = a.EmployeeID;";
+            id = EMPLOYEE[0];
         }
         else if (type == "student") {
             background = "studentPage.png";
+            query =  "SELECT StudentId FROM STUDENT";
+            id = STUDENT[0];
         }
         else if (type == "course") {
             background = "coursePage.png";
+            query =  "SELECT CourseId FROM COURSE";
+            id = COURSE[0];
         }
+        initializeNextEntry();
+    }
+
+    private void initializeNextEntry() {
+        List<Integer> idList = new ArrayList<>();
+
+        try (ResultSet result = connection.createStatement().executeQuery(query)) {
+            while (result.next()) {
+                idList.add(result.getInt(id));
+            }
+            idList.sort(Integer::compareTo);
+    
+            if (idList.size() < 2) {
+                next = null;
+            } else {
+                int index = idList.indexOf(Integer.parseInt(key));
+                if (index >= 0 && index < idList.size() - 1) {
+                    next = Integer.toString(idList.get(index + 1));
+                } else {
+                    next = Integer.toString(idList.get(0));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }       
     }
 
     @Override
@@ -108,7 +147,7 @@ public class EditPage extends Page {
         }
         else if (type == "course") {
             background = "coursePage.png";
-            selectQuery = "SELECT * FROM COURSE WHERE CourceId = ?";
+            selectQuery = "SELECT * FROM COURSE WHERE CourseId = ?";
             createCourse();
         }
     }
@@ -277,11 +316,49 @@ public class EditPage extends Page {
             menu.start(primaryStage);            
         });
 
+        // Setup the previous entry button
+        Image image = new Image("file:" + getPath() + "back.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button backToMenuButton = new Button();
+        backToMenuButton.setGraphic(imageView);
+        addButtonTransition(backToMenuButton, 30, 30);
+        backToMenuButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        backToMenuButton.setOnAction(event -> {
+
+            ProfessorMenu profMenu = new ProfessorMenu();
+            profMenu.start(primaryStage);
+
+        });
+
+        // Setup the previous entry button
+        image = new Image("file:" + getPath() + "next.png");
+        imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button nextButton = new Button();
+        nextButton.setGraphic(imageView);
+        addButtonTransition(nextButton, 30, 30);
+        nextButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        nextButton.setOnAction(event -> {
+
+            if (next != null) {
+                EditPage page = new EditPage(type, next);
+                page.start(primaryStage);
+            }
+        });
+
         // Setup the back to main menu button
         Button backButton = Page.createBackButton();
-        bottomBox.getChildren().addAll(saveButton, backButton);
+        HBox buttonBox = new HBox(backToMenuButton, backButton, nextButton);
+        buttonBox.setAlignment(Pos.BOTTOM_CENTER);
+        buttonBox.setSpacing(50);
+
+        bottomBox.getChildren().addAll(saveButton, buttonBox);
         bottomBox.setSpacing(5);
         bottomBox.setAlignment(Pos.CENTER);
+
 
         // Setup the boxes
         mainBox.getChildren().addAll(professorSide, projectSide);
@@ -808,14 +885,52 @@ public class EditPage extends Page {
         titleBox.setAlignment(Pos.CENTER_LEFT);        
         titleBox.setPadding(new Insets(20, 0, 0, 30));
 
+        // Setup the previous entry button
+        Image image = new Image("file:" + getPath() + "back.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button backToMenuButton = new Button();
+        backToMenuButton.setGraphic(imageView);
+        addButtonTransition(backToMenuButton, 30, 30);
+        backToMenuButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        backToMenuButton.setOnAction(event -> {
+
+            AuxiliaryMenu auxiliaryMenu = new AuxiliaryMenu();
+            auxiliaryMenu.start(primaryStage);
+
+        });
+
+        // Setup the previous entry button
+        image = new Image("file:" + getPath() + "next.png");
+        imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button nextButton = new Button();
+        nextButton.setGraphic(imageView);
+        addButtonTransition(nextButton, 30, 30);
+        nextButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        nextButton.setOnAction(event -> {
+
+            if (next != null) {
+                EditPage page = new EditPage(type, next);
+                page.start(primaryStage);
+            }
+        });
+
         // Setup the back to main menu button
         Button backButton = Page.createBackButton();
-        bottomBox.getChildren().addAll(saveButton, backButton);
+
+        HBox buttonBox = new HBox(backToMenuButton, backButton, nextButton);
+        buttonBox.setAlignment(Pos.BOTTOM_CENTER);
+        buttonBox.setSpacing(50);
+
+        bottomBox.getChildren().addAll(saveButton, buttonBox);
         bottomBox.setSpacing(5);
         bottomBox.setAlignment(Pos.BOTTOM_CENTER);
         
 
-        // Limit the TextField size to 100 pixels
+        // Limit the TextField size to 250 pixels
         for (TextField field: textComponents) {
             field.setMaxWidth(250);
         }
@@ -831,9 +946,313 @@ public class EditPage extends Page {
     }
 
     private void createStudent() {
+        // Fetch the Student from the database.
+        fetchEntry();
+
+        // Setup the boxes.
+        VBox base = new VBox();
+        VBox mainBox = new VBox();
+        VBox bottomBox = new VBox();
+
+        // Setup the components List
+        textComponents = new ArrayList<>();
+        radioComponents = new ArrayList<>();
+        dateComponents = new ArrayList<>();
+
+        // Set up the title
+        Label studentLabel = new Label("Student");
+        studentLabel.setFont(Font.font(30));
+        studentLabel.setStyle("-fx-font-weight: bold;");
+
+        // Set up the features
+        // Student ID
+        TextField studentId = createNumericTextField(10);
+        studentId.setPromptText("Student ID");
+        studentId.setText(entry.get(STUDENT[0]));
+        textComponents.add(studentId);
+
+        // First Name
+        TextField fname = makeTextField(50);
+        fname.setPromptText("First Name");
+        fname.setText(entry.get(STUDENT[1]));
+        textComponents.add(fname);
+
+        // Laste Name
+        TextField lname = makeTextField(50);
+        lname.setPromptText("Last Name");
+        lname.setText(entry.get(STUDENT[2]));
+        textComponents.add(lname);
+
+        // Father Name
+        TextField fatherName = makeTextField(50);
+        fatherName.setPromptText("Father's Name");
+        fatherName.setText(entry.get(STUDENT[3]));
+        textComponents.add(fatherName);
+
+        // Sex Radio Button
+        Label gender = new Label("Sex");
+        gender.setFont(Font.font(15));
+        gender.setStyle("-fx-font-weight: bold;");
+        RadioButton maleRadioButton = new RadioButton("Male");
+        RadioButton femaleRadioButton = new RadioButton("Female");
+
+        ToggleGroup toggleGroup = new ToggleGroup();
+        maleRadioButton.setToggleGroup(toggleGroup);
+        femaleRadioButton.setToggleGroup(toggleGroup);
+
+        VBox sex = new VBox(gender, maleRadioButton, femaleRadioButton);
+        sex.setPadding(new Insets(5));
+        
+        if (entry.get("Sex") != null) {
+            if (entry.get("Sex").equals("Male")) {
+                maleRadioButton.setSelected(true);
+            } else if (entry.get("Sex").equals("Female")) {
+                femaleRadioButton.setSelected(true);
+            }
+        }
+        radioComponents.add(sex);
+
+        // Semester
+        TextField semester = createNumericTextField(2);
+        semester.setPromptText("Semester");
+        semester.setText(entry.get(STUDENT[5]));
+        textComponents.add(semester);
+
+        // Email
+        TextField email = makeTextField(150);
+        email.setPromptText("Email Address");
+        email.setText(entry.get("Email"));
+        textComponents.add(email);
+
+        // Phone
+        TextField phone = createNumericTextField(10);
+        phone.setPromptText("Phone Number");
+        phone.setText(entry.get("Phone"));
+        textComponents.add(phone);
+        
+        // Birthday
+        DatePicker birthday = new DatePicker();
+        birthday.setPromptText("Birthday");
+        if (entry.get("Birthday") != null) {
+            birthday.setValue(LocalDate.parse(entry.get("Birthday")));
+        }
+        dateComponents.add(birthday);
+
+        // Entry Date
+        DatePicker entryDate = new DatePicker();
+        entryDate.setPromptText("Entry Date");
+        if (entry.get("EntryDate") != null) {
+            entryDate.setValue(LocalDate.parse(entry.get("EntryDate")));
+        }
+        dateComponents.add(entryDate);
+
+        // Address
+        TextField address = makeTextField(150);
+        address.setPromptText("Address");
+        address.setText(entry.get("Address"));
+        textComponents.add(address);
+
+        // Setup of Save Entry Button
+        Button saveButton = new Button("Save");
+        addButtonTransition(saveButton, 100, 50);
+        saveButton.setOnAction(event -> {
+            if (!checkForMissingValues(true)) {
+                showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
+                return;
+            }
+            updateStudent();
+            StudentMenu menu = new StudentMenu();
+            menu.start(primaryStage);            
+        });
+
+        HBox titleBox = new HBox(studentLabel);
+        titleBox.setAlignment(Pos.CENTER_LEFT);        
+        titleBox.setPadding(new Insets(20, 0, 0, 30));
+
+        // Setup the back to Student Main Menu button
+        Image image = new Image("file:" + getPath() + "back.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button backToMenuButton = new Button();
+        backToMenuButton.setGraphic(imageView);
+        addButtonTransition(backToMenuButton, 30, 30);
+        backToMenuButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        backToMenuButton.setOnAction(event -> {
+
+            StudentMenu studentMenu = new StudentMenu();
+            studentMenu.start(primaryStage);
+
+        });
+
+        // Setup the next entry button
+        image = new Image("file:" + getPath() + "next.png");
+        imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button nextButton = new Button();
+        nextButton.setGraphic(imageView);
+        addButtonTransition(nextButton, 30, 30);
+        nextButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        nextButton.setOnAction(event -> {
+
+            if (next != null) {
+                EditPage page = new EditPage(type, next);
+                page.start(primaryStage);
+            }
+        });
+
+        // Setup the back to main menu button
+        Button backButton = Page.createBackButton();
+
+        HBox buttonBox = new HBox(backToMenuButton, backButton, nextButton);
+        buttonBox.setAlignment(Pos.BOTTOM_CENTER);
+        buttonBox.setSpacing(50);
+
+        bottomBox.getChildren().addAll(saveButton, buttonBox);
+        bottomBox.setSpacing(5);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
+        
+
+        // Limit the TextField size to 250 pixels
+        for (TextField field: textComponents) {
+            field.setMaxWidth(250);
+        }
+
+        int i = 0;
+        for (TextField field : textComponents) {
+            if (i == 3) {
+                mainBox.getChildren().add(radioComponents.get(0));
+            }
+            mainBox.getChildren().add(field);
+            i++;
+        }
+        mainBox.getChildren().addAll(dateComponents.get(0), dateComponents.get(1));
+        mainBox.setAlignment(Pos.CENTER_LEFT);
+        mainBox.setPadding(new Insets(0, 0, 0, 30));
+        mainBox.setSpacing(5);
+
+        base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        root.getChildren().addAll(base);
     }
 
     private void createCourse() {
+        // Fetch the Student from the database.
+        fetchEntry();
+
+        // Setup the boxes.        
+        VBox base = new VBox();
+        VBox mainBox = new VBox();
+        VBox bottomBox = new VBox();
+
+        // Setup the components List
+        textComponents = new ArrayList<>();
+
+        // Set up the title
+        Label courseLabel = new Label("Course");
+        courseLabel.setFont(Font.font(30));
+        courseLabel.setStyle("-fx-font-weight: bold;");
+
+        // Set up the features
+        // Student ID
+        TextField courseId = createNumericTextField(10);
+        courseId.setPromptText("Course ID");
+        courseId.setText(entry.get("CourseId"));
+        textComponents.add(courseId);
+
+        // Course Name
+        TextField name = makeTextField(50);
+        name.setPromptText("Course Name");
+        name.setText(entry.get("Name"));
+        textComponents.add(name);
+
+        // Semester
+        TextField semester = createNumericTextField(2);
+        semester.setPromptText("Semester");
+        semester.setText(entry.get("Semester"));
+        textComponents.add(semester);
+
+        // Setup of Save Entry Button
+        Button saveButton = new Button("Save");
+        addButtonTransition(saveButton, 100, 50);
+        saveButton.setOnAction(event -> {
+            if (!checkForMissingValues(true)) {
+                showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
+                return;
+            }
+            updateCourse();
+            CourseMenu menu = new CourseMenu();
+            menu.start(primaryStage);            
+        });
+
+        HBox titleBox = new HBox(courseLabel);
+        titleBox.setAlignment(Pos.CENTER);
+        titleBox.setPadding(new Insets(150, 0, 0, 0));
+
+        // Setup the back to Course Main Menu button
+        Image image = new Image("file:" + getPath() + "back.png");
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button backToMenuButton = new Button();
+        backToMenuButton.setGraphic(imageView);
+        addButtonTransition(backToMenuButton, 30, 30);
+        backToMenuButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        backToMenuButton.setOnAction(event -> {
+
+            CourseMenu courseMenu = new CourseMenu();
+            courseMenu.start(primaryStage);
+
+        });
+
+        // Setup the next entry button
+        image = new Image("file:" + getPath() + "next.png");
+        imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button nextButton = new Button();
+        nextButton.setGraphic(imageView);
+        addButtonTransition(nextButton, 30, 30);
+        nextButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        nextButton.setOnAction(event -> {
+
+            if (next != null) {
+                EditPage page = new EditPage(type, next);
+                page.start(primaryStage);
+            }
+        });
+
+        // Setup the back to main menu button
+        Button backButton = Page.createBackButton();
+
+        HBox buttonBox = new HBox(backToMenuButton, backButton, nextButton);
+        buttonBox.setAlignment(Pos.BOTTOM_CENTER);
+        buttonBox.setSpacing(50);
+
+        bottomBox.getChildren().addAll(saveButton, buttonBox);
+        bottomBox.setSpacing(5);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
+        
+
+        // Limit the TextField size to 250 pixels
+        for (TextField field: textComponents) {
+            field.setMaxWidth(250);
+        }
+
+        for (TextField field : textComponents) {
+            mainBox.getChildren().add(field);
+        }
+        mainBox.setAlignment(Pos.CENTER);
+        mainBox.setPadding(new Insets(0, 0, 0, 0));
+        mainBox.setSpacing(5);
+
+        // Set VBox.setVgrow to Priority.ALWAYS for both bottomBox and mainBox
+        VBox.setVgrow(bottomBox, Priority.ALWAYS);
+        VBox.setVgrow(mainBox, Priority.ALWAYS);
+
+        base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        root.getChildren().addAll(base);
+        
     }
 
     private void updateProfessorEntry() {
@@ -996,6 +1415,77 @@ public class EditPage extends Page {
         }
     }
 
+    private boolean updateStudent() {
+        updatedEntry = new HashMap<>();
+        updatedEntry.put(STUDENT[0], textComponents.get(0).getText());
+        updatedEntry.put(STUDENT[1], textComponents.get(1).getText());
+        updatedEntry.put(STUDENT[2], textComponents.get(2).getText());
+        updatedEntry.put(STUDENT[3], textComponents.get(3).getText());
+        updatedEntry.put(STUDENT[5], textComponents.get(4).getText());
+        updatedEntry.put(STUDENT[6], textComponents.get(5).getText());
+        updatedEntry.put(STUDENT[7], textComponents.get(6).getText());
+        updatedEntry.put(STUDENT[10], textComponents.get(7).getText());
+
+        // Update Sex
+        VBox vbox = radioComponents.get(0); // Sex Radio Button
+        for (Node childNode : vbox.getChildren()) {
+            if (childNode instanceof RadioButton) {
+                RadioButton radioButton = (RadioButton) childNode;
+                if (radioButton.isSelected()) {
+                    updatedEntry.put(STUDENT[4], radioButton.getText());
+                }
+            }
+        }
+
+        // Update Dates
+        try {
+            LocalDate selectedDate1 = dateComponents.get(0).getValue();
+            LocalDate selectedDate2 = dateComponents.get(1).getValue();
+        
+            // Store the selected dates in updatedEntry
+            updatedEntry.put(STUDENT[8], selectedDate1.toString());
+            updatedEntry.put(STUDENT[9], selectedDate2.toString());
+            
+        } catch (Exception e) {
+            showAlert(AlertType.ERROR, "Error", "Date Pickers are incorrect", "Dates are not fill");
+        }
+
+        // Make the query and update the STUDENT Table
+        String updateQuery = makeUpdateQuery(STUDENT);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            for (int i = 0; i < STUDENT.length; i++) {
+                preparedStatement.setString(i+1, updatedEntry.get(STUDENT[i]));
+            }
+            preparedStatement.setString(12, entry.get(STUDENT[0]));
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            showAlert(AlertType.ERROR, "Duplicate StudentId", "StudentId already exists", "An student with the same StudentId already exists.");
+            return false;
+        }
+    }
+
+    private boolean updateCourse() {
+        updatedEntry = new HashMap<>();
+        updatedEntry.put(COURSE[0], textComponents.get(0).getText());
+        updatedEntry.put(COURSE[1], textComponents.get(1).getText());
+        updatedEntry.put(COURSE[2], textComponents.get(2).getText());
+
+        // Make the query and update the COURSE Table
+        String updateQuery = makeUpdateQuery(COURSE);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            for (int i = 0; i < COURSE.length; i++) {
+                preparedStatement.setString(i+1, updatedEntry.get(COURSE[i]));
+            }
+            preparedStatement.setString(4, entry.get(COURSE[0]));
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            showAlert(AlertType.ERROR, "Duplicate CourseId", "CourseId already exists", "An Course with the same CourseId already exists.");
+            return false;
+        }
+    }
+
     private void fetchEntry() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setString(1, key);
@@ -1069,22 +1559,28 @@ public class EditPage extends Page {
                 }
             }
             
-            for (DatePicker date : dateComponents) {
-                if (date.getValue() == null) {
-                    return false;
-                }
-            }
-
-            for (VBox vbox : radioComponents) {
-                for (Node childNode : vbox.getChildren()) {
-                    if (childNode instanceof RadioButton) {
-                        RadioButton radioButton = (RadioButton) childNode;
-                        if (radioButton.isSelected()) {
-                            return true;
-                        }
+            if (dateComponents != null) {            
+                for (DatePicker date : dateComponents) {
+                    if (date.getValue() == null) {
+                        return false;
                     }
                 }
             }
+
+            if (radioComponents != null) {
+                for (VBox vbox : radioComponents) {
+                    for (Node childNode : vbox.getChildren()) {
+                        if (childNode instanceof RadioButton) {
+                            RadioButton radioButton = (RadioButton) childNode;
+                            if (radioButton.isSelected()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            return true;
         }
         else {
             for (int i = 0; i < textComponents.size() - 2; i++) {
@@ -1113,6 +1609,7 @@ public class EditPage extends Page {
             }
         }
         return false;
+        
     }
 
     // Check for missing values in a List.
