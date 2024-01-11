@@ -204,7 +204,7 @@ public class ProfessorMenu extends Page {
                 break;
             case "Delete":
                 System.out.println("Deleted! " + TableManager.selectedId);
-                if(TableManager.selectedId == null){
+                if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
                     alert.setHeaderText("No professor selected");
@@ -214,17 +214,33 @@ public class ProfessorMenu extends Page {
                 }
                 Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion!");
-                confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: '" + TableManager.selectedId + "' ?");
+                if(TableManager.selectedRowIdList.size() == 1){
+                    confirmAlert.setHeaderText("Are you sure you want to delete the professor with ssn: '" + TableManager.selectedRowIdList.get(0) + "' ?");
+                }
+                else{
+                    String selections = "";
+                    for (String str : TableManager.selectedRowIdList) {
+                        selections += "'" + str +"', ";
+                    }
+                    selections = selections.substring(0,selections.length()-2);
+                    int index = selections.lastIndexOf(", ");
+                    if(index != -1){
+                        selections = selections.substring(0, index) + " and " + selections.substring(index+2);
+                    }
+                    confirmAlert.setHeaderText("Are you sure you want to delete the professors with SSNs: " + selections + " ?");
+                }
                 ButtonType yesButtonType = new ButtonType("Yes");
                 ButtonType noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + TableManager.selectedId);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + TableManager.selectedId);
-                            Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + TableManager.selectedId);
-                            resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndex());
+                            for (String ssn : TableManager.selectedRowIdList) {
+                                Page.connection.createStatement().executeUpdate("DELETE FROM project WHERE ProfessorID = " + ssn);
+                                Page.connection.createStatement().executeUpdate("DELETE FROM professor WHERE ProfID = "    + ssn);
+                                Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "        + ssn);
+                            }
+                            resultTableView.getItems().remove(resultTableView.getSelectionModel().getSelectedIndices());
                             resultTableView.getSelectionModel().clearSelection();
                         } catch (SQLException e) {
                             e.printStackTrace();
@@ -235,18 +251,29 @@ public class ProfessorMenu extends Page {
                         updateMenu(filterButton, (CheckBox)fieldButton.getContent());
                         updateMenu(filterButton, (CheckBox)projectButton.getContent());
                     }
-                    else{
-                        System.out.println("NO pressed!");
-                    }
                 });
                 resultTableView.getSelectionModel().clearSelection();
                 TableManager.selectedId = null;
 
                 break;
             case "Edit":
-                System.out.println("Edit person with ssn: "+ TableManager.selectedId);
-                EditPage editProfessor = new EditPage("professor", TableManager.selectedId);
+            if(TableManager.selectedRowIdList.size() > 1){
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Too many selections");
+                alert.setHeaderText("Too many professors selected, please select only one");
+                alert.showAndWait();
+            }
+            else if(TableManager.selectedRowIdList.size() < 1){
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("No selection");
+                alert.setHeaderText("You have not selected a professor");
+                alert.setContentText("Select a professor and try again!");
+                alert.showAndWait();
+            }
+            else{
+                EditPage editProfessor = new EditPage("professor", TableManager.selectedRowIdList.get(0));
                 editProfessor.start(primaryStage);
+            }
                 break;
             case "Teaches":
                 System.out.println("Teaches!");
@@ -617,7 +644,8 @@ public class ProfessorMenu extends Page {
                     
                     resultTableView = TableManager.CreateTableView(resultSet, "professor");
                     TableManager.setUpMouseReleased(resultTableView);
-                    
+                    TableManager.setAllowMultipleRowSelection(true);
+                    resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                     resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
                     resultScrollPane.setContent(resultTableView);
                     resultScrollPane.setFitToWidth(true);
@@ -1090,9 +1118,10 @@ public class ProfessorMenu extends Page {
     private void refreshTable(){
         try {
             ResultSet resultSet =  previousQuery.executeQuery();
-            resultTableView = TableManager.CreateTableView(resultSet, "course");
+            resultTableView = TableManager.CreateTableView(resultSet, "professor");
             TableManager.setUpMouseReleased(resultTableView);
             TableManager.setAllowMultipleRowSelection(true);
+            resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             resultScrollPane.setContent(resultTableView);
             resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
         } catch (SQLException e) {

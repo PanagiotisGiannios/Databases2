@@ -2,6 +2,7 @@ package code;
 
 import java.sql.*;
 import javafx.animation.ScaleTransition;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -66,6 +67,9 @@ public class CourseMenu extends Page {
 
     private Button searchButton;
 
+    private ComboBox<String> viewComboBox  = new ComboBox<String>(FXCollections.observableArrayList());
+    private TextField viewNameTextField = Page.makeTextField(20);
+
     private String selectString = "SELECT CourseID, Name, Semester, ";
     private String joinString   = "FROM Course";
     private String whereString  = "";
@@ -98,10 +102,33 @@ public class CourseMenu extends Page {
             }
         }
         retrieveSemesters();
-
+        retrieveViews();
         //Simulate a press on the search button to populate the viewTable at the start.
         handleButtonPress(new Button("Search"));
         System.out.println("\n\nDONE!\n\n");
+    }
+
+    /**
+     * Retrieves all the views from the databes and puts them into a comboBox,
+     * ignores all views starting with "ov_" since that
+     * code represents the default views of the database 
+     * and also only keeps the ones with
+     * code: "co_" since that code represents the courses 
+     */
+    private void retrieveViews() {
+        try{
+            viewComboBox.getItems().clear();
+            ResultSet results = Page.connection.createStatement().executeQuery("Select table_name FROM information_schema.views WHERE table_schema = 'university'");
+            while (results.next()) {
+                if(!results.getString(1).substring(0,3).equals("ov_") && results.getString(1).substring(0,3).equals("co_")){
+                    viewComboBox.getItems().add(results.getString(1).substring(3));
+                }
+            }
+            viewComboBox.getItems().add("Default");
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
     }
 
     private void retrieveSemesters(){
@@ -124,12 +151,10 @@ public class CourseMenu extends Page {
         String text = button.getText();
         switch (text) {
             case "Add":
-                System.out.println("Added!");
                 AddPage prof = new AddPage("course");
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.selectedId);
                 if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
@@ -184,23 +209,41 @@ public class CourseMenu extends Page {
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
-                TableManager.selectedId = null;
+                TableManager.selectedRowIdList.clear();
 
                 break;
             case "Edit":
-                for (String str : TableManager.selectedRowIdList) {
-                    System.out.println("Edit person with ssn: "+ str);
+                if(TableManager.selectedRowIdList.size() > 1){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Too many selections");
+                    alert.setHeaderText("Too many courses selected, please select only one");
+                    alert.showAndWait();
+                }
+                else if(TableManager.selectedRowIdList.size() < 1){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No selection");
+                    alert.setHeaderText("You have not selected a course");
+                    alert.setContentText("Select a course and try again!");
+                    alert.showAndWait();
+                }
+                else{
+                    EditPage editCourse = new EditPage("course", TableManager.selectedRowIdList.get(0));
+                    editCourse.start(primaryStage);
                 }
                 
                 break;
-            case "Teaches":
-                System.out.println("Teaches!");
-                break;
-            
+                //TODO: Fix search!
             case "Search":
             System.out.println("Searching!\n");
                 selectString = "SELECT DISTINCT CourseID AS 'CourseID', Name AS 'Course Name', Semester AS 'Semester', ";
-                joinString   = "From courseInfo";
+                String selectedViewString = viewComboBox.getSelectionModel().getSelectedItem();
+                if(selectedViewString == null || selectedViewString.equals("Default")){
+                    selectedViewString = "ov_courseinfo";
+                }
+                else{
+                    selectedViewString = "co_"+selectedViewString;
+                }
+                joinString   = "FROM `" + selectedViewString + "`";
                 whereString  = "WHERE";
                 groupString = "";
 
@@ -373,9 +416,9 @@ public class CourseMenu extends Page {
                     resultSet = preparedStatement.executeQuery();
                     
                     resultTableView = TableManager.CreateTableView(resultSet, "course");
-                    resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                     TableManager.setUpMouseReleased(resultTableView);
                     TableManager.setAllowMultipleRowSelection(true);
+                    resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
                     resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
                     resultScrollPane.setContent(resultTableView);
                     resultScrollPane.setFitToWidth(true);
@@ -384,6 +427,35 @@ public class CourseMenu extends Page {
                 catch(SQLException e){
                     e.printStackTrace();
                 }
+                break;
+            case "Create View":
+            if(viewNameTextField.getText().trim().isEmpty()){
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("No name input");
+                alert.setHeaderText("View Name Text Field is empty\nInput a name and try again!");
+                alert.setContentText(null);
+                alert.showAndWait();
+            }
+            else if(viewNameTextField.getText().trim().toLowerCase().equals("default")){
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Not allowed name");
+                alert.setHeaderText("The name of the created view cannot be \"Default\"!\nChange it and try again!");
+                alert.setContentText(null);
+                alert.showAndWait();
+            }
+            else{
+                try {
+                    String name = "`co_" + viewNameTextField.getText().replace(" ", "_") + "`";
+                    for(Object parameter: whereParametersList){
+                        whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
+                    }
+                    System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                    Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                    retrieveViews();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
                 break;
             default:
                 System.out.println("Undefined!");
@@ -412,6 +484,9 @@ public class CourseMenu extends Page {
             button.setPrefWidth(115);
         }
         else if(button.getText().equals("Attended By")){
+            button.setPrefWidth(130);
+        }
+        else if(button.getText().equals("Create View")){
             button.setPrefWidth(130);
         }
 
@@ -475,7 +550,7 @@ public class CourseMenu extends Page {
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
-        String[] buttonTexts = {"Add","Delete","Edit","Taught By","Attended By"};
+        String[] buttonTexts = {"Add","Delete","Edit","Taught By","Attended By","Create View"};
         Button[] rightSideButtons = new Button[buttonTexts.length];
         for(int i = 0; i < rightSideButtons.length;i++){
             rightSideButtons[i] = new Button(buttonTexts[i]);
@@ -561,7 +636,19 @@ public class CourseMenu extends Page {
             searchButton.setScaleY(1);
             handleButtonPress(searchButton);
         });
-        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,nameField,searchButton);
+
+        viewComboBox.setPromptText("Select View");
+        viewComboBox.setPrefHeight(40);
+        viewComboBox.setPrefWidth(105);
+        viewComboBox.setOnAction(event -> {
+            String select = viewComboBox.getSelectionModel().getSelectedItem();
+            System.out.println("Selected view: " + select);
+        });
+        viewNameTextField.setPrefWidth(105);
+        viewNameTextField.setPrefHeight(40);
+        viewNameTextField.setPromptText("New View Name");
+
+        queryOptionsBox.getChildren().addAll(filterButton,selectFilterButton,nameField,searchButton,viewComboBox,viewNameTextField);
 
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
@@ -672,6 +759,7 @@ public class CourseMenu extends Page {
             resultTableView = TableManager.CreateTableView(resultSet, "course");
             TableManager.setUpMouseReleased(resultTableView);
             TableManager.setAllowMultipleRowSelection(true);
+            resultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             resultScrollPane.setContent(resultTableView);
             resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
         } catch (SQLException e) {
