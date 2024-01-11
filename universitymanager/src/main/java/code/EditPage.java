@@ -37,6 +37,8 @@ public class EditPage extends Page {
     private String key;
     private String background = "uniPage.png";
 
+    private String projectName = null;
+
     // Components
     List<TextField> textComponents = null;
     List<VBox> radioComponents = null;
@@ -49,6 +51,8 @@ public class EditPage extends Page {
     
     private TableView<ObservableList<String>> table = null;
     private ScrollPane pane = null;
+    private final int TABLEWIDTH = 350;
+    private final int TABLEHEIGHT = 150;
 
     // SQL Tables
     private final String[] EMPLOYEE = {"SSN", "FirstName", "LastName", "Sex", "Phone", "Email", "JobStartingDate", "Birthday", "Address", "Salary"};
@@ -264,6 +268,10 @@ public class EditPage extends Page {
         Button saveButton = new Button("Save");
         addButtonTransition(saveButton, 100, 50);
         saveButton.setOnAction(event -> {
+            if(!checkForMissingValues(false)) {
+                showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
+                return;
+            }
             updateProfessorEntry();
             ProfessorMenu menu = new ProfessorMenu();
             menu.start(primaryStage);            
@@ -388,7 +396,7 @@ public class EditPage extends Page {
         addButtonTransition(editProjectButton, 30, 30);
         editProjectButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
         editProjectButton.setOnAction(event -> {
-            String projectName = TableManager.selectedId;
+            this.projectName = TableManager.selectedId;
             if (projectName == null) {
                 return;
             }
@@ -440,8 +448,56 @@ public class EditPage extends Page {
 
             // Refreash Table.
             table = createProjectTable();
-            table.setPrefHeight(150);
-            table.setPrefWidth(300);
+            table.setPrefHeight(TABLEHEIGHT);
+            table.setPrefWidth(TABLEWIDTH);
+            pane.setContent(table);
+            pane.setFitToWidth(true);
+            pane.setVbarPolicy(ScrollBarPolicy.NEVER);
+        });
+
+        // Make the save project button        
+        image = new Image("file:" + getPath() + "save_project.png");
+        imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        Button saveProjectButton = new Button();
+        saveProjectButton.setGraphic(imageView);
+        addButtonTransition(saveProjectButton, 30, 30);
+        saveProjectButton.setStyle("-fx-background-color: rgba(255,255,255,0);");
+        saveProjectButton.setOnAction(event -> {
+
+            // Save the data into a list
+            secondEntry = new ArrayList<>();
+            secondEntry.add(name.getText());
+
+            // Save field to the list
+            try {
+                RadioButton selectedField = (RadioButton) fieldGroup.getSelectedToggle();
+                secondEntry.add(selectedField.getText());
+            }
+            catch (NullPointerException e) {
+                secondEntry.add(null);
+            }
+
+            // Save type to the list
+            try {
+                RadioButton selectedType = (RadioButton) typeGroup.getSelectedToggle();
+                secondEntry.add(selectedType.getText());
+            }
+            catch (NullPointerException e) {
+                secondEntry.add(null);
+            }
+
+            // Save info
+            secondEntry.add(info.getText());
+
+            handleButtonPress("editProject");
+            clearFields("project");
+
+            // Refreash Table.
+            table = createProjectTable();
+            table.setPrefHeight(TABLEHEIGHT);
+            table.setPrefWidth(TABLEWIDTH);
             pane.setContent(table);
             pane.setFitToWidth(true);
             pane.setVbarPolicy(ScrollBarPolicy.NEVER);
@@ -489,14 +545,14 @@ public class EditPage extends Page {
 
             // Refreash Table.
             table = createProjectTable();
-            table.setPrefHeight(150);
-            table.setPrefWidth(300);
+            table.setPrefHeight(TABLEHEIGHT);
+            table.setPrefWidth(TABLEWIDTH);
             pane.setContent(table);
             pane.setFitToWidth(true);
             pane.setVbarPolicy(ScrollBarPolicy.NEVER);
         });
         
-        HBox topBox = new HBox(projectLabel, addProjectButton, editProjectButton, deleteProjectButton);
+        HBox topBox = new HBox(projectLabel, addProjectButton, editProjectButton, saveProjectButton, deleteProjectButton);
         topBox.setSpacing(30);
         
         projectBox = new VBox(topBox, name, field, type, info, pane);
@@ -517,6 +573,13 @@ public class EditPage extends Page {
             return;
         }
         else if (button == "editProject") {
+            if (checkForMissingValues(secondEntry)) {
+                updateProject();
+            }
+            else {
+                showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
+            }
+            return;
 
         }
     }
@@ -537,8 +600,8 @@ public class EditPage extends Page {
 
                 // Refreash Table.
                 table = createProjectTable();
-                table.setPrefHeight(150);
-                table.setPrefWidth(300);
+                table.setPrefHeight(TABLEHEIGHT);
+                table.setPrefWidth(TABLEWIDTH);
                 pane.setContent(table);
                 pane.setFitToWidth(true);
                 pane.setVbarPolicy(ScrollBarPolicy.NEVER);
@@ -572,8 +635,8 @@ public class EditPage extends Page {
                 TableManager.setUpMouseReleased(table);
                 table.setFixedCellSize(Region.USE_COMPUTED_SIZE);
 
-                table.setPrefHeight(150);
-                table.setPrefWidth(300);
+                table.setPrefHeight(TABLEHEIGHT);
+                table.setPrefWidth(TABLEWIDTH);
                 resultSet.close();
             }
             catch (Exception ex) {
@@ -732,6 +795,10 @@ public class EditPage extends Page {
         Button saveButton = new Button("Save");
         addButtonTransition(saveButton, 100, 50);
         saveButton.setOnAction(event -> {
+            if (!checkForMissingValues(true)) {
+                showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
+                return;
+            }
             updateAuxiliaryEntry();
             AuxiliaryMenu menu = new AuxiliaryMenu();
             menu.start(primaryStage);            
@@ -776,7 +843,7 @@ public class EditPage extends Page {
                 return;
             }            
         }
-        showAlert(AlertType.ERROR, "", "", "");        
+        showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");      
     }
 
     private void updateAuxiliaryEntry() {
@@ -784,9 +851,8 @@ public class EditPage extends Page {
             if (updateAuxiliary()) {
                 showAlert(AlertType.INFORMATION, "Success", "The Auxiliary Staff has changed", "You have successfully update " + entry.get(EMPLOYEE[1]) + " " + entry.get(EMPLOYEE[2]));
                 return;
-            }            
+            }
         }
-        showAlert(AlertType.ERROR, "", "", "");        
     }
 
     private boolean updateEmployee() {
@@ -833,6 +899,7 @@ public class EditPage extends Page {
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
+            showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
             return false;
         }
     }
@@ -877,9 +944,33 @@ public class EditPage extends Page {
         }
     }
 
+     private boolean updateProject() {
+        String updateQuery = makeUpdateQuery(PROJECT);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
+            String profid;
+            if (updatedEntry != null) {
+                profid = updatedEntry.get(EMPLOYEE[0]);
+            }
+            else {
+                profid = entry.get(EMPLOYEE[0]);
+            }
+            preparedStatement.setString(1, profid);
+            preparedStatement.setString(2, secondEntry.get(0));
+            preparedStatement.setString(3, secondEntry.get(1));
+            preparedStatement.setString(4, secondEntry.get(2));
+            preparedStatement.setString(5, secondEntry.get(3));
+            preparedStatement.setString(6, profid);
+            preparedStatement.setString(7, projectName);
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
     private boolean updateAuxiliary() {
         // Update the updateEntry.
-        updatedEntry.put(AUXILIARY_STAFF[0], textComponents.get(0).getText());
+        updatedEntry.put(AUXILIARY_STAFF[0], updatedEntry.get(EMPLOYEE[0]));
 
         // Update Profession
         VBox vbox = radioComponents.get(1); // Profession Radio Button
@@ -895,8 +986,9 @@ public class EditPage extends Page {
         // Make the query and update the AUXILIARY_STAFF Table
         String updateQuery = makeUpdateQuery(AUXILIARY_STAFF);
         try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
-            preparedStatement.setString(1, updatedEntry.get(AUXILIARY_STAFF[1]));            
-            preparedStatement.setString(2, updatedEntry.get(EMPLOYEE[0]));
+            preparedStatement.setString(1, updatedEntry.get(EMPLOYEE[0]));            
+            preparedStatement.setString(2, updatedEntry.get(AUXILIARY_STAFF[1]));
+            preparedStatement.setString(3, entry.get(EMPLOYEE[0]));
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -937,6 +1029,9 @@ public class EditPage extends Page {
         else if (table == PROFESSOR) {
             updateQuery.append("PROFESSOR SET ");
         }
+        else if (table == PROJECT) {
+            updateQuery.append("PROJECT SET ");
+        }
         else if (table == AUXILIARY_STAFF) {
             updateQuery.append("AUXILIARY_STAFF SET ");
         }
@@ -955,33 +1050,69 @@ public class EditPage extends Page {
         updateQuery.append("WHERE ");
         updateQuery.append(table[0]);
         updateQuery.append(" =?");
-
+        if (table == PROJECT) {
+            updateQuery.append(" AND ");
+            updateQuery.append(table[1]);
+            updateQuery.append(" =?;");
+        }
         System.out.println(updateQuery);
+
         return updateQuery.toString();
     }
 
-    // Checks and controls the input that the user enters.
-    private boolean check() {
-        if (!checkForMissingValues(entry)) {
-            showAlert(AlertType.ERROR, "Missing Values", "Some values are missing", "Please fill all the cells");
-            return false;
-        }
-        else if (!checkForDuplicate()) {
-            showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
-            return false;
-        }
-        return true;
-    }
+    // Check for missing values.
+    private boolean checkForMissingValues(boolean all) {
+        if (all) {
+            for (TextField text : textComponents) {
+                if (onlySpace(text.getText())) {
+                    return false;
+                }
+            }
+            
+            for (DatePicker date : dateComponents) {
+                if (date.getValue() == null) {
+                    return false;
+                }
+            }
 
-    // Check for missing values in a Map.
-    private boolean checkForMissingValues(Map<String, String> map) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String e = entry.getValue();
-            if (e == null || e == "" || onlySpace(e)) {
-                return false;
+            for (VBox vbox : radioComponents) {
+                for (Node childNode : vbox.getChildren()) {
+                    if (childNode instanceof RadioButton) {
+                        RadioButton radioButton = (RadioButton) childNode;
+                        if (radioButton.isSelected()) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
-        return true;
+        else {
+            for (int i = 0; i < textComponents.size() - 2; i++) {
+                TextField text = textComponents.get(i);
+                if (onlySpace(text.getText())) {
+                    return false;
+                }
+            }
+            
+            for (DatePicker date : dateComponents) {
+                if (date.getValue() == null) {
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < radioComponents.size() - 2; i++) {
+                VBox vbox = radioComponents.get(i);
+                for (Node childNode : vbox.getChildren()) {
+                    if (childNode instanceof RadioButton) {
+                        RadioButton radioButton = (RadioButton) childNode;
+                        if (radioButton.isSelected()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // Check for missing values in a List.
@@ -990,41 +1121,6 @@ public class EditPage extends Page {
             if (e == null || e == "" || onlySpace(e)) {
                 return false;
             }
-        }
-        return true;
-    }
-
-    // Check for duplicates.
-    private boolean checkForDuplicate() {
-        String checkDuplicateQuery = "";
-        String[] table = EMPLOYEE;
-        if (type == "professor" || type == "axiliary") {
-            checkDuplicateQuery = "SELECT COUNT(*) FROM EMPLOYEE WHERE SSN = ?";
-            table = EMPLOYEE;
-        }
-        else if (type == "student") {
-            checkDuplicateQuery = "SELECT COUNT(*) FROM STUDENT WHERE StudentId = ?";
-            table = STUDENT;
-        }
-        else if (type == "course") {
-            checkDuplicateQuery = "SELECT COUNT(*) FROM COURSE WHERE CourseId = ?";
-            table = COURSE;
-        }
-
-        try (PreparedStatement checkDuplicateStatement = connection.prepareStatement(checkDuplicateQuery)) {
-            checkDuplicateStatement.setString(1, entry.get(table[0]));
-
-            try (ResultSet resultSet = checkDuplicateStatement.executeQuery()) {
-                resultSet.next();
-                int count = resultSet.getInt(1);
-
-                // SSN already exists
-                if (count > 0) {
-                    return false;
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return true;
     }
