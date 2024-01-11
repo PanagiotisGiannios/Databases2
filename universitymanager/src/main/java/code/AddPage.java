@@ -58,7 +58,7 @@ public class AddPage extends Page {
                 background = "studentPage.png";
                 break;
             case "course":
-                background = "coursePage.png";      
+                background = "coursePage.png";
             default:
                 break;
         }
@@ -816,12 +816,12 @@ public class AddPage extends Page {
         });
 
         HBox titleBox = new HBox(courseLabel);
-        titleBox.setAlignment(Pos.CENTER_LEFT);        
-        titleBox.setPadding(new Insets(20, 0, 0, 30));
+        titleBox.setAlignment(Pos.CENTER);
+        titleBox.setPadding(new Insets(150, 0, 0, 0));
 
         // Setup the back to main menu button
         Button backButton = Page.createBackButton();
-        bottomBox.getChildren().addAll(addButton, backButton);
+        bottomBox.getChildren().addAll(backButton);
         bottomBox.setSpacing(5);
         bottomBox.setAlignment(Pos.BOTTOM_CENTER);
         
@@ -834,8 +834,9 @@ public class AddPage extends Page {
         for (TextField field : textComponents) {
             mainBox.getChildren().add(field);
         }
-        mainBox.setAlignment(Pos.CENTER_LEFT);
-        mainBox.setPadding(new Insets(0, 0, 0, 30));
+        mainBox.getChildren().add(addButton);
+        mainBox.setAlignment(Pos.CENTER);
+        mainBox.setPadding(new Insets(0, 0, 0, 0));
         mainBox.setSpacing(5);
 
         // Set VBox.setVgrow to Priority.ALWAYS for both bottomBox and mainBox

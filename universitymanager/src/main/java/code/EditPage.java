@@ -62,6 +62,19 @@ public class EditPage extends Page {
     public EditPage(String type, String key) {
         this.type = type;
         this.key = key;
+
+        if (type == "professor") {
+            background = "professorPage.png";
+        }
+        else if (type == "auxiliary") {
+            background = "auxiliaryStaffPage.png";
+        }
+        else if (type == "student") {
+            background = "studentPage.png";
+        }
+        else if (type == "course") {
+            background = "coursePage.png";
+        }
     }
 
     @Override
@@ -432,8 +445,6 @@ public class EditPage extends Page {
             pane.setContent(table);
             pane.setFitToWidth(true);
             pane.setVbarPolicy(ScrollBarPolicy.NEVER);
-
-            handleButtonPress("editProject");
         });
 
         // Create the project board

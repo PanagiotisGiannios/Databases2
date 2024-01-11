@@ -31,8 +31,8 @@ public class Page extends Application {
     private static String background = "uniPage.png";
     private static String title = "University Management";
 
-    final int WIDTH = 1000;
-    final int HEIGHT = 900;
+    int WIDTH = 1000;
+    int HEIGHT = 800;
 
     public static Connection connection;
     public static Stage primaryStage;

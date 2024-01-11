@@ -87,14 +87,14 @@ public class TableManager {
 
     private static void handleSingleSelection(TableView<ObservableList<String>> tableView){
         ObservableList<String> selectedRow = tableView.getSelectionModel().getSelectedItem();
-        if(selectedRow.isEmpty()){
+        if(selectedRow != null && selectedRow.isEmpty()){
             selectedId = null;
             return;
         }
         if(selectedRow != null){
             if(selectedRow.get(0).equals(selectedId)){
                 tableView.getSelectionModel().clearSelection();
-                selectedId = null;   
+                selectedId = null;
             }
             else{
                 selectedId = selectedRow.get(0);
