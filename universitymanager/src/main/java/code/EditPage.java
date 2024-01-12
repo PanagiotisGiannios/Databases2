@@ -49,6 +49,7 @@ public class EditPage extends Page {
     private Map<String, String> updatedEntry = null;
     private String selectQuery = "";
     private List<String> secondEntry = null;
+    private String manager = null;
     
     private TableView<ObservableList<String>> table = null;
     private ScrollPane pane = null;
@@ -77,6 +78,7 @@ public class EditPage extends Page {
             background = "professorPage.png";
             query =  "SELECT e.SSN FROM EMPLOYEE e JOIN PROFESSOR p ON e.SSN = p.ProfId;";
             id = EMPLOYEE[0];
+            findManager();
         }
         else if (type == "auxiliary") {
             background = "auxiliaryStaffPage.png";
@@ -220,6 +222,12 @@ public class EditPage extends Page {
         }
         radioComponents.add(sex);
 
+        // Email
+        TextField email = makeTextField(150);
+        email.setPromptText("Email Address");
+        email.setText(entry.get("Email"));
+        textComponents.add(email);
+
         // Address
         TextField address = makeTextField(150);
         address.setPromptText("Address");
@@ -231,12 +239,6 @@ public class EditPage extends Page {
         salary.setPromptText("Salary");
         salary.setText(entry.get("Salary"));
         textComponents.add(salary);
-
-        // Email
-        TextField email = makeTextField(150);
-        email.setPromptText("Email Address");
-        email.setText(entry.get("Email"));
-        textComponents.add(email);
         
         // Birthday
         DatePicker birthday = new DatePicker();
@@ -1262,8 +1264,7 @@ public class EditPage extends Page {
                 showAlert(AlertType.INFORMATION, "Success", "The Professor has changed", "You have successfully update " + entry.get(EMPLOYEE[1]) + " " + entry.get(EMPLOYEE[2]));
                 return;
             }            
-        }
-        showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");      
+        }     
     }
 
     private void updateAuxiliaryEntry() {
@@ -1319,21 +1320,18 @@ public class EditPage extends Page {
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
-            showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
+            if (manager.equals(key)) {
+                showAlert(AlertType.ERROR, "Can't change the Rector's SSN", "Make another Professor Rector and then try again", "You can modify everything else except SSN");
+            }
+            else {
+                showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
+            }
             return false;
         }
     }
 
     private boolean updateProfessor() {
-        // Find who is the manager.
-        String manager = "";
-        String whoIsManager = "SELECT ProfId FROM PROFESSOR WHERE ManagerId IS NULL";        
-        try (ResultSet result = connection.createStatement().executeQuery(whoIsManager)){
-            result.next();
-            manager = result.getString("ProfId");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        findManager();
 
         // Update the updateEntry.
         updatedEntry.put(PROFESSOR[0], textComponents.get(0).getText());
@@ -1487,6 +1485,17 @@ public class EditPage extends Page {
         }
     }
 
+    // Find who is the manager.
+    private void findManager() {        
+        String whoIsManager = "SELECT ProfId FROM PROFESSOR WHERE ManagerId IS NULL";        
+        try (ResultSet result = connection.createStatement().executeQuery(whoIsManager)){
+            result.next();
+            manager = result.getString("ProfId");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void fetchEntry() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setString(1, key);
@@ -1625,7 +1634,7 @@ public class EditPage extends Page {
 
     // Clear all the fields.
     private void clearFields(String selection) {
-        if (selection == "project" || selection == "all") {
+        if (selection.equals("project") || selection.equals("all")) {
             int size = textComponents.size();
             for (int i = size - 2; i < size; i++) {
                 TextField textField = textComponents.get(i);
@@ -1645,7 +1654,7 @@ public class EditPage extends Page {
             }
         }
 
-        if (selection == "professor" || selection == "all") {
+        if (selection.equals("professor") || selection.equals("all")) {
 
             for (TextField text : textComponents) {
                 text.clear();
@@ -1665,7 +1674,7 @@ public class EditPage extends Page {
             }
         }
 
-        if (selection == "course") {
+        if (selection.equals("course")) {
             for (TextField text : textComponents) {
                 text.clear();
             }
