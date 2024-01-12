@@ -30,10 +30,6 @@ import java.util.*;
 import javafx.scene.layout.Background;
 
 public class ProfessorMenu extends Page {
-
-    //TODO: 
-    private String FPass = "!Sql12345Sql!";
-    private String PPass = "1234";
     private final static int LIMIT = 10;
 
 
@@ -124,15 +120,6 @@ public class ProfessorMenu extends Page {
         loadBackground("professorPage.png");
         professorMenuSetup();
         createScene();
-        //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
-        if(Page.connection == null){
-            
-            try {
-                Page.connection = DatabaseConnector.connect("root", "1234");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         retrieveFields();
         retrieveProjects();
         retrieveViews();
@@ -799,9 +786,7 @@ public class ProfessorMenu extends Page {
          * of the necessary components for each side
          */
         StackPane rightSide = new StackPane();
-        //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
-        //leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
@@ -943,10 +928,7 @@ public class ProfessorMenu extends Page {
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         resultScrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-       // resultScrollPane.setPrefWidth(400);
-        //resultScrollPane.setPrefHeight(300);
         resultScrollPane.setContent(resultTableView);
-        //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
         resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
         leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
         leftBox.setPadding(new Insets(0, 0, 0, 25));
@@ -1130,9 +1112,5 @@ public class ProfessorMenu extends Page {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args){
-        launch(args);
     }
 }

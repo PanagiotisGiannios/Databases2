@@ -8,7 +8,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -32,10 +31,7 @@ public class LoginPage extends Page {
     }
 
 
-    private void loginPageSetup() {
-        //TODO:
-        // StackPane usernameContainer = new StackPane();
-        
+    private void loginPageSetup() {        
         Text welcomeText = new Text("Welcome to University Management\n\n");
         
         welcomeText.setStyle("-fx-font-family: 'Irish Grover'; -fx-font-size: 40;");
@@ -51,8 +47,6 @@ public class LoginPage extends Page {
         passwordTextField.setPromptText("Password");
         passwordTextField.setMaxWidth(400);
         passwordTextField.setFocusTraversable(false);
-
-
 
         //Create the login button where the cursor also changes when hovered above it.
         Button loginButton = new Button("Login");
@@ -85,8 +79,7 @@ public class LoginPage extends Page {
         loginBox.getChildren().addAll(usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);
         
         root.getChildren().addAll(welcomeTextBox,loginBox);
-        
-/** */
+
         // Set up the login button action
         loginButton.setOnAction(e -> {
             String userId = usernameTextField.getText();
@@ -156,9 +149,5 @@ public class LoginPage extends Page {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

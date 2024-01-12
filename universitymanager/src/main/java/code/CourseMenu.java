@@ -23,13 +23,6 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import java.util.*;
 
 public class CourseMenu extends Page {
-
-    //TODO: 
-    private String FPass = "!Sql12345Sql!";
-    private String PPass = "1234";
-
-
-
     private static final String[] FILTER_BUTTON_TEXTS = {"Average Grade", "Teacher Amount", "Student Amount", "Semester", "CourseID"};
     private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Average Grade", "Teacher Amount", "Student Amount"};
     private List<String> courseSemesters = new ArrayList<String>();
@@ -790,9 +783,5 @@ public class CourseMenu extends Page {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args){
-        launch(args);
     }
 }

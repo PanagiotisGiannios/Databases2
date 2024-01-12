@@ -11,4 +11,4 @@ public class DatabaseConnector {
     public static Connection connect(String userId, String password) throws SQLException {
         return DriverManager.getConnection(URL, userId, password);
     }
-}/** */
+}

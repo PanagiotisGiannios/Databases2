@@ -104,7 +104,6 @@ public class TableManager {
 
     private static void handleMultipleSelection(TableView<ObservableList<String>> tableView){
         ObservableList<ObservableList<String>> selectedRows = tableView.getSelectionModel().getSelectedItems();
-        //tableView.getSelectionModel().selectIndices(tableView.getSelectionModel().getSelectedIndices().toArray(new int[0]));
         if(selectedRows.isEmpty()){
             selectedRowIdList.clear();
             return;

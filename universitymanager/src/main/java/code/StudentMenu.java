@@ -30,13 +30,7 @@ import java.util.*;
 import javafx.scene.layout.Background;
 
 public class StudentMenu extends Page {
-
-    //TODO: 
-    private String FPass = "!Sql12345Sql!";
-    private String PPass = "1234";
     private final static int LIMIT = 10;
-
-
 
     private static final String[] FILTER_BUTTON_TEXTS = {"Semester", "Sex", "Age", "Student ID", "E-mail", "Years Enrolled", "Phone", "Average Grade", "Course Amount", "Father Name"};
     private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Semester", "Average Grade", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Entry Date", "Father Name"};
@@ -122,26 +116,8 @@ public class StudentMenu extends Page {
         loadBackground("studentPage.png");
         studentMenuSetup();
         createScene();
-        //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
-        if(Page.connection == null){
-            
-            try {
-                Page.connection = DatabaseConnector.connect("root", "1234");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         retrieveFields();
         retrieveViews();
-        //Simulate a press on the search button to populate the viewTable at the start.
-        // for (CheckBox checkBox : selectFiltersContainer.getChildren().toArray(new CheckBox[0])) {
-        //     if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[0])){
-        //         checkBox.setSelected(true);
-        //     }
-        //     if(checkBox.getText().equals(SELECT_FILTER_BUTTON_TEXTS[5])){
-        //         checkBox.setSelected(true);
-        //     }
-        // }
         handleButtonPress(new Button("Search"));
         System.out.println("\n\nDONE!\n\n");
     }
@@ -649,9 +625,7 @@ public class StudentMenu extends Page {
          * of the necessary components for each side
          */
         StackPane rightSide = new StackPane();
-        //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
-        //leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
@@ -789,10 +763,7 @@ public class StudentMenu extends Page {
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         resultScrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-       // resultScrollPane.setPrefWidth(400);
-        //resultScrollPane.setPrefHeight(300);
         resultScrollPane.setContent(resultTableView);
-        //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
         resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
         leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
         leftBox.setPadding(new Insets(0, 0, 0, 25));
@@ -803,7 +774,6 @@ public class StudentMenu extends Page {
 
         /*Make each side of the middle box fill the entire available area*/
         HBox.setHgrow(leftSide, javafx.scene.layout.Priority.ALWAYS);
-        //HBox.setHgrow(rightSide, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
 
         Button backButton = Page.createBackButton();
@@ -949,9 +919,5 @@ public class StudentMenu extends Page {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args){
-        launch(args);
     }
 }

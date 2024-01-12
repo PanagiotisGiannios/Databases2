@@ -2,9 +2,7 @@ package code;
 
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -17,7 +15,6 @@ import javafx.stage.Stage;
 public class MainMenu extends Page {
     // Create a GridPane to arrange the buttons
     private GridPane gridPane = null;
-
 
     @Override
     public void start(Stage primaryStage) {
@@ -111,9 +108,5 @@ public class MainMenu extends Page {
                 courseMenu.start(primaryStage);
                 break;
         }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

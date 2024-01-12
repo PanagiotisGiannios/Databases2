@@ -28,12 +28,6 @@ import javafx.scene.layout.Background;
 
 public class AuxiliaryMenu extends Page {
 
-    //TODO: 
-    private String FPass = "!Sql12345Sql!";
-    private String PPass = "1234";
-
-
-
     private static final String[] FILTER_BUTTON_TEXTS = {"Salary", "Sex", "Age", "SSN", "E-mail", "Profession", "Years Worked", "Phone"};
     private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Profession", "Salary", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Job Starting Date"};
 
@@ -867,9 +861,5 @@ public class AuxiliaryMenu extends Page {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args){
-        launch(args);
     }
 }
