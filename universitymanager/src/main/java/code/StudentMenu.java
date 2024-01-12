@@ -99,7 +99,6 @@ public class StudentMenu extends Page {
 
     private Button searchButton;
 
-    //TODO:
     private ComboBox<String> viewComboBox  = new ComboBox<String>(FXCollections.observableArrayList());
     private TextField viewNameTextField = Page.makeTextField(20);
 
@@ -219,7 +218,6 @@ public class StudentMenu extends Page {
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            //TODO: fix deletes
                             for (String id : TableManager.selectedRowIdList) {
                                 Page.connection.createStatement().executeUpdate("DELETE FROM student WHERE StudentID = " + id);
                                 Page.connection.createStatement().executeUpdate("DELETE FROM attends WHERE StudentID = " + id);

@@ -101,7 +101,6 @@ public class ProfessorMenu extends Page {
 
     private Button searchButton;
 
-    //TODO:
     private ComboBox<String> viewComboBox  = new ComboBox<String>(FXCollections.observableArrayList());
     private TextField viewNameTextField = Page.makeTextField(20);
 
@@ -276,6 +275,13 @@ public class ProfessorMenu extends Page {
             }
                 break;
             case "Teaches":
+                if(TableManager.selectedRowIdList == null || TableManager.selectedRowIdList.isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No selection");
+                    alert.setHeaderText("No professor selected, select a professor and try again!");
+                    alert.showAndWait();
+                    break;
+                }
                 TeachesPage teaches = new TeachesPage("professor", TableManager.selectedRowIdList);
                 teaches.start(primaryStage);
                 break;
@@ -283,7 +289,7 @@ public class ProfessorMenu extends Page {
                 if(TableManager.selectedRowIdList.size() < 1){
                     Alert alert = new Alert(AlertType.ERROR);
                     alert.setTitle("No professor selected!");
-                    alert.setHeaderText("No professro selected, select a professor and try again!");
+                    alert.setHeaderText("No professor selected, select a professor and try again!");
                     alert.showAndWait();
                     break;
                 }

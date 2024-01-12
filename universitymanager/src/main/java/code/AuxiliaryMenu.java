@@ -207,7 +207,6 @@ public class AuxiliaryMenu extends Page {
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            //TODO: check deletes
                             for (String id : TableManager.selectedRowIdList) {
                                 Page.connection.createStatement().executeUpdate("DELETE FROM auxiliary_Staff WHERE EmployeeID = " + id);
                                 Page.connection.createStatement().executeUpdate("DELETE FROM employee WHERE ssn = "              + id);

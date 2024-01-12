@@ -1,23 +1,12 @@
 package code;
 
-import javafx.application.Application;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -27,19 +16,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.naming.spi.DirStateFactory.Result;
 
-import com.mysql.cj.x.protobuf.MysqlxCrud.Collection;
 
 public class TeachesPage extends Page {
     
     private String source;
     private List<String> idList = new ArrayList<String>();
-    private List<String> resultList = new ArrayList<>();
     private ToggleGroup leftToggleGroup = new ToggleGroup();
 
     private VBox rightVBox;
@@ -103,7 +87,7 @@ public class TeachesPage extends Page {
         leftSide.getChildren().addAll(leftScroll);
         leftScroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
         leftScroll.setHbarPolicy(ScrollBarPolicy.NEVER);
-        
+
         leftScroll.setPrefHeight(200);
         leftSide.setPadding(new Insets(0, 0, 0, 200));
         rightScroll.setContent(rightVBox);
@@ -250,11 +234,9 @@ public class TeachesPage extends Page {
                 for (Node node : vbox.getChildren()) {
                     if (node instanceof HBox) {
                         HBox hbox = (HBox) node;
-                        int i = 0;
                         for (Node cell : hbox.getChildren()) {
                             if (cell instanceof Text) {
                                 ((Text) cell).setWrappingWidth(maxWidth);
-                                i++;
                             }
                         }
                     }

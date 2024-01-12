@@ -232,7 +232,6 @@ public class CourseMenu extends Page {
                 }
                 
                 break;
-                //TODO: Fix search!
             case "Search":
             System.out.println("Searching!\n");
                 selectString = "SELECT DISTINCT CourseID AS 'CourseID', Name AS 'Course Name', Semester AS 'Semester', ";
