@@ -961,10 +961,10 @@ public class ProfessorMenu extends Page {
         
         base.getChildren().addAll(titleBox,mainBox,backBox);
 
-        VBox test = new VBox(base);
-        test.setAlignment(Pos.CENTER);
+        VBox container = new VBox(base);
+        container.setAlignment(Pos.CENTER);
 
-        root.getChildren().addAll(test);
+        root.getChildren().addAll(container);
         
     }
 

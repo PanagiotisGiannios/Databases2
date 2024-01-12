@@ -26,10 +26,6 @@ public class MainMenu extends Page {
         loadBackground("emptyPage.png");
         createMainMenuPage();
         createScene();
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setHeaderText(null);
-        alert.setContentText("Make sure you have updated to the latest database with everything using everything.sql !!");
-        alert.showAndWait();
     }
 
     private void createMainMenuPage() {

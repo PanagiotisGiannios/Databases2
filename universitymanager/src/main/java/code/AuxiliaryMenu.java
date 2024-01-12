@@ -749,7 +749,10 @@ public class AuxiliaryMenu extends Page {
 
         base.getChildren().addAll(titleBox,mainBox,backBox);
 
-        root.getChildren().addAll(base);
+        VBox container = new VBox(base);
+        container.setAlignment(Pos.CENTER);
+
+        root.getChildren().addAll(container);
         
     }
 
