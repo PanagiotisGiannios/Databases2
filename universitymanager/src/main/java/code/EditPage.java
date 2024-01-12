@@ -1575,8 +1575,7 @@ public class EditPage extends Page {
             updateQuery.append(table[1]);
             updateQuery.append(" =?;");
         }
-        System.out.println(updateQuery);
-
+        
         return updateQuery.toString();
     }
 

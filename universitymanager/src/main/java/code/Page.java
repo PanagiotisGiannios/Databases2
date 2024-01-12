@@ -273,15 +273,12 @@ public class Page extends Application {
                             }
                             double value = Double.parseDouble(newText);
                             if (value >= 0 && value <= 10) {
-                                System.out.println("accepted!");
                                 return change; // Accept the change
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("rejected");
                             // Ignore and reject the change if parsing fails
                         }
                     }
-                    System.out.println("rejected");
                     return null; // Reject the change
                 });
 

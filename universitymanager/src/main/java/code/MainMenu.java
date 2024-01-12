@@ -78,6 +78,7 @@ public class MainMenu extends Page {
     private void handleCase(int col, int row, Stage primaryStage) throws Exception {
         int caseNum = col  + row * 2;
         switch (caseNum + 1) {
+            
             // Professor Pressed
             case 1:
                 ProfessorMenu professorMainMenu = new ProfessorMenu();
@@ -89,21 +90,16 @@ public class MainMenu extends Page {
             case 2:
                 AuxiliaryMenu auxiliaryMenu = new AuxiliaryMenu();
                 auxiliaryMenu.start(primaryStage);
-                System.out.println("Auxiliary Staff Pressed");
-                //AddPage auxiliaryAddPage = new AddPage("auxiliary");
-                //auxiliaryAddPage.start(primaryStage);
                 break;
             
             // Student Pressed
             case 3:
-                System.out.println("Student Pressed");
                 StudentMenu studentMenu = new StudentMenu();
                 studentMenu.start(primaryStage);
                 break;
 
             // Course Pressed
             case 4:
-                System.out.println("Course Pressed");
                 CourseMenu courseMenu = new CourseMenu();
                 courseMenu.start(primaryStage);
                 break;
