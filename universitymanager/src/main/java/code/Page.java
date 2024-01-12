@@ -20,6 +20,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.converter.BigIntegerStringConverter;
+import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 import java.sql.Connection;
@@ -31,8 +33,8 @@ public class Page extends Application {
     private static String background = "uniPage.png";
     private static String title = "University Management";
 
-    int WIDTH = 1000;
-    int HEIGHT = 800;
+    final int WIDTH = 1000;
+    final int HEIGHT = 900;
 
     public static Connection connection;
     public static Stage primaryStage;
@@ -220,7 +222,7 @@ public class Page extends Application {
         TextField textField = new TextField();
 
         // Create a converter for integer values
-        IntegerStringConverter converter = new IntegerStringConverter();
+        BigIntegerStringConverter converter = new BigIntegerStringConverter();
 
         // Create a TextFormatter to limit the length of the text
         textField.setTextFormatter(new TextFormatter<>(converter,
@@ -257,6 +259,42 @@ public class Page extends Application {
         alert.showAndWait();
     }
     
+    public static TextField createGradeTextField() {
+        // Create a TextField
+        TextField textField = new TextField();
+
+        // Set up a TextFormatter to restrict input to double values in the range -1 to 10
+        TextFormatter<Double> textFormatter = new TextFormatter<>(
+                new DoubleStringConverter(),
+                null,
+                change -> {
+                    String newText = change.getControlNewText();
+                    if (newText.matches("[0-9]*\\.?[0-9]*?") || newText.isEmpty()) {
+                        try {
+                            if(newText.isEmpty()){
+                                return change;
+                            }
+                            double value = Double.parseDouble(newText);
+                            if (value >= 0 && value <= 10) {
+                                System.out.println("accepted!");
+                                return change; // Accept the change
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("rejected");
+                            // Ignore and reject the change if parsing fails
+                        }
+                    }
+                    System.out.println("rejected");
+                    return null; // Reject the change
+                });
+
+        // Apply the TextFormatter to the TextField
+        textField.setTextFormatter(textFormatter);
+
+        return textField;
+    }
+
+
     public static void main(String[] args) {
         launch(args);
     }

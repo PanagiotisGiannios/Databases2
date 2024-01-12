@@ -429,34 +429,57 @@ public class CourseMenu extends Page {
                 }
                 break;
             case "Create View":
-            if(viewNameTextField.getText().trim().isEmpty()){
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("No name input");
-                alert.setHeaderText("View Name Text Field is empty\nInput a name and try again!");
-                alert.setContentText(null);
-                alert.showAndWait();
-            }
-            else if(viewNameTextField.getText().trim().toLowerCase().equals("default")){
-                Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Not allowed name");
-                alert.setHeaderText("The name of the created view cannot be \"Default\"!\nChange it and try again!");
-                alert.setContentText(null);
-                alert.showAndWait();
-            }
-            else{
-                try {
-                    String name = "`co_" + viewNameTextField.getText().replace(" ", "_") + "`";
-                    for(Object parameter: whereParametersList){
-                        whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
-                    }
-                    System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
-                    Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
-                    retrieveViews();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                if(viewNameTextField.getText().trim().isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No name input");
+                    alert.setHeaderText("View Name Text Field is empty\nInput a name and try again!");
+                    alert.setContentText(null);
+                    alert.showAndWait();
                 }
-            }
+                else if(viewNameTextField.getText().trim().toLowerCase().equals("default")){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Not allowed name");
+                    alert.setHeaderText("The name of the created view cannot be \"Default\"!\nChange it and try again!");
+                    alert.setContentText(null);
+                    alert.showAndWait();
+                }
+                else{
+                    try {
+                        String name = "`co_" + viewNameTextField.getText().replace(" ", "_") + "`";
+                        for(Object parameter: whereParametersList){
+                            whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
+                        }
+                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                        Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+                        retrieveViews();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
+            case "Taught By":
+                if(TableManager.selectedRowIdList == null || TableManager.selectedRowIdList.isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No selection");
+                    alert.setHeaderText("No course selected, select a course and try again!");
+                    alert.showAndWait();
+                }
+                else{
+                    TeachesPage teaches = new TeachesPage("course", TableManager.selectedRowIdList);
+                    teaches.start(primaryStage);
+                }
+                break;
+            case "Attended By":
+                if(TableManager.selectedRowIdList == null || TableManager.selectedRowIdList.isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No selection");
+                    alert.setHeaderText("No course selected, select a course and try again!");
+                    alert.showAndWait();
+                }
+                else{
+                    AttendsPage attends = new AttendsPage("course", TableManager.selectedRowIdList);
+                    attends.start(primaryStage);
+                }
             default:
                 System.out.println("Undefined!");
                 break;

@@ -261,8 +261,17 @@ public class StudentMenu extends Page {
                     editStudent.start(primaryStage);
                 }
                 break;
-            case "Teaches":
-                System.out.println("Teaches!");
+            case "Attends":
+                if(TableManager.selectedRowIdList == null || TableManager.selectedRowIdList.isEmpty()){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No selection");
+                    alert.setHeaderText("No student selected, select a student and try again!");
+                    alert.showAndWait();
+                }
+                else{
+                    AttendsPage attends = new AttendsPage("student", TableManager.selectedRowIdList);
+                    attends.start(primaryStage);
+                }
                 break;
             case "Search":
                 selectString = "SELECT DISTINCT StudentID AS 'Student ID', FirstName AS 'First Name', LastName AS 'Last Name', ";
@@ -648,7 +657,7 @@ public class StudentMenu extends Page {
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
-        String[] buttonTexts = {"Add","Delete","Edit","Teaches","Rector","Create View"};
+        String[] buttonTexts = {"Add","Delete","Edit","Attends","Create View"};
         Button[] rightSideButtons = new Button[buttonTexts.length];
         for(int i = 0; i < rightSideButtons.length;i++){
             rightSideButtons[i] = new Button(buttonTexts[i]);

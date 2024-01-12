@@ -192,6 +192,7 @@ public class EditPage extends Page {
         
         // Phone
         TextField phone = createNumericTextField(10);
+        //TextField phone = makeTextField(10);
         phone.setPromptText("Phone Number");
         phone.setText(entry.get("Phone"));
         textComponents.add(phone);

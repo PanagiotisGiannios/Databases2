@@ -276,7 +276,8 @@ public class ProfessorMenu extends Page {
             }
                 break;
             case "Teaches":
-                System.out.println("Teaches!");
+                TeachesPage teaches = new TeachesPage("professor", TableManager.selectedRowIdList);
+                teaches.start(primaryStage);
                 break;
             case "Rector":
                 System.out.println("make rector person with ssn: " + TableManager.selectedId);
