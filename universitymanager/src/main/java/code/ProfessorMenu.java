@@ -303,27 +303,10 @@ public class ProfessorMenu extends Page {
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            if(TableManager.selectedRowIdList.size() >0){
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.selectedRowIdList.get(0));
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.selectedRowIdList.get(0));
-                                TableManager.selectedRowIdList.clear();
-                                try {
-                                    ResultSet resultSet =  previousQuery.executeQuery();
-                                    resultTableView = TableManager.CreateTableView(resultSet, "professor");
-                                    TableManager.setUpMouseReleased(resultTableView);
-                                    resultScrollPane.setContent(resultTableView);
-                                    resultTableView.setFixedCellSize(Region.USE_COMPUTED_SIZE);
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            else{
-                                Alert alert = new Alert(AlertType.ERROR); 
-                                alert.setTitle("Error");
-                                alert.setHeaderText("No professor selected");
-                                alert.setContentText("Select a professor and try again!");
-                                alert.showAndWait();
-                            }
+                            Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.selectedRowIdList.get(0));
+                            Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.selectedRowIdList.get(0));
+                            TableManager.selectedRowIdList.clear();
+                            refreshTable();
                             
                         } catch (SQLException e) {
                             e.printStackTrace();
