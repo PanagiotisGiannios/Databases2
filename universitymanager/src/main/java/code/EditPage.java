@@ -97,6 +97,7 @@ public class EditPage extends Page {
         initializeNextEntry();
     }
 
+    // Initialize the idList to help with the next button.
     private void initializeNextEntry() {
         List<Integer> idList = new ArrayList<>();
 
@@ -130,6 +131,7 @@ public class EditPage extends Page {
         createScene();
     }
 
+    // Initialize the Edit Page.
     private void createEditPage() {
         if (type == "professor") {
             background = "professorPage.png";
@@ -153,6 +155,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Creates the Professor Edit Page.
     private void createProfessor() {
         // Fetch the Professor from the database.
         fetchEntry();
@@ -641,6 +644,7 @@ public class EditPage extends Page {
         return projectBox;
     }
 
+    // Handles some buttons from the project section.
     private void handleButtonPress(String button) {
         if (button == "addProject") {
             if (checkForMissingValues(secondEntry)) {
@@ -698,6 +702,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Creates a table to store projects.
     private TableView<ObservableList<String>> createProjectTable() {
         String query = "SELECT Name, Field, Type, Information FROM PROJECT WHERE ProfessorId = ?";
     
@@ -728,6 +733,7 @@ public class EditPage extends Page {
         return table;
     }
 
+    // Creates the Auxiliary Staff Edit Page.
     private void createAuxiliary() {
         // Fetch the Auxiliary Staff from the database.
         fetchEntry();
@@ -950,6 +956,7 @@ public class EditPage extends Page {
         root.getChildren().addAll(base);
     }
 
+    // Creates the Student Edit Page.
     private void createStudent() {
         // Fetch the Student from the database.
         fetchEntry();
@@ -1142,6 +1149,7 @@ public class EditPage extends Page {
         root.getChildren().addAll(base);
     }
 
+    // Creates the Course Edit Page.
     private void createCourse() {
         // Fetch the Student from the database.
         fetchEntry();
@@ -1259,6 +1267,7 @@ public class EditPage extends Page {
         
     }
 
+    // Handles the updates for a Professor.
     private void updateProfessorEntry() {
         if (updateEmployee()){
             if (updateProfessor()) {
@@ -1268,6 +1277,7 @@ public class EditPage extends Page {
         }     
     }
 
+    // Handles the updates for a Auxiliary Staff.
     private void updateAuxiliaryEntry() {
         if (updateEmployee()){
             if (updateAuxiliary()) {
@@ -1277,6 +1287,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Updates an Employee.
     private boolean updateEmployee() {
         updatedEntry = new HashMap<>();
         updatedEntry.put(EMPLOYEE[0], textComponents.get(0).getText());
@@ -1332,6 +1343,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Updates a Profesor.
     private boolean updateProfessor() {
         findManager();
 
@@ -1364,7 +1376,8 @@ public class EditPage extends Page {
         }
     }
 
-     private boolean updateProject() {
+    // Updates a Project.
+    private boolean updateProject() {
         String updateQuery = makeUpdateQuery(PROJECT);
         try (PreparedStatement preparedStatement = connection.prepareStatement(updateQuery)) {
             String profid;
@@ -1388,6 +1401,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Updates an Auxiliary Staff.
     private boolean updateAuxiliary() {
         // Update the updateEntry.
         updatedEntry.put(AUXILIARY_STAFF[0], updatedEntry.get(EMPLOYEE[0]));
@@ -1416,6 +1430,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Updates a Student.
     private boolean updateStudent() {
         updatedEntry = new HashMap<>();
         updatedEntry.put(STUDENT[0], textComponents.get(0).getText());
@@ -1466,6 +1481,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Updates a Course.
     private boolean updateCourse() {
         updatedEntry = new HashMap<>();
         updatedEntry.put(COURSE[0], textComponents.get(0).getText());
@@ -1488,7 +1504,7 @@ public class EditPage extends Page {
     }
 
     // Find who is the manager.
-    private void findManager() {        
+    private void findManager() {
         String whoIsManager = "SELECT ProfId FROM PROFESSOR WHERE ManagerId IS NULL";        
         try (ResultSet result = connection.createStatement().executeQuery(whoIsManager)){
             result.next();
@@ -1498,6 +1514,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Fetch the Entry in the entry Map accordingly to the type of the Edit Page.
     private void fetchEntry() {
         try (PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
             preparedStatement.setString(1, key);
@@ -1523,6 +1540,7 @@ public class EditPage extends Page {
         }
     }
 
+    // Make the update query, to update the entry.
     private String makeUpdateQuery(String[] table) {
         StringBuilder updateQuery = new StringBuilder("UPDATE ");
         if (table == EMPLOYEE) {

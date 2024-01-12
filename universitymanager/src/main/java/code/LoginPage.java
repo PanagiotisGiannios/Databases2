@@ -30,10 +30,8 @@ public class LoginPage extends Page {
         createScene();
     }
 
-
     private void loginPageSetup() {        
-        Text welcomeText = new Text("Welcome to University Management\n\n");
-        
+        Text welcomeText = new Text("Welcome to University Management\n\n");        
         welcomeText.setStyle("-fx-font-family: 'Irish Grover'; -fx-font-size: 40;");
 
         // Set up the username text field
@@ -51,7 +49,6 @@ public class LoginPage extends Page {
         //Create the login button where the cursor also changes when hovered above it.
         Button loginButton = new Button("Login");
         loginButton.setCursor(Cursor.HAND);
-
         loginButton.setFont(new Font(15));
         
         //Create two buttons so that we don't have to type our passwords every time
@@ -62,18 +59,15 @@ public class LoginPage extends Page {
 
         // Create a label for displaying errors
         Label errorLabel = new Label();
-        //createBackground(errorLabel, BACKGROUND_COL_LIGHT, 0.5);
-        errorLabel.setStyle("-fx-text-fill: red;"+
-                            "-fx-background-color: rgba(" + BACKGROUND_COL_LIGHT +"," + "0.8);");
-
+        errorLabel.setStyle("-fx-text-fill: red;" + "-fx-background-color: rgba(" + BACKGROUND_COL_LIGHT + "," + "0.8);");
         
-        //Create two vertical boxes to hold the login components
-        
-        VBox loginBox = new VBox(10);
-        VBox welcomeTextBox = new VBox();
+        //Create two vertical boxes to hold the login components        
+        VBox welcomeTextBox = new VBox();        
         welcomeTextBox.setPadding(new Insets(70, 20, 0, 20));
         welcomeTextBox.setAlignment(Pos.TOP_CENTER);
         welcomeTextBox.getChildren().addAll(welcomeText);
+
+        VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
         loginBox.getChildren().addAll(usernameTextField, passwordTextField, loginButton, errorLabel, PanButton, FragkButton);

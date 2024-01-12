@@ -429,6 +429,7 @@ public class AddPage extends Page {
         return projectBox;
     }
 
+    // Creates a table to store projects.
     private TableView<ObservableList<String>> createProjectTable() {
         String query = "SELECT Name, Field, Type, Information FROM PROJECT WHERE ProfessorId = ?";
     
@@ -935,7 +936,7 @@ public class AddPage extends Page {
     }
 
     // Insert a new entry in the Employee Table.
-    private void addEmployee() {        
+    private void addEmployee() {
         String insertEmployeeQuery = "INSERT INTO EMPLOYEE (SSN, FirstName, LastName, Sex, Phone, Email, JobStartingDate, Birthday, Address, Salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertEmployeeQuery)) {
             for (int i = 0; i < 10; i++) {
