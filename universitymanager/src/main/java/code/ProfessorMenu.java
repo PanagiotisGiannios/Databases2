@@ -280,20 +280,33 @@ public class ProfessorMenu extends Page {
                 teaches.start(primaryStage);
                 break;
             case "Rector":
-                System.out.println("make rector person with ssn: " + TableManager.selectedId);
+                if(TableManager.selectedRowIdList.size() < 1){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("No professor selected!");
+                    alert.setHeaderText("No professro selected, select a professor and try again!");
+                    alert.showAndWait();
+                    break;
+                }
+                if(TableManager.selectedRowIdList.size() > 1){
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Too many professors selected!");
+                    alert.setHeaderText("Too many professors selected, select one professor and try again!");
+                    alert.showAndWait();
+                    break;
+                }
                 confirmAlert = new Alert(AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Setting Rector!");
-                confirmAlert.setHeaderText("Are you sure you want to set the professor with ssn: '" + TableManager.selectedId + "' as Rector ?");
+                confirmAlert.setHeaderText("Are you sure you want to set the professor with ssn: '" + TableManager.selectedRowIdList.get(0) + "' as Rector ?");
                 yesButtonType = new ButtonType("Yes");
                 noButtonType = new ButtonType("No");
                 confirmAlert.getButtonTypes().setAll(yesButtonType,noButtonType);
                 confirmAlert.showAndWait().ifPresent(buttonType ->{
                     if(buttonType == yesButtonType){
                         try {
-                            if(TableManager.selectedId != null){
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.selectedId);
-                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.selectedId);
-                                TableManager.selectedId = null;
+                            if(TableManager.selectedRowIdList.size() >0){
+                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = " + TableManager.selectedRowIdList.get(0));
+                                Page.connection.createStatement().executeUpdate("UPDATE professor SET ManagerID = NULL WHERE profId = " + TableManager.selectedRowIdList.get(0));
+                                TableManager.selectedRowIdList.clear();
                                 try {
                                     ResultSet resultSet =  previousQuery.executeQuery();
                                     resultTableView = TableManager.CreateTableView(resultSet, "professor");
@@ -415,7 +428,7 @@ public class ProfessorMenu extends Page {
                 if(((CheckBox)phoneButton.getContent()).isSelected()){
                     if(!phoneTextField.getText().isEmpty()){
                         whereString = whereString.concat(" AND Phone = ?");
-                        whereParametersList.add(Integer.parseInt(phoneTextField.getText()));
+                        whereParametersList.add(phoneTextField.getText());
                     }
                     else{
                         showMissingAlert = true;
