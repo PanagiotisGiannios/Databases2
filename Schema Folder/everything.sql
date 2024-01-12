@@ -1,5 +1,5 @@
 CREATE TABLE EMPLOYEE (
-	SSN				INTEGER		    NOT NULL,
+	SSN				BIGINT		    NOT NULL,
 	FirstName		VARCHAR(50)		NOT NULL,
 	LastName		VARCHAR(50)		NOT NULL,
 	Sex				VARCHAR(10)		NOT NULL,
@@ -8,25 +8,25 @@ CREATE TABLE EMPLOYEE (
 	JobStartingDate	DATE			NOT NULL,
 	Birthday		DATE			NOT NULL,	
 	Address			VARCHAR(150)	NOT NULL,	
-	Salary			INTEGER		    NOT NULL,	
+	Salary			BIGINT		    NOT NULL,	
 PRIMARY KEY (SSN));
 
 CREATE TABLE PROFESSOR (
-	ProfId			INTEGER 	 NOT NULL,
-	ManagerId		INTEGER,
+	ProfId			BIGINT 	 NOT NULL,
+	ManagerId		BIGINT,
 	Profession		VARCHAR(50)	NOT NULL,
 	FOREIGN KEY		(ProfId) REFERENCES EMPLOYEE(SSN) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY		(ManagerId) REFERENCES PROFESSOR(ProfId) ON DELETE SET NULL ON UPDATE CASCADE,
 PRIMARY KEY (ProfId));
 
 CREATE TABLE AUXILIARY_STAFF (
-	EmployeeId		INTEGER NOT NULL,
+	EmployeeId		BIGINT NOT NULL,
 	Profession		VARCHAR(50)	NOT NULL,
 	FOREIGN KEY		(EmployeeId) REFERENCES EMPLOYEE(SSN) ON DELETE CASCADE ON UPDATE CASCADE,
 PRIMARY KEY (EmployeeId));
 
 CREATE TABLE PROJECT (
-	ProfessorId		INTEGER NOT NULL,
+	ProfessorId		BIGINT NOT NULL,
 	Name			VARCHAR(50)	NOT NULL,	
 	Field			VARCHAR(50)	NOT NULL,
 	Type			VARCHAR(50)	NOT NULL,
@@ -35,13 +35,13 @@ CREATE TABLE PROJECT (
 PRIMARY KEY (Name, ProfessorId));
 
 CREATE TABLE COURSE (
-	CourseId		INTEGER	NOT NULL,
+	CourseId		BIGINT	NOT NULL,
 	Name			VARCHAR(50)	NOT NULL,	
 	Semester		VARCHAR(2)	NOT NULL,
 PRIMARY KEY (CourseId));
 
 CREATE TABLE STUDENT (
-    StudentId   INTEGER AUTO_INCREMENT 	NOT NULL,
+    StudentId   BIGINT AUTO_INCREMENT 	NOT NULL,
     FirstName   VARCHAR(50)     		NOT NULL,
     LastName    VARCHAR(50)     		NOT NULL,
     FatherName  VARCHAR(50)     		NOT NULL,
@@ -56,16 +56,16 @@ CREATE TABLE STUDENT (
 ) AUTO_INCREMENT = 1054;
 
 CREATE TABLE TEACHES (
-	ProfId			INTEGER		NOT NULL,
-	CourseId		INTEGER		NOT NULL,
+	ProfId			BIGINT		NOT NULL,
+	CourseId		BIGINT		NOT NULL,
 	FOREIGN KEY		(ProfId) 	REFERENCES PROFESSOR (ProfId) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY		(CourseId) 	REFERENCES COURSE (CourseId) ON DELETE CASCADE ON UPDATE CASCADE,
 PRIMARY KEY (ProfId, CourseId));
 
 CREATE TABLE ATTENDS (
 	Grade			REAL		DEFAULT -1,
-	StudentId		INTEGER		NOT NULL,
-	CourseId		INTEGER		NOT NULL,
+	StudentId		BIGINT		NOT NULL,
+	CourseId		BIGINT		NOT NULL,
 	FOREIGN KEY		(StudentId) REFERENCES STUDENT (StudentId) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY		(CourseId) 	REFERENCES COURSE (CourseId) ON DELETE CASCADE ON UPDATE CASCADE,
 PRIMARY KEY (StudentId, CourseId));
@@ -128,20 +128,20 @@ VALUES
 
 INSERT INTO PROJECT (ProfessorId, Name, Field, Type, Information)
 VALUES
-    (19900001, 'Project 1', 'Comp. Architecture & Hardware', 'Research', 'Description 1'),
-    (19920002, 'Project 2', 'Signals & Communications', 'Development', 'Description 2'),
-    (19880003, 'Project 3', 'Apps & Foundations of C.S.', 'Education', 'Description 3'),
+    (19900001, 'Project 1', 'Computer Hardware and Architecture', 'Research', 'Description 1'),
+    (19920002, 'Project 2', 'Signals and Communications', 'Development', 'Description 2'),
+    (19880003, 'Project 3', 'Applications and Foundations of Computer Science', 'Education', 'Description 3'),
     (19950004, 'Project 4', 'Energy', 'Research', 'Description 4'),
-    (19910005, 'Project 5', 'Software & Info. Sys. Eng.', 'Development', 'Description 5'),
-    (19930006, 'Project 6', 'Software & Info. Sys. Eng.', 'Development', 'Description 6'),
+    (19910005, 'Project 5', 'Software and Information System Engineering', 'Development', 'Description 5'),
+    (19930006, 'Project 6', 'Software and Information System Engineering', 'Development', 'Description 6'),
     (19890007, 'Project 7', 'Energy', 'Research', 'Description 7'),
-    (19940008, 'Project 8', 'Apps & Foundations of C.S.', 'Education', 'Description 8'),
-    (19920009, 'Project 9', 'Comp. Architecture & Hardware', 'Development', 'Description 9'),
+    (19940008, 'Project 8', 'Applications and Foundations of Computer Science', 'Education', 'Description 8'),
+    (19920009, 'Project 9', 'Computer Hardware and Architecture', 'Development', 'Description 9'),
     (19960010, 'Project 10', 'Energy', 'Research', 'Description 10'),
-    (19900011, 'Project 11', 'Software & Info. Sys. Eng.', 'Development', 'Description 11'),
-    (19930012, 'Project 12', 'Apps & Foundations of C.S.', 'Education', 'Description 12'),
-    (19950013, 'Project 13', 'Signals & Communications', 'Development', 'Description 13'),
-    (19920014, 'Project 14', 'Software & Info. Sys. Eng.', 'Development', 'Description 14'),
+    (19900011, 'Project 11', 'Software and Information System Engineering', 'Development', 'Description 11'),
+    (19930012, 'Project 12', 'Applications and Foundations of Computer Science', 'Education', 'Description 12'),
+    (19950013, 'Project 13', 'Signals and Communications', 'Development', 'Description 13'),
+    (19920014, 'Project 14', 'Software and Information System Engineering', 'Development', 'Description 14'),
     (19880015, 'Project 15', 'Energy', 'Research', 'Description 15');
 
 INSERT INTO auxiliary_staff (EmployeeID, profession)

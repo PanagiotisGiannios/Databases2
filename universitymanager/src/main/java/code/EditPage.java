@@ -796,6 +796,12 @@ public class EditPage extends Page {
         }
         radioComponents.add(sex);
 
+        // Email
+        TextField email = makeTextField(150);
+        email.setPromptText("Email Address");
+        email.setText(entry.get("Email"));
+        textComponents.add(email);
+
         // Address
         TextField address = makeTextField(150);
         address.setPromptText("Address");
@@ -808,11 +814,7 @@ public class EditPage extends Page {
         salary.setText(entry.get("Salary"));
         textComponents.add(salary);
 
-        // Email
-        TextField email = makeTextField(150);
-        email.setPromptText("Email Address");
-        email.setText(entry.get("Email"));
-        textComponents.add(email);
+        
         
         // Birthday
         DatePicker birthday = new DatePicker();
@@ -886,7 +888,7 @@ public class EditPage extends Page {
 
         HBox titleBox = new HBox(titleLabel);
         titleBox.setAlignment(Pos.CENTER_LEFT);        
-        titleBox.setPadding(new Insets(20, 0, 0, 30));
+        titleBox.setPadding(new Insets(20, 0, 0, 70));
 
         // Setup the previous entry button
         Image image = new Image("file:" + getPath() + "back.png");
@@ -941,10 +943,11 @@ public class EditPage extends Page {
         mainBox.getChildren().addAll(textComponents.get(0), textComponents.get(1), textComponents.get(2), textComponents.get(3), radioComponents.get(0), textComponents.get(4), textComponents.get(5), textComponents.get(6), dateComponents.get(0), dateComponents.get(1), radioComponents.get(1));
 
         mainBox.setAlignment(Pos.CENTER_LEFT);
-        mainBox.setPadding(new Insets(0, 0, 0, 30));
+        mainBox.setPadding(new Insets(0, 0, 0, 70));
         mainBox.setSpacing(5);
 
         base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        base.setAlignment(Pos.CENTER);
         root.getChildren().addAll(base);
     }
 
@@ -1070,7 +1073,7 @@ public class EditPage extends Page {
 
         HBox titleBox = new HBox(studentLabel);
         titleBox.setAlignment(Pos.CENTER_LEFT);        
-        titleBox.setPadding(new Insets(20, 0, 0, 30));
+        titleBox.setPadding(new Insets(20, 0, 0, 70));
 
         // Setup the back to Student Main Menu button
         Image image = new Image("file:" + getPath() + "back.png");
@@ -1132,10 +1135,11 @@ public class EditPage extends Page {
         }
         mainBox.getChildren().addAll(dateComponents.get(0), dateComponents.get(1));
         mainBox.setAlignment(Pos.CENTER_LEFT);
-        mainBox.setPadding(new Insets(0, 0, 0, 30));
+        mainBox.setPadding(new Insets(0, 0, 0, 70));
         mainBox.setSpacing(5);
 
         base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        base.setAlignment(Pos.CENTER);
         root.getChildren().addAll(base);
     }
 
@@ -1190,7 +1194,6 @@ public class EditPage extends Page {
 
         HBox titleBox = new HBox(courseLabel);
         titleBox.setAlignment(Pos.CENTER);
-        titleBox.setPadding(new Insets(150, 0, 0, 0));
 
         // Setup the back to Course Main Menu button
         Image image = new Image("file:" + getPath() + "back.png");
@@ -1234,7 +1237,8 @@ public class EditPage extends Page {
 
         bottomBox.getChildren().addAll(saveButton, buttonBox);
         bottomBox.setSpacing(5);
-        bottomBox.setAlignment(Pos.BOTTOM_CENTER);
+        bottomBox.setAlignment(Pos.BOTTOM_CENTER);        
+        bottomBox.setPadding(new Insets(100, 0, 0, 0));
         
 
         // Limit the TextField size to 250 pixels
@@ -1249,11 +1253,9 @@ public class EditPage extends Page {
         mainBox.setPadding(new Insets(0, 0, 0, 0));
         mainBox.setSpacing(5);
 
-        // Set VBox.setVgrow to Priority.ALWAYS for both bottomBox and mainBox
-        VBox.setVgrow(bottomBox, Priority.ALWAYS);
-        VBox.setVgrow(mainBox, Priority.ALWAYS);
-
         base.getChildren().addAll(titleBox, mainBox, bottomBox);
+        base.setAlignment(Pos.CENTER);
+        base.setPadding(new Insets(0, 0, 150, 0));
         root.getChildren().addAll(base);
         
     }
@@ -1320,12 +1322,13 @@ public class EditPage extends Page {
             preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
-            if (manager.equals(key)) {
+            if (manager != null && manager.equals(key)) {
                 showAlert(AlertType.ERROR, "Can't change the Rector's SSN", "Make another Professor Rector and then try again", "You can modify everything else except SSN");
             }
             else {
                 showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
             }
+            e.printStackTrace();
             return false;
         }
     }
