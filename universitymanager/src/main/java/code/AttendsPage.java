@@ -37,11 +37,9 @@ public class AttendsPage extends Page {
         loadLogo();
         loadBackground("coursePage.png");
         if(source.equals("student")){
-            System.out.println("prof!");
             professorSetup();
         }
         else if(source.equals("course")){
-            System.out.println("course!");
             professorSetup();
         }
         createScene();
@@ -160,11 +158,9 @@ public class AttendsPage extends Page {
                             }
                             String selectedStudentId = studentIDText.getText();
                             selectedStudent = selectedStudentId;
-                            System.out.println("Selected ID: " + selectedStudentId);
                             rightVBox = createRightVBox("course", selectedStudentId);
                             rightScroll.setContent(null);
                             rightScroll.setContent(rightVBox);
-                            // Perform further actions with the selected SSN
                         }
                     });
 
@@ -193,7 +189,7 @@ public class AttendsPage extends Page {
                 List<Double> columnWidths = new ArrayList<>();
                 
                 HBox titles = new HBox(15);
-                titles.setPadding(new Insets(0, 0, 0, 30)); // Add padding to the top
+                titles.setPadding(new Insets(0, 0, 0, 30));
                 Text id = new Text("ID");
                 Text fName = new Text("Course Name");
                 
@@ -204,7 +200,6 @@ public class AttendsPage extends Page {
                 columnWidths.add(id.prefWidth(-1));
                 columnWidths.add(fName.prefWidth(-1));
                 vbox.getChildren().add(titles);
-                // Add labels to the labelsHBox
 
                 while (res.next()) {
                     HBox hbox = new HBox(15);
@@ -223,11 +218,9 @@ public class AttendsPage extends Page {
                     radioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
                             String selectedID = idText.getText();
-                            System.out.println("Selected id: " + selectedID);
                             rightVBox = createRightVBox("student", selectedID);
                             rightScroll.setContent(null);
                             rightScroll.setContent(rightVBox);
-                            // Perform further actions with the selected SSN
                         }
                     });
 
@@ -264,7 +257,7 @@ public class AttendsPage extends Page {
                 List<Double> columnWidths = new ArrayList<>();
                 
                 HBox titles = new HBox(15);
-                titles.setPadding(new Insets(0, 0, 0, 30)); // Add padding to the top
+                titles.setPadding(new Insets(0, 0, 0, 30));
                 Text id = new Text("ID");
                 Text name = new Text("Course Name");
                 titles.setStyle("-fx-background-color: rgba(0,0,0,0.3);");
@@ -285,7 +278,6 @@ public class AttendsPage extends Page {
                         if(attendedCoursesId.equals(res.getString(1))){
                             ResultSet grade = Page.connection.createStatement().executeQuery("select grade from attends where studentId = "+ callerID +" AND courseID = " + attendedCoursesId );
                             while (grade.next()) {
-                                System.out.println(grade.getString(1));
                                 gradeTextField.setText(grade.getString(1));
                             }
                             checkBox.setSelected(true);
@@ -293,7 +285,6 @@ public class AttendsPage extends Page {
                     }
                     Text idText   = new Text(res.getString(1));
                     Text nameText = new Text(res.getString(2));
-                    //TextField gradeTextField = Page.createGradeTextField();
                     gradeTextField.setPromptText("Grade:");
                     hbox.getChildren().addAll(checkBox,idText,nameText,gradeTextField);
                     columnWidths.add(idText.prefWidth(-1));
@@ -471,7 +462,6 @@ public class AttendsPage extends Page {
                 whereString = whereString + " OR StudentID = " + id;
             }
             whereString = whereString.replaceFirst("OR", "");
-            System.out.println(whereString);
             res = Page.connection.createStatement().executeQuery("SELECT studentId, FirstName, LastName FROM OV_students " + whereString);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -488,7 +478,6 @@ public class AttendsPage extends Page {
                 whereString = whereString + " OR courseID = " + id;
             }
             whereString = whereString.replaceFirst("OR", "");
-            System.out.println(whereString);
             res = Page.connection.createStatement()
                     .executeQuery("SELECT courseID, Name FROM OV_courseinfo " + whereString);
         } catch (SQLException e){
@@ -505,7 +494,6 @@ public class AttendsPage extends Page {
                 if((((HBox)node).getChildren()).size() <= 2){
                     continue;
                 }
-                //ObservableList<Node> children  = ((HBox)node).getChildren();
                 Node first = ((HBox)node).getChildren().get(0);
                 boolean checked = false;
                 String courseId = null;

@@ -30,26 +30,22 @@ public class LoginPage extends Page {
         // Set up the username text field
         TextField usernameTextField = new TextField();
         usernameTextField.setPromptText("Username");
-        usernameTextField.setMaxWidth(400);
+        usernameTextField.setMaxWidth(150);
+        usernameTextField.setPrefHeight(40);
         usernameTextField.setFocusTraversable(false);
         
         // Set up the password text field
         PasswordField passwordTextField = new PasswordField();
         passwordTextField.setPromptText("Password");
-        passwordTextField.setMaxWidth(400);
+        passwordTextField.setMaxWidth(150);
+        passwordTextField.setPrefHeight(40);
         passwordTextField.setFocusTraversable(false);
 
         //Create the login button where the cursor also changes when hovered above it.
         Button loginButton = new Button("Login");
         loginButton.setCursor(Cursor.HAND);
         loginButton.setFont(new Font(15));
-        
-        //Create two buttons so that we don't have to type our passwords every time
-        Button PanButton = new Button("Panagiotis");
-        PanButton.setCursor(Cursor.HAND);
-        Button FragkButton = new Button("Fragkiskos");
-        FragkButton.setCursor(Cursor.HAND);
-        
+
         //Create two vertical boxes to hold the login components        
         VBox welcomeTextBox = new VBox();        
         welcomeTextBox.setPadding(new Insets(70, 20, 0, 20));
@@ -59,10 +55,10 @@ public class LoginPage extends Page {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(20));
         loginBox.setAlignment(Pos.CENTER);
-        loginBox.getChildren().addAll(usernameTextField, passwordTextField, loginButton, PanButton, FragkButton);
         
         root.getChildren().addAll(welcomeTextBox,loginBox);
-
+        Page.addButtonTransition(loginButton, 150, 40);
+        
         // Set up the login button action
         loginButton.setOnAction(e -> {
             String userId = usernameTextField.getText();
@@ -79,10 +75,11 @@ public class LoginPage extends Page {
                     showAlert(AlertType.WARNING, "Error", "Invalid username or password.", "Please try again");
                 }                
                 else
-                    e1.printStackTrace();                
+                e1.printStackTrace();                
             }
         });
-
+        loginBox.getChildren().addAll(usernameTextField, passwordTextField, loginButton);
+        
         // Activate the loginButton when Enter is pressed
         loginBox.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {

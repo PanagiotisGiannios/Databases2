@@ -115,6 +115,5 @@ public class TableManager {
             }
             selectedRowIdList = tempList;
         }
-        System.out.println(tableView.getSelectionModel().getSelectedIndices());
     }
 }

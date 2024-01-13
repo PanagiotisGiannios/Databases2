@@ -76,8 +76,6 @@ public class CourseMenu extends Page {
     private ScrollPane resultScrollPane;
     private TableView<ObservableList<String>>  resultTableView;
 
-    //private String ssnSelected;
-
     @Override
     public void start(Stage primaryStage) {
         Page.primaryStage = primaryStage;
@@ -98,7 +96,6 @@ public class CourseMenu extends Page {
         retrieveViews();
         //Simulate a press on the search button to populate the viewTable at the start.
         handleButtonPress(new Button("Search"));
-        System.out.println("\n\nDONE!\n\n");
     }
 
     /**
@@ -197,9 +194,6 @@ public class CourseMenu extends Page {
                         retrieveSemesters();
                         updateMenu(filterButton, (CheckBox)semesterButton.getContent());
                     }
-                    else{
-                        System.out.println("NO pressed!");
-                    }
                 });
                 resultTableView.getSelectionModel().clearSelection();
                 TableManager.selectedRowIdList.clear();
@@ -226,7 +220,6 @@ public class CourseMenu extends Page {
                 
                 break;
             case "Search":
-            System.out.println("Searching!\n");
                 selectString = "SELECT DISTINCT CourseID AS 'CourseID', Name AS 'Course Name', Semester AS 'Semester', ";
                 String selectedViewString = viewComboBox.getSelectionModel().getSelectedItem();
                 if(selectedViewString == null || selectedViewString.equals("Default")){
@@ -369,7 +362,6 @@ public class CourseMenu extends Page {
                     whereString = "";
                 }
                 String query = selectString + "\n" + joinString + "\n" + whereString + "\n" + groupString;
-                System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Incomplete Filters");
@@ -441,9 +433,13 @@ public class CourseMenu extends Page {
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
-                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         retrieveViews();
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("View created successfully");
+                        alert.showAndWait();
+                        viewNameTextField.clear();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -473,7 +469,6 @@ public class CourseMenu extends Page {
                     attends.start(primaryStage);
                 }
             default:
-                System.out.println("Undefined!");
                 break;
         }
 
@@ -487,7 +482,6 @@ public class CourseMenu extends Page {
     private void setButtonProperties(Button button){
         ScaleTransition hoverTransition = new ScaleTransition(Duration.millis(100),button);
         ScaleTransition clickTransition = new ScaleTransition(Duration.millis(50),button);
-        System.out.println("\nsetting up button: " + button.getText() + "\n");
         button.setMinWidth(100);
         button.setMinHeight(50);
         button.setPrefWidth(100);
@@ -559,9 +553,7 @@ public class CourseMenu extends Page {
          * of the necessary components for each side
          */
         StackPane rightSide = new StackPane();
-        //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
-        //leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
@@ -592,7 +584,6 @@ public class CourseMenu extends Page {
         studentAmountButton = toCustomMenu(FILTER_BUTTON_TEXTS[2]);
         semesterButton = toCustomMenu(FILTER_BUTTON_TEXTS[3]);
         courseIDButton = toCustomMenu(FILTER_BUTTON_TEXTS[4]);
-        System.out.println("Done customMenus!\n");
 
         averageGradeStartTextField = Page.createNumericTextField(3);
         averageGradeEndTextField   = Page.createNumericTextField(3);
@@ -655,10 +646,6 @@ public class CourseMenu extends Page {
         viewComboBox.setPromptText("Select View");
         viewComboBox.setPrefHeight(40);
         viewComboBox.setPrefWidth(105);
-        viewComboBox.setOnAction(event -> {
-            String select = viewComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("Selected view: " + select);
-        });
         viewNameTextField.setPrefWidth(105);
         viewNameTextField.setPrefHeight(40);
         viewNameTextField.setPromptText("New View Name");
@@ -678,7 +665,6 @@ public class CourseMenu extends Page {
 
         /*Make each side of the middle box fill the entire available area*/
         HBox.setHgrow(leftSide, javafx.scene.layout.Priority.ALWAYS);
-        //HBox.setHgrow(rightSide, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
 
         Button backButton = Page.createBackButton();
@@ -737,9 +723,6 @@ public class CourseMenu extends Page {
                 courseIDTextFieldMenuItem = new CustomMenuItem(new HBox(courseIDTextField));
                 menu.getItems().add(menu.getItems().indexOf(courseIDButton)+1,courseIDTextFieldMenuItem);
             }
-        }
-        else {
-            System.out.println("Other!");
         }
     }
     private void refreshSemesters(){

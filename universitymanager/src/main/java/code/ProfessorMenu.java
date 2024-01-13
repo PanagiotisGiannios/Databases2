@@ -32,8 +32,6 @@ import javafx.scene.layout.Background;
 public class ProfessorMenu extends Page {
     private final static int LIMIT = 10;
 
-
-
     private static final String[] FILTER_BUTTON_TEXTS = {"Is Rector", "Salary", "Sex", "Age", "SSN", "E-mail", "Project", "Field", "Years Worked", "Phone"};
     private static final String[] SELECT_FILTER_BUTTON_TEXTS = {"Field", "Salary", "Sex", "Address", "Phone Number", "E-mail", "Birthday","Job Starting Date", "RectorID","Project Name",  "Project Information", "Project Type"};
     private List<String> projectNames = new ArrayList<String>();
@@ -111,8 +109,6 @@ public class ProfessorMenu extends Page {
     private ScrollPane resultScrollPane;
     private TableView<ObservableList<String>>  resultTableView;
 
-    //private String ssnSelected;
-
     @Override
     public void start(Stage primaryStage) {
         Page.primaryStage = primaryStage;
@@ -136,9 +132,7 @@ public class ProfessorMenu extends Page {
     }
     
     /**
-     * Retrieve all the views of the database,
-     * if it encounters a view with a different code than "pr_"
-     * that view gets ignored,the default view is ov_professors.
+     * Retrieves all of the views
      */
     private void retrieveViews() {
         try{
@@ -155,8 +149,9 @@ public class ProfessorMenu extends Page {
             e.printStackTrace();
         }
     }
+
     /**
-     * Retrieves all fields of the professors
+     * Retrieves the fields of the professors
      */
     private void retrieveFields(){
         String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
@@ -169,8 +164,9 @@ public class ProfessorMenu extends Page {
             e.printStackTrace();
         }
     }
+
     /**
-     * Retrieves all projects of every professor
+     * Retrieves the projects
      */
     private void retrieveProjects(){
         String getProjects = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
@@ -196,6 +192,9 @@ public class ProfessorMenu extends Page {
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
+            /**
+             * Deletes the selected professor(s) after asking the user to confirm
+             */
                 if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
@@ -279,6 +278,9 @@ public class ProfessorMenu extends Page {
                 teaches.start(primaryStage);
                 break;
             case "Rector":
+            /**
+             * Sets the selected professor as rector (has managerId = null and everyone else's managerId is equal to their id)
+             */
                 if(TableManager.selectedRowIdList.size() < 1){
                     Alert alert = new Alert(AlertType.ERROR);
                     alert.setTitle("No professor selected!");
@@ -315,6 +317,12 @@ public class ProfessorMenu extends Page {
                 
                 break;
             case "Search":
+            /**
+             * Performs a search by creating a select string based on the show/hide columns button
+             * then creates the join statement based on the view and if the user wants to see or use
+             * information about the projects and finally creates a string for the where statement
+             * based on the filters the user has selected
+             */
                 selectString = "SELECT DISTINCT ssn AS 'SSN', FirstName AS 'First Name', LastName AS 'Last Name', ";
                 String selectedViewString = viewComboBox.getSelectionModel().getSelectedItem();
                 if(selectedViewString == null || selectedViewString.equals("Default")){
@@ -668,16 +676,19 @@ public class ProfessorMenu extends Page {
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
-
                         Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         retrieveViews();
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("View created successfully");
+                        alert.showAndWait();
+                        viewNameTextField.clear();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             default:
-                System.out.println("Undefined!");
                 break;
         }
 
@@ -741,12 +752,7 @@ public class ProfessorMenu extends Page {
     }   
     
     /**
-     * Handles the press of the project radio buttons, 
-     * when the radio button with text: "By Name" is 
-     * selected we put all the projects as checkboxes
-     * into a scrollPane below that radioButton
-     * Otherwise we set up two textfields for ranges
-     * below the other button.
+     * Handles the press of a radio button, showing the correct containers
      * @param button
      */
     private void handleProjectRadioButtonPress(RadioButton button){
@@ -780,7 +786,7 @@ public class ProfessorMenu extends Page {
     }
 
     /**
-     * Sets up the professor menu
+     * Sets up the menu.
      */
     private void professorMenuSetup(){
         VBox base = new VBox(10);
@@ -966,16 +972,11 @@ public class ProfessorMenu extends Page {
     }
 
     /**
-     * When a filter is selected the menu gets 
-     * updated based on which filter was
-     * selected.
+     * Updates the filter menu by putting the necessary fields when a checkbox is clicked
      * @param menu
      * @param checkBox
      */
     private void updateMenu(MenuButton menu,CheckBox checkBox){
-        /* When salary is clicked,we remove the previous range 
-         * and if it was just selected we create another range below the salary checkbox 
-         */
         if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())) {
             menu.getItems().remove(salaryRangeTextFieldsMenuItem);
             if(checkBox.isSelected()) {
@@ -985,11 +986,6 @@ public class ProfessorMenu extends Page {
                 menu.getItems().add(menu.getItems().indexOf(salaryButton) + 1, salaryRangeTextFieldsMenuItem);
             }
         } 
-        /**
-         * When Sex is clicked we remove the previous radio buttons
-         * and if it was just selected we create a VBox containing
-         * two radio buttons, one for male and one for female
-         */
         else if(FILTER_BUTTON_TEXTS[2].equals(checkBox.getText())){
             menu.getItems().remove(radioButtons);
             if(checkBox.isSelected()){
@@ -998,9 +994,6 @@ public class ProfessorMenu extends Page {
                 menu.getItems().add(menu.getItems().indexOf(sexFilterButton)+1,radioButtons);
             }
         }
-        /**
-         * When 
-         */
         else if(FILTER_BUTTON_TEXTS[3].equals(checkBox.getText())){
             menu.getItems().remove(ageRangeTextFieldsMenuItem);
             if(checkBox.isSelected()){
@@ -1109,6 +1102,11 @@ public class ProfessorMenu extends Page {
         }
     }
 
+    /**
+     * Creates a Custom menu item that contains a checkbox with text
+     * @param text
+     * @return
+     */
     private CustomMenuItem toCustomMenu(String text){
         CheckBox checkBox = new CheckBox(text);
         checkBox.setFocusTraversable(false);
@@ -1121,6 +1119,9 @@ public class ProfessorMenu extends Page {
         
     }
 
+    /**
+     * Refreshes the table view
+     */
     private void refreshTable(){
         try {
             ResultSet resultSet =  previousQuery.executeQuery();

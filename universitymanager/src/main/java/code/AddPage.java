@@ -255,6 +255,8 @@ public class AddPage extends Page {
             secondEntry = null;
             professorStored = false;
             projectHistoryList = null;
+            // Refresh Table.
+            pane.setContent(null);
             lock(false);
         });
 
@@ -411,7 +413,7 @@ public class AddPage extends Page {
                 e.printStackTrace();
             }
 
-            // Refreash Table.
+            // Refresh Table.
             table = createProjectTable();
             table.setPrefHeight(120);
             pane.setContent(table);

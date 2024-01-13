@@ -26,7 +26,7 @@ import javafx.util.converter.DoubleStringConverter;
 import java.sql.Connection;
 
 public class Page extends Application {
-    private static String path = System.getProperty("user.dir") + "\\universitymanager\\images\\";
+    private static String path = System.getProperty("user.dir") + "\\images\\";
     private static String pagePath = path + "pages\\";
     private static String logo = "university.png";
     private static String background = "uniPage.png";
@@ -109,7 +109,7 @@ public class Page extends Application {
 
     public static Button createBackButton() {
         // Load the image
-        Image image = new Image("file:" + System.getProperty("user.dir") + "\\universitymanager\\images\\university.png");
+        Image image = new Image("file:" + path + "university.png");
 
         // Create an ImageView with the image
         ImageView imageView = new ImageView(image);
@@ -127,7 +127,7 @@ public class Page extends Application {
         // Set up the action for when the button is released
         backButton.setOnMouseReleased(e -> {
             MainMenu mainMenu = new MainMenu();
-            mainMenu.start(Page.primaryStage);
+            mainMenu.start(primaryStage);
         });
         
 

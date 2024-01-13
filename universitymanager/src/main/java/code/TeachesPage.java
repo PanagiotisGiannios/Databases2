@@ -38,11 +38,9 @@ public class TeachesPage extends Page {
         loadLogo();
         loadBackground("teachesPage.png");
         if(source.equals("professor")){
-            System.out.println("prof!");
             professorSetup();
         }
         else if(source.equals("course")){
-            System.out.println("course!");
             professorSetup();
         }
         createScene();
@@ -120,7 +118,7 @@ public class TeachesPage extends Page {
                 List<Double> columnWidths = new ArrayList<>();
                 
                 HBox titles = new HBox(15);
-                titles.setPadding(new Insets(0, 0, 0, 30)); // Add padding to the top
+                titles.setPadding(new Insets(0, 0, 0, 30));
                 Text ssn = new Text("SSN");
                 Text fName = new Text("First Name");
                 Text lName = new Text("Last Name");
@@ -134,7 +132,6 @@ public class TeachesPage extends Page {
                 columnWidths.add(fName.prefWidth(-1));
                 columnWidths.add(lName.prefWidth(-1));
                 vbox.getChildren().add(titles);
-                // Add labels to the labelsHBox
 
                 while (res.next()) {
                     HBox hbox = new HBox(15);
@@ -155,11 +152,9 @@ public class TeachesPage extends Page {
                     radioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
                             String selectedSSN = ssnText.getText();
-                            System.out.println("Selected SSN: " + selectedSSN);
                             rightVBox = createRightVBox("course", selectedSSN);
                             rightScroll.setContent(null);
                             rightScroll.setContent(rightVBox);
-                            // Perform further actions with the selected SSN
                         }
                     });
 
@@ -188,7 +183,7 @@ public class TeachesPage extends Page {
                 List<Double> columnWidths = new ArrayList<>();
                 
                 HBox titles = new HBox(15);
-                titles.setPadding(new Insets(0, 0, 0, 30)); // Add padding to the top
+                titles.setPadding(new Insets(0, 0, 0, 30));
                 Text id = new Text("ID");
                 Text fName = new Text("Course Name");
                 
@@ -199,7 +194,6 @@ public class TeachesPage extends Page {
                 columnWidths.add(id.prefWidth(-1));
                 columnWidths.add(fName.prefWidth(-1));
                 vbox.getChildren().add(titles);
-                // Add labels to the labelsHBox
 
                 while (res.next()) {
                     HBox hbox = new HBox(15);
@@ -218,11 +212,9 @@ public class TeachesPage extends Page {
                     radioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
                             String selectedID = idText.getText();
-                            System.out.println("Selected id: " + selectedID);
                             rightVBox = createRightVBox("professor", selectedID);
                             rightScroll.setContent(null);
                             rightScroll.setContent(rightVBox);
-                            // Perform further actions with the selected SSN
                         }
                     });
 
@@ -259,7 +251,7 @@ public class TeachesPage extends Page {
                 List<Double> columnWidths = new ArrayList<>();
                 
                 HBox titles = new HBox(15);
-                titles.setPadding(new Insets(0, 0, 0, 30)); // Add padding to the top
+                titles.setPadding(new Insets(0, 0, 0, 30));
                 Text id = new Text("ID");
                 Text name = new Text("Course Name");
                 titles.setStyle("-fx-background-color: rgba(0,0,0,0.3);");
@@ -452,7 +444,6 @@ public class TeachesPage extends Page {
                 whereString = whereString + " OR SSN = " + id;
             }
             whereString = whereString.replaceFirst("OR", "");
-            System.out.println(whereString);
             res = Page.connection.createStatement().executeQuery("SELECT ssn, FirstName, LastName FROM OV_professors " + whereString);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -469,7 +460,6 @@ public class TeachesPage extends Page {
                 whereString = whereString + " OR courseID = " + id;
             }
             whereString = whereString.replaceFirst("OR", "");
-            System.out.println(whereString);
             res = Page.connection.createStatement()
                     .executeQuery("SELECT courseID, Name FROM OV_courseinfo " + whereString);
         } catch (SQLException e){

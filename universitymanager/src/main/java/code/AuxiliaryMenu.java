@@ -97,11 +97,9 @@ public class AuxiliaryMenu extends Page {
     private ScrollPane resultScrollPane;
     private TableView<ObservableList<String>>  resultTableView;
 
-    //private String ssnSelected;
 
     @Override
     public void start(Stage primaryStage) {
-        //Page.scene.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         if(Page.connection == null){
             
             try {
@@ -164,12 +162,10 @@ public class AuxiliaryMenu extends Page {
         String text = button.getText();
         switch (text) {
             case "Add":
-                System.out.println("Added!");
                 AddPage auxiliaryAddPage = new AddPage("auxiliary");
                 auxiliaryAddPage.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.selectedId);
                 if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
@@ -213,9 +209,6 @@ public class AuxiliaryMenu extends Page {
                         refreshTable();
                         retrieveProfessions();
                         updateMenu(filterButton, (CheckBox)professionButton.getContent());
-                    }
-                    else{
-                        System.out.println("NO pressed!");
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
@@ -430,7 +423,6 @@ public class AuxiliaryMenu extends Page {
                     whereString = "";
                 }
                 String query = selectString + "\n" + joinString + "\n" + whereString + "\n" + groupString;
-                System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Incomplete Filters");
@@ -502,16 +494,19 @@ public class AuxiliaryMenu extends Page {
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
-                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         retrieveViews();
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("View created successfully");
+                        alert.showAndWait();
+                        viewNameTextField.clear();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             default:
-                System.out.println("Undefined!");
                 break;
         }
 
@@ -590,9 +585,7 @@ public class AuxiliaryMenu extends Page {
          * of the necessary components for each side
          */
         StackPane rightSide = new StackPane();
-        //rightSide.setStyle("-fx-background-color: rgb(255,255,0);");
         StackPane leftSide  = new StackPane();
-        //leftSide.setStyle("-fx-background-color: rgb(255,0,255);");
         VBox leftBox  = new VBox(35);
         VBox rightBox = new VBox(35);
 
@@ -706,10 +699,6 @@ public class AuxiliaryMenu extends Page {
         viewComboBox.setPromptText("Select View");
         viewComboBox.setPrefHeight(40);
         viewComboBox.setPrefWidth(105);
-        viewComboBox.setOnAction(event -> {
-            String select = viewComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("Selected view: " + select);
-        });
         viewNameTextField.setPrefWidth(105);
         viewNameTextField.setPrefHeight(40);
         viewNameTextField.setPromptText("New View Name");
@@ -719,10 +708,7 @@ public class AuxiliaryMenu extends Page {
         resultScrollPane = new ScrollPane();
         resultScrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         resultScrollPane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-       // resultScrollPane.setPrefWidth(400);
-        //resultScrollPane.setPrefHeight(300);
         resultScrollPane.setContent(resultTableView);
-        //resultScrollPane.setStyle("-fx-background: rgba(255, 255, 255, 0.5);");
         resultScrollPane.setBackground(new Background(new BackgroundFill(Color.rgb(255, 255, 255, 0.5),CornerRadii.EMPTY,javafx.geometry.Insets.EMPTY)));
         leftBox.getChildren().addAll(queryOptionsBox,resultScrollPane);
         leftBox.setPadding(new Insets(0, 0, 0, 25));
@@ -733,7 +719,6 @@ public class AuxiliaryMenu extends Page {
 
         /*Make each side of the middle box fill the entire available area*/
         HBox.setHgrow(leftSide, javafx.scene.layout.Priority.ALWAYS);
-        //HBox.setHgrow(rightSide, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
 
         Button backButton = Page.createBackButton();
@@ -831,9 +816,6 @@ public class AuxiliaryMenu extends Page {
                 phoneTextFieldItem = new CustomMenuItem(new HBox(phoneTextField));
                 menu.getItems().add(menu.getItems().indexOf(phoneButton) + 1, phoneTextFieldItem);
             }
-        }
-        else {
-            System.out.println("Other!");
         }
     }
 

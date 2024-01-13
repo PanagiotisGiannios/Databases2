@@ -107,8 +107,6 @@ public class StudentMenu extends Page {
     private ScrollPane resultScrollPane;
     private TableView<ObservableList<String>>  resultTableView;
 
-    //private String ssnSelected;
-
     @Override
     public void start(Stage primaryStage) {
         Page.primaryStage = primaryStage;
@@ -119,7 +117,6 @@ public class StudentMenu extends Page {
         retrieveFields();
         retrieveViews();
         handleButtonPress(new Button("Search"));
-        System.out.println("\n\nDONE!\n\n");
     }
     
     private void retrieveViews() {
@@ -157,12 +154,10 @@ public class StudentMenu extends Page {
         String text = button.getText();
         switch (text) {
             case "Add":
-                System.out.println("Added!");
                 AddPage prof = new AddPage("student");
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.selectedId);
                 if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
@@ -207,9 +202,6 @@ public class StudentMenu extends Page {
                         refreshTable();
                         retrieveFields();
                         updateMenu(filterButton, (CheckBox)semesterButton.getContent());
-                    }
-                    else{
-                        System.out.println("NO pressed!");
                     }
                 });
                 resultTableView.getSelectionModel().clearSelection();
@@ -465,7 +457,6 @@ public class StudentMenu extends Page {
                     whereString = "";
                 }
                 String query = selectString + "\n" + joinString + "\n" + whereString;
-                System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Incomplete Filters");
@@ -533,16 +524,19 @@ public class StudentMenu extends Page {
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
-                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         retrieveViews();
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Success");
+                        alert.setHeaderText("View created successfully");
+                        alert.showAndWait();
+                        viewNameTextField.clear();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             default:
-                System.out.println("Undefined!");
                 break;
         }
 
@@ -748,10 +742,6 @@ public class StudentMenu extends Page {
         viewComboBox.setPromptText("Select View");
         viewComboBox.setPrefHeight(40);
         viewComboBox.setPrefWidth(105);
-        viewComboBox.setOnAction(event -> {
-            String select = viewComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("Selected view: " + select);
-        });
         viewNameTextField.setPrefWidth(105);
         viewNameTextField.setPrefHeight(40);
         viewNameTextField.setPromptText("New View Name");
@@ -889,9 +879,6 @@ public class StudentMenu extends Page {
                 fatherNameTextFieldItem = new CustomMenuItem(new VBox(fatherNameTextField));
                 menu.getItems().add(menu.getItems().indexOf(fatherNameButton)+1,fatherNameTextFieldItem);
             }
-        }
-        else {
-            System.out.println("We have big problem!");
         }
     }
 
