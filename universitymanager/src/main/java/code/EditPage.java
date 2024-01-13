@@ -1338,7 +1338,6 @@ public class EditPage extends Page {
             else {
                 showAlert(AlertType.ERROR, "Duplicate SSN", "SSN already exists", "An employee with the same SSN already exists.");
             }
-            e.printStackTrace();
             return false;
         }
     }
