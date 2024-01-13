@@ -133,9 +133,13 @@ public class ProfessorMenu extends Page {
             }
         }
         handleButtonPress(new Button("Search"));
-        System.out.println("\n\nDONE!\n\n");
     }
     
+    /**
+     * Retrieve all the views of the database,
+     * if it encounters a view with a different code than "pr_"
+     * that view gets ignored,the default view is ov_professors.
+     */
     private void retrieveViews() {
         try{
             viewComboBox.getItems().clear();
@@ -151,7 +155,9 @@ public class ProfessorMenu extends Page {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Retrieves all fields of the professors
+     */
     private void retrieveFields(){
         String getProfessorFields = "SELECT DISTINCT profession FROM Professor";
         
@@ -163,7 +169,9 @@ public class ProfessorMenu extends Page {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Retrieves all projects of every professor
+     */
     private void retrieveProjects(){
         String getProjects = "SELECT Name FROM Project ORDER BY cast(substring(Name, 8) AS SIGNED)";
         
@@ -184,12 +192,10 @@ public class ProfessorMenu extends Page {
         String text = button.getText();
         switch (text) {
             case "Add":
-                System.out.println("Added!");
                 AddPage prof = new AddPage("professor");
                 prof.start(Page.primaryStage);
                 break;
             case "Delete":
-                System.out.println("Deleted! " + TableManager.selectedId);
                 if(TableManager.selectedRowIdList.isEmpty()){
                     Alert alert = new Alert(AlertType.ERROR); 
                     alert.setTitle("Error");
@@ -304,9 +310,6 @@ public class ProfessorMenu extends Page {
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else{
-                        System.out.println("No rector!");
                     }
                 });
                 
@@ -598,7 +601,6 @@ public class ProfessorMenu extends Page {
                     whereString = "";
                 }
                 String query = selectString + "\n" + joinString + "\n" + whereString;
-                System.out.println("\n\n"+ query + "\n\n");
                 if(showMissingAlert){
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("Incomplete Filters");
@@ -666,7 +668,7 @@ public class ProfessorMenu extends Page {
                         for(Object parameter: whereParametersList){
                             whereString = whereString.replaceFirst("\\?", "'" + String.valueOf(parameter) + "'");
                         }
-                        System.out.println("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
+
                         Page.connection.createStatement().execute("CREATE VIEW "+ name + " AS SELECT * " + joinString +" " + whereString);
                         retrieveViews();
                     } catch (SQLException e) {
@@ -738,6 +740,15 @@ public class ProfessorMenu extends Page {
 
     }   
     
+    /**
+     * Handles the press of the project radio buttons, 
+     * when the radio button with text: "By Name" is 
+     * selected we put all the projects as checkboxes
+     * into a scrollPane below that radioButton
+     * Otherwise we set up two textfields for ranges
+     * below the other button.
+     * @param button
+     */
     private void handleProjectRadioButtonPress(RadioButton button){
         filterButton.getItems().remove(projectRadioButtons);
         if(button.getText().equals("By Name")){
@@ -768,6 +779,9 @@ public class ProfessorMenu extends Page {
         }
     }
 
+    /**
+     * Sets up the professor menu
+     */
     private void professorMenuSetup(){
         VBox base = new VBox(10);
         HBox titleBox = new HBox();
@@ -913,10 +927,6 @@ public class ProfessorMenu extends Page {
         viewComboBox.setPromptText("Select View");
         viewComboBox.setPrefHeight(40);
         viewComboBox.setPrefWidth(105);
-        viewComboBox.setOnAction(event -> {
-            String select = viewComboBox.getSelectionModel().getSelectedItem();
-            System.out.println("Selected view: " + select);
-        });
         viewNameTextField.setPrefWidth(105);
         viewNameTextField.setPrefHeight(40);
         viewNameTextField.setPromptText("New View Name");
@@ -939,7 +949,6 @@ public class ProfessorMenu extends Page {
 
         /*Make each side of the middle box fill the entire available area*/
         HBox.setHgrow(leftSide, javafx.scene.layout.Priority.ALWAYS);
-        //HBox.setHgrow(rightSide, javafx.scene.layout.Priority.ALWAYS);
         VBox.setVgrow(mainBox, javafx.scene.layout.Priority.ALWAYS);
 
         Button backButton = Page.createBackButton();
@@ -956,11 +965,18 @@ public class ProfessorMenu extends Page {
         
     }
 
+    /**
+     * When a filter is selected the menu gets 
+     * updated based on which filter was
+     * selected.
+     * @param menu
+     * @param checkBox
+     */
     private void updateMenu(MenuButton menu,CheckBox checkBox){
-        if(FILTER_BUTTON_TEXTS[0].equals(checkBox.getText())) {
-            System.out.println("Rector");
-        } 
-        else if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())) {
+        /* When salary is clicked,we remove the previous range 
+         * and if it was just selected we create another range below the salary checkbox 
+         */
+        if(FILTER_BUTTON_TEXTS[1].equals(checkBox.getText())) {
             menu.getItems().remove(salaryRangeTextFieldsMenuItem);
             if(checkBox.isSelected()) {
                 startTextField.setPrefWidth(80);
@@ -969,6 +985,11 @@ public class ProfessorMenu extends Page {
                 menu.getItems().add(menu.getItems().indexOf(salaryButton) + 1, salaryRangeTextFieldsMenuItem);
             }
         } 
+        /**
+         * When Sex is clicked we remove the previous radio buttons
+         * and if it was just selected we create a VBox containing
+         * two radio buttons, one for male and one for female
+         */
         else if(FILTER_BUTTON_TEXTS[2].equals(checkBox.getText())){
             menu.getItems().remove(radioButtons);
             if(checkBox.isSelected()){
@@ -977,6 +998,9 @@ public class ProfessorMenu extends Page {
                 menu.getItems().add(menu.getItems().indexOf(sexFilterButton)+1,radioButtons);
             }
         }
+        /**
+         * When 
+         */
         else if(FILTER_BUTTON_TEXTS[3].equals(checkBox.getText())){
             menu.getItems().remove(ageRangeTextFieldsMenuItem);
             if(checkBox.isSelected()){
@@ -1082,9 +1106,6 @@ public class ProfessorMenu extends Page {
                 phoneTextFieldItem = new CustomMenuItem(new HBox(phoneTextField));
                 menu.getItems().add(menu.getItems().indexOf(phoneButton) + 1, phoneTextFieldItem);
             }
-        }
-        else {
-            System.out.println("Other!");
         }
     }
 
